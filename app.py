@@ -1,7 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
-from utils.theme import inject_css
+from utils.theme import inject_css, sidebar_logo, sidebar_user, sidebar_separator
 from views import auth_page, groups_page, matches_page, predictions_page, ranking_page
 
 st.set_page_config(
@@ -10,14 +10,11 @@ st.set_page_config(
     layout="centered",
 )
 
-# ── Theme ─────────────────────────────────────────────────────────────────
 inject_css()
-
-# ── Bootstrap ─────────────────────────────────────────────────────────────
 init_db()
 init_session()
 
-# ── Capture ?invite= token from URL ──────────────────────────────────────
+# ── Capture ?invite= token ────────────────────────────────────────────────
 params = st.query_params
 invite_token = params.get("invite", None)
 if invite_token and not st.session_state.get("pending_invite_token"):
@@ -25,28 +22,43 @@ if invite_token and not st.session_state.get("pending_invite_token"):
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### ⚽ &nbsp;Prode Mundial 2026")
-    st.divider()
+    sidebar_logo()
 
     if is_logged_in():
-        st.markdown(f"**{st.session_state.display_name}**")
-        st.caption(f"@{st.session_state.username}")
-        st.divider()
-
+        # ── Navegación ────────────────────────────────────────────────────
         default_nav = "Mis grupos" if st.session_state.get("pending_invite_token") else "Inicio"
-        nav_options = ["🏠  Inicio", "👥  Mis grupos", "⚽  Partidos", "🎯  Predecir", "🏆  Ranking"]
-        nav_keys    = ["Inicio",     "Mis grupos",     "Partidos",    "Predecir",    "Ranking"]
-        default_idx = nav_keys.index(default_nav)
 
+        nav_labels = ["Inicio", "Ranking", "Mis predicciones", "Partidos", "Mis grupos"]
+        nav_keys   = ["Inicio", "Ranking", "Predecir",         "Partidos", "Mis grupos"]
+
+        # Separadores visuales entre grupos de nav
+        # Grupo 1: Inicio
+        # Grupo 2: Ranking, Predecir  (acciones del usuario)
+        # Grupo 3: Partidos, Mis grupos (datos)
+        nav_with_sep = [
+            "Inicio",
+            "— sep —",
+            "Ranking",
+            "Mis predicciones",
+            "— sep —",
+            "Partidos",
+            "Mis grupos",
+        ]
+
+        # Usamos radio oculto para el estado real
+        default_idx = nav_keys.index(default_nav)
         nav_selection = st.radio(
             "nav",
-            nav_options,
+            nav_labels,
             index=default_idx,
             label_visibility="collapsed",
         )
-        nav = nav_keys[nav_options.index(nav_selection)]
+        nav = nav_keys[nav_labels.index(nav_selection)]
 
-        st.divider()
+        # ── Usuario y logout ──────────────────────────────────────────────
+        sidebar_separator()
+        sidebar_user(st.session_state.display_name, st.session_state.username)
+
         if st.button("Cerrar sesión", use_container_width=True):
             logout_user()
             st.rerun()
@@ -64,7 +76,8 @@ elif nav == "Inicio":
     st.markdown("""
 **¿Cómo funciona?**
 
-Predecí el resultado de cada partido antes de que empiece. Cuanto más acertés, más puntos sumás en el ranking de tu grupo.
+Predecí el resultado de cada partido antes de que empiece.
+Cuanto más acertés, más puntos sumás en el ranking de tu grupo.
 """)
     st.markdown("""
 | Acierto | Puntos |
