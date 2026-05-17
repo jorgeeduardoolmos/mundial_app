@@ -49,9 +49,9 @@ def set_match_result(db: Session, match_id: int, home_goals: int, away_goals: in
 
 
 def get_stages(db: Session) -> list[str]:
-    rows = db.query(Match.stage).distinct().order_by(Match.match_datetime).all()
+    rows = db.query(Match.stage, Match.match_datetime).order_by(Match.match_datetime).all()
     seen = []
-    for (stage,) in rows:
+    for stage, _ in rows:
         if stage not in seen:
             seen.append(stage)
     return seen
