@@ -1,7 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
-from views import auth_page, groups_page, matches_page, predictions_page
+from views import auth_page, groups_page, matches_page, predictions_page, ranking_page
 
 st.set_page_config(
     page_title="Prode Mundial 2026",
@@ -80,5 +80,5 @@ elif nav == "Predecir":
     predictions_page.show()
 
 elif nav == "Ranking":
-    st.title("Ranking")
-    st.info("🔧 Módulo 5 — próximamente.")
+    ranking_page.show()
+
