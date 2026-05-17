@@ -1,66 +1,72 @@
 import streamlit as st
-import pandas as pd
+from db.models import init_db
+from utils.session import init_session, is_logged_in, logout_user
+from pages import auth_page
 
-# Configuraci��n de la p��gina
-st.set_page_config(page_title="Serrano Turismo 2025", layout="wide")
+st.set_page_config(
+    page_title="Prode Mundial 2026",
+    page_icon="⚽",
+    layout="centered",
+)
 
-st.title("?? Serrano Turismo - Planes 2025")
-st.markdown("Consulta las opciones de pago para tu viaje a C��rdoba.")
+# Bootstrap DB and session
+init_db()
+init_session()
 
-# Datos extra��dos del PDF 
-data = {
-    "Programa": [
-        "C��rdoba 6 d��as en bus", "C��rdoba 6 d��as en avi��n", 
-        "C��rdoba 5 d��as en bus", "C��rdoba 5 d��as en avi��n", 
-        "C��rdoba 4 d��as en avi��n"
-    ],
-    "Cuota Inscripci��n": [10800, 10800, 9000, 9000, 8100],
-    "Valor Total": [690000, 840000, 570000, 720000, 600000],
-    "Contado": [600000, 750000, 495000, 645000, 540000],
-    "3 cuotas consec.": [230000, 280000, 190000, 240000, 200000],
-    "6 cuotas consec.": [150000, 182000, 123500, 156000, 130000],
-    "Fija_Plan3": [60000, 60000, 50000, 50000, 45000],
-    "Fija_Plan4": [45000, 45000, 37500, 37500, 33750],
-    "IPC_18": [28333, 36667, 23333, 31667, 25833],
-    "IPC_17": [30000, 38824, 24706, 33529, 27353],
-    "IPC_16": [31875, 41250, 26250, 35625, 29063]
-}
+# ── SIDEBAR ───────────────────────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("### ⚽ Prode Mundial 2026")
+    st.divider()
 
-df = pd.DataFrame(data)
+    if is_logged_in():
+        st.markdown(f"👤 **{st.session_state.display_name}**")
+        st.caption(f"@{st.session_state.username}")
+        st.divider()
 
-# Selector en la barra lateral
-opcion = st.sidebar.selectbox("Selecciona tu viaje:", df["Programa"])
-viaje = df[df["Programa"] == opcion].iloc[0]
+        nav = st.radio(
+            "Navegación",
+            ["Inicio", "Mis grupos", "Partidos", "Ranking"],
+            label_visibility="collapsed",
+        )
 
-# M��tricas principales
-c1, c2, c3 = st.columns(3)
-c1.metric("Valor Lista", f"${viaje['Valor Total']:,}")
-c2.metric("Pago Contado", f"${viaje['Contado']:,}")
-c3.metric("Inscripci��n", f"${viaje['Cuota Inscripci��n']:,}")
+        st.divider()
+        if st.button("Cerrar sesión", use_container_width=True):
+            logout_user()
+            st.rerun()
+    else:
+        nav = "Auth"
 
-st.divider()
+# ── ROUTING ───────────────────────────────────────────────────────────────
+if not is_logged_in():
+    auth_page.show()
 
-# Tabs para organizar la info [cite: 4, 9]
-t1, t2 = st.tabs(["Cuotas Fijas/Consecutivas", "Plan Mixto (IPC)"])
+elif nav == "Inicio":
+    st.title(f"¡Hola, {st.session_state.display_name}! 👋")
+    st.info("El prode del Mundial 2026 está en construcción. Los módulos de grupos, partidos y predicciones se van a ir habilitando de a uno.")
+    st.markdown("""
+    #### ¿Qué podés hacer?
+    - 🏟️ **Grupos**: crear un grupo privado y compartirlo con tus amigos
+    - ⚽ **Partidos**: predecir el resultado antes de que empiece
+    - 🏆 **Ranking**: ver quién va punteando en tu grupo
 
-with t1:
-    st.write("### Opciones de cuotas fijas consecutivas")
-    col_a, col_b = st.columns(2)
-    col_a.info(f"**3 cuotas de:** ${viaje['3 cuotas consec.']:,}")
-    col_b.info(f"**6 cuotas de:** ${viaje['6 cuotas consec.']:,}")
+    #### Sistema de puntos
+    | Acierto | Puntos |
+    |---|---|
+    | Acertaste quién ganó | 2 pts |
+    | Acertaste los goles del ganador | 2 pts |
+    | Acertaste los goles del perdedor | 2 pts |
+    | Acertaste que fue empate | 2 pts |
+    | Acertaste el marcador exacto de un empate | 4 pts |
+    """)
 
-with t2:
-    st.write("### Plan Combinado (Fijas + Ajuste IPC)")
-    st.write("Se abonan cuotas fijas iniciales y el resto se ajusta por IPC.")
-    
-    f1, f2 = st.columns(2)
-    f1.success(f"Opci��n 3 cuotas fijas de: ${viaje['Fija_Plan3']:,}")
-    f2.success(f"Opci��n 4 cuotas fijas de: ${viaje['Fija_Plan4']:,}")
-    
-    st.markdown("**Cuotas restantes ajustables:**")
-    i1, i2, i3 = st.columns(3)
-    i1.warning(f"18 cuotas: ${viaje['IPC_18']:,}")
-    i2.warning(f"17 cuotas: ${viaje['IPC_17']:,}")
-    i3.warning(f"16 cuotas: ${viaje['IPC_16']:,}")
+elif nav == "Mis grupos":
+    st.title("Mis grupos")
+    st.info("🔧 Módulo 2 — próximamente.")
 
-st.sidebar.info("Los planes de 3 o 4 cuotas fijas se complementan con el plan de cuotas ajustado por IPC.")
+elif nav == "Partidos":
+    st.title("Partidos")
+    st.info("🔧 Módulo 3 — próximamente.")
+
+elif nav == "Ranking":
+    st.title("Ranking")
+    st.info("🔧 Módulo 5 — próximamente.")
