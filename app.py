@@ -1,7 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
-from pages import auth_page, groups_page
+from views import auth_page, groups_page
 
 st.set_page_config(
     page_title="Prode Mundial 2026",
