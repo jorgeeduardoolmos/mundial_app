@@ -1,16 +1,36 @@
+import os
 from sqlalchemy import (
     create_engine, Column, Integer, String,
     DateTime, ForeignKey, Boolean, UniqueConstraint
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
-import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "mundial.db")
-DATABASE_URL = f"sqlite:///{DB_PATH}"
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+def _get_database_url() -> str:
+    # 1. Streamlit secrets (producción en Streamlit Cloud)
+    try:
+        import streamlit as st
+        return st.secrets["DATABASE_URL"]
+    except Exception:
+        pass
+    # 2. Variable de entorno
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        return url
+    # 3. SQLite local como fallback
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    return f"sqlite:///{os.path.join(base_dir, 'mundial.db')}"
+
+
+DATABASE_URL = _get_database_url()
+
+# Supabase a veces devuelve postgres:// en lugar de postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+_connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+engine = create_engine(DATABASE_URL, connect_args=_connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 
