@@ -44,3 +44,23 @@ def sidebar_separator():
     st.sidebar.markdown("""
 <div style="margin:6px 0;height:0.5px;background:linear-gradient(to right,#1c1c1c 0%,#1c1c1c 60%,transparent 100%);"></div>
 """, unsafe_allow_html=True)
+
+
+def sidebar_trophy():
+    """Muestra la copa del Mundial centrada en el sidebar."""
+    import base64
+    import os
+    img_path = os.path.join(os.path.dirname(__file__), "..", "static", "copa.png")
+    img_path = os.path.normpath(img_path)
+    try:
+        with open(img_path, "rb") as f:
+            data = base64.b64encode(f.read()).decode()
+        st.sidebar.markdown(f"""
+<div style="display:flex;justify-content:center;padding:8px 0 20px;">
+  <img src="data:image/png;base64,{data}"
+       style="width:80px;opacity:0.92;filter:drop-shadow(0 4px 12px #c9a84c33);"
+       alt="Copa del Mundo"/>
+</div>
+""", unsafe_allow_html=True)
+    except FileNotFoundError:
+        pass

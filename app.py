@@ -1,7 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
-from utils.theme import inject_css, sidebar_logo, sidebar_user, sidebar_separator
+from utils.theme import inject_css, sidebar_logo, sidebar_user, sidebar_separator, sidebar_trophy
 from views import auth_page, groups_page, matches_page, predictions_page, ranking_page
 
 st.set_page_config(
@@ -25,6 +25,7 @@ with st.sidebar:
     sidebar_logo()
 
     if is_logged_in():
+        sidebar_trophy()
         # ── Navegación ────────────────────────────────────────────────────
         default_nav = "Mis grupos" if st.session_state.get("pending_invite_token") else "Inicio"
 
