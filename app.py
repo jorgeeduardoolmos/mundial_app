@@ -1,7 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
-from views import auth_page, groups_page, matches_page
+from views import auth_page, groups_page, matches_page, predictions_page
 
 st.set_page_config(
     page_title="Prode Mundial 2026",
@@ -31,7 +31,7 @@ with st.sidebar:
 
         # If user arrived via invite link, default to Mis grupos
         default_nav = "Mis grupos" if st.session_state.get("pending_invite_token") else "Inicio"
-        nav_options = ["Inicio", "Mis grupos", "Partidos", "Ranking"]
+        nav_options = ["Inicio", "Mis grupos", "Partidos", "Predecir", "Ranking"]
         default_idx = nav_options.index(default_nav)
 
         nav = st.radio(
@@ -75,6 +75,9 @@ elif nav == "Mis grupos":
 
 elif nav == "Partidos":
     matches_page.show()
+
+elif nav == "Predecir":
+    predictions_page.show()
 
 elif nav == "Ranking":
     st.title("Ranking")

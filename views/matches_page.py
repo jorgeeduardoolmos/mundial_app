@@ -3,6 +3,7 @@ from modules.matches import (
     get_all_matches, get_stages, set_match_result,
     is_open_for_prediction, format_match_datetime
 )
+from modules.predictions import score_all_predictions_for_match
 from db.seed import seed_matches
 from utils.session import get_db_session, require_login
 
@@ -104,7 +105,8 @@ def show():
                     try:
                         ok, msg = set_match_result(db, match.id, hg, ag)
                         if ok:
-                            st.success(msg)
+                            scored = score_all_predictions_for_match(db, match.id)
+                            st.success(f"{msg} Se puntuaron {scored} predicciones.")
                             st.rerun()
                         else:
                             st.error(msg)
