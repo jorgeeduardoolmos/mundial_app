@@ -1,6 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
+from utils.theme import inject_css
 from views import auth_page, groups_page, matches_page, predictions_page, ranking_page
 
 st.set_page_config(
@@ -9,11 +10,14 @@ st.set_page_config(
     layout="centered",
 )
 
-# Bootstrap DB and session
+# ── Theme ─────────────────────────────────────────────────────────────────
+inject_css()
+
+# ── Bootstrap ─────────────────────────────────────────────────────────────
 init_db()
 init_session()
 
-# ── Capture ?invite= token from URL (before anything else) ────────────────
+# ── Capture ?invite= token from URL ──────────────────────────────────────
 params = st.query_params
 invite_token = params.get("invite", None)
 if invite_token and not st.session_state.get("pending_invite_token"):
@@ -21,25 +25,26 @@ if invite_token and not st.session_state.get("pending_invite_token"):
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### ⚽ Prode Mundial 2026")
+    st.markdown("### ⚽ &nbsp;Prode Mundial 2026")
     st.divider()
 
     if is_logged_in():
-        st.markdown(f"👤 **{st.session_state.display_name}**")
+        st.markdown(f"**{st.session_state.display_name}**")
         st.caption(f"@{st.session_state.username}")
         st.divider()
 
-        # If user arrived via invite link, default to Mis grupos
         default_nav = "Mis grupos" if st.session_state.get("pending_invite_token") else "Inicio"
-        nav_options = ["Inicio", "Mis grupos", "Partidos", "Predecir", "Ranking"]
-        default_idx = nav_options.index(default_nav)
+        nav_options = ["🏠  Inicio", "👥  Mis grupos", "⚽  Partidos", "🎯  Predecir", "🏆  Ranking"]
+        nav_keys    = ["Inicio",     "Mis grupos",     "Partidos",    "Predecir",    "Ranking"]
+        default_idx = nav_keys.index(default_nav)
 
-        nav = st.radio(
-            "Navegación",
+        nav_selection = st.radio(
+            "nav",
             nav_options,
             index=default_idx,
             label_visibility="collapsed",
         )
+        nav = nav_keys[nav_options.index(nav_selection)]
 
         st.divider()
         if st.button("Cerrar sesión", use_container_width=True):
@@ -53,22 +58,22 @@ if not is_logged_in():
     auth_page.show()
 
 elif nav == "Inicio":
-    st.title(f"¡Hola, {st.session_state.display_name}! 👋")
+    st.title(f"Hola, {st.session_state.display_name}")
+    st.caption("Mundial 2026 · Prode con amigos")
+    st.divider()
     st.markdown("""
-    #### ¿Qué podés hacer?
-    - 🏟️ **Mis grupos**: crear un grupo privado y compartirlo con tus amigos
-    - ⚽ **Partidos**: predecir el resultado antes de que empiece
-    - 🏆 **Ranking**: ver quién va punteando en tu grupo
+**¿Cómo funciona?**
 
-    #### Sistema de puntos
-    | Acierto | Puntos |
-    |---|---|
-    | Acertaste quién ganó | 2 pts |
-    | Acertaste los goles del ganador | 2 pts |
-    | Acertaste los goles del perdedor | 2 pts |
-    | Acertaste que fue empate | 2 pts |
-    | Acertaste el marcador exacto de un empate | 4 pts |
-    """)
+Predecí el resultado de cada partido antes de que empiece. Cuanto más acertés, más puntos sumás en el ranking de tu grupo.
+""")
+    st.markdown("""
+| Acierto | Puntos |
+|---|---|
+| Ganador o empate | 2 pts |
+| Goles del ganador | 2 pts |
+| Goles del perdedor | 2 pts |
+| Empate + marcador exacto | 4 pts extra |
+""")
 
 elif nav == "Mis grupos":
     groups_page.show()
@@ -81,4 +86,3 @@ elif nav == "Predecir":
 
 elif nav == "Ranking":
     ranking_page.show()
-

@@ -1,0 +1,298 @@
+/* ── Prode Mundial 2026 — Black & Gold Theme ─────────────────────────── */
+
+/* Base */
+[data-testid="stAppViewContainer"] {
+    background-color: #0a0a0a;
+}
+[data-testid="stSidebar"] {
+    background-color: #0a0a0a;
+    border-right: 0.5px solid #1f1f1f;
+}
+[data-testid="stSidebar"] > div:first-child {
+    background-color: #0a0a0a;
+    padding-top: 1.5rem;
+}
+.main .block-container {
+    padding-top: 2rem;
+    background-color: #0a0a0a;
+}
+
+/* ── Texto general ───────────────────────────────────────────────────── */
+html, body, [class*="css"], p, span, label, div {
+    color: #e8e0cc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+h1 { color: #e8e0cc !important; font-weight: 500 !important; font-size: 1.6rem !important; letter-spacing: -0.3px; }
+h2 { color: #e8e0cc !important; font-weight: 500 !important; font-size: 1.2rem !important; }
+h3 { color: #c9a84c !important; font-weight: 500 !important; font-size: 1rem !important; }
+p  { color: #e8e0cc !important; }
+
+/* ── Sidebar nav ─────────────────────────────────────────────────────── */
+[data-testid="stSidebarNav"] { display: none; }
+
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] label {
+    color: #4a4a4a !important;
+    font-size: 0.8rem;
+    letter-spacing: 0.2px;
+}
+[data-testid="stSidebar"] h3 {
+    color: #c9a84c !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.3px;
+}
+[data-testid="stSidebar"] .stMarkdown p {
+    color: #e8e0cc !important;
+}
+
+/* ── Radio nav ───────────────────────────────────────────────────────── */
+[data-testid="stSidebar"] .stRadio label {
+    color: #4a4a4a !important;
+    font-size: 0.8rem !important;
+    padding: 6px 8px;
+    border-radius: 5px;
+    transition: color 0.15s;
+}
+[data-testid="stSidebar"] .stRadio label:hover {
+    color: #e8e0cc !important;
+}
+[data-testid="stSidebar"] [aria-checked="true"] + div label,
+[data-testid="stSidebar"] .stRadio [data-baseweb="radio"]:has(input:checked) label {
+    color: #c9a84c !important;
+}
+[data-testid="stSidebar"] [data-baseweb="radio"] [data-testid="stMarkdownContainer"] p {
+    font-size: 0.82rem !important;
+}
+
+/* ── Botones ─────────────────────────────────────────────────────────── */
+.stButton > button {
+    background-color: transparent;
+    border: 0.5px solid #2a2a2a;
+    color: #e8e0cc;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    padding: 6px 16px;
+    transition: border-color 0.15s, color 0.15s;
+    letter-spacing: 0.2px;
+}
+.stButton > button:hover {
+    border-color: #c9a84c;
+    color: #c9a84c;
+    background-color: #c9a84c0a;
+}
+.stButton > button:active {
+    transform: scale(0.98);
+}
+
+/* ── Botón primario (form submit) ────────────────────────────────────── */
+.stButton > button[kind="primaryFormSubmit"],
+.stFormSubmitButton > button {
+    background-color: #c9a84c;
+    border-color: #c9a84c;
+    color: #0a0a0a;
+    font-weight: 500;
+}
+.stFormSubmitButton > button:hover {
+    background-color: #d4b56a;
+    border-color: #d4b56a;
+    color: #0a0a0a;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────── */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stNumberInput > div > div > input,
+.stSelectbox > div > div > div {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #1f1f1f !important;
+    border-radius: 6px !important;
+    color: #e8e0cc !important;
+    font-size: 0.85rem !important;
+}
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus,
+.stNumberInput > div > div > input:focus {
+    border-color: #c9a84c !important;
+    box-shadow: 0 0 0 1px #c9a84c22 !important;
+}
+
+/* ── Selectbox ───────────────────────────────────────────────────────── */
+.stSelectbox [data-baseweb="select"] > div {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #1f1f1f !important;
+    border-radius: 6px !important;
+    color: #e8e0cc !important;
+}
+[data-baseweb="popover"] [data-baseweb="menu"] {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #1f1f1f !important;
+}
+[data-baseweb="popover"] li {
+    background-color: #0f0f0f !important;
+    color: #e8e0cc !important;
+    font-size: 0.82rem !important;
+}
+[data-baseweb="popover"] li:hover {
+    background-color: #c9a84c15 !important;
+    color: #c9a84c !important;
+}
+
+/* ── Number input ────────────────────────────────────────────────────── */
+.stNumberInput button {
+    background-color: #1a1a1a !important;
+    border-color: #1f1f1f !important;
+    color: #c9a84c !important;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    background-color: transparent;
+    border-bottom: 0.5px solid #1a1a1a;
+    gap: 0;
+}
+.stTabs [data-baseweb="tab"] {
+    background-color: transparent;
+    border: none;
+    color: #3a3a3a !important;
+    font-size: 0.82rem !important;
+    padding: 8px 16px;
+    border-bottom: 1.5px solid transparent;
+    transition: color 0.15s;
+}
+.stTabs [aria-selected="true"] {
+    color: #c9a84c !important;
+    border-bottom: 1.5px solid #c9a84c !important;
+    background-color: transparent !important;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #e8e0cc !important;
+    background-color: transparent !important;
+}
+.stTabs [data-baseweb="tab-highlight"] {
+    background-color: #c9a84c !important;
+    height: 1.5px;
+}
+.stTabs [data-baseweb="tab-border"] {
+    background-color: #1a1a1a !important;
+}
+
+/* ── Expanders ───────────────────────────────────────────────────────── */
+.streamlit-expanderHeader {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #1a1a1a !important;
+    border-radius: 8px !important;
+    color: #e8e0cc !important;
+    font-size: 0.82rem !important;
+    padding: 10px 14px !important;
+}
+.streamlit-expanderHeader:hover {
+    border-color: #c9a84c44 !important;
+    color: #c9a84c !important;
+}
+.streamlit-expanderContent {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #1a1a1a !important;
+    border-top: none !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+/* ── Métricas ────────────────────────────────────────────────────────── */
+[data-testid="stMetric"] {
+    background-color: #0f0f0f;
+    border: 0.5px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+[data-testid="stMetricLabel"] p {
+    color: #3a3a3a !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+[data-testid="stMetricValue"] {
+    color: #c9a84c !important;
+    font-size: 1.4rem !important;
+    font-weight: 500 !important;
+}
+
+/* ── Divider ─────────────────────────────────────────────────────────── */
+hr {
+    border-color: #1a1a1a !important;
+    margin: 1rem 0 !important;
+}
+
+/* ── Alerts ──────────────────────────────────────────────────────────── */
+.stAlert {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #1f1f1f !important;
+    border-radius: 8px !important;
+    color: #e8e0cc !important;
+}
+[data-testid="stAlert"] p { color: #e8e0cc !important; }
+
+/* Éxito */
+[data-testid="stAlert"][data-baseweb="notification"][kind="positive"] {
+    border-color: #c9a84c44 !important;
+}
+[data-testid="stAlert"][data-baseweb="notification"][kind="positive"] p {
+    color: #c9a84c !important;
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────── */
+[data-testid="stToast"] {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #c9a84c33 !important;
+    color: #c9a84c !important;
+}
+
+/* ── Tables (markdown) ───────────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; }
+thead tr { border-bottom: 0.5px solid #2a2a2a; }
+th {
+    color: #3a3a3a !important;
+    font-size: 0.72rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 8px 12px;
+    font-weight: 500;
+}
+td {
+    color: #e8e0cc !important;
+    font-size: 0.82rem !important;
+    padding: 10px 12px;
+    border-bottom: 0.5px solid #141414;
+}
+tr:hover td { background-color: #c9a84c07; }
+
+/* ── Code blocks ─────────────────────────────────────────────────────── */
+.stCodeBlock, code {
+    background-color: #0f0f0f !important;
+    border: 0.5px solid #1f1f1f !important;
+    border-radius: 6px !important;
+    color: #c9a84c !important;
+    font-size: 0.8rem !important;
+}
+
+/* ── Caption ─────────────────────────────────────────────────────────── */
+.stCaption p, small {
+    color: #2e2e2e !important;
+    font-size: 0.72rem !important;
+}
+
+/* ── Info / Warning / Error ──────────────────────────────────────────── */
+[data-testid="stAlert"][data-baseweb="notification"][kind="info"] {
+    border-color: #1f1f1f !important;
+}
+[data-testid="stAlert"][data-baseweb="notification"][kind="warning"] {
+    border-color: #c9a84c44 !important;
+}
+[data-testid="stAlert"][data-baseweb="notification"][kind="error"] {
+    border-color: #5a1a1a !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #c9a84c44; }
