@@ -1,7 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
-from pages import auth_page
+from pages import auth_page, groups_page
 
 st.set_page_config(
     page_title="Prode Mundial 2026",
@@ -13,6 +13,12 @@ st.set_page_config(
 init_db()
 init_session()
 
+# ── Capture ?invite= token from URL (before anything else) ────────────────
+params = st.query_params
+invite_token = params.get("invite", None)
+if invite_token and not st.session_state.get("pending_invite_token"):
+    st.session_state.pending_invite_token = invite_token
+
 # ── SIDEBAR ───────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### ⚽ Prode Mundial 2026")
@@ -23,9 +29,15 @@ with st.sidebar:
         st.caption(f"@{st.session_state.username}")
         st.divider()
 
+        # If user arrived via invite link, default to Mis grupos
+        default_nav = "Mis grupos" if st.session_state.get("pending_invite_token") else "Inicio"
+        nav_options = ["Inicio", "Mis grupos", "Partidos", "Ranking"]
+        default_idx = nav_options.index(default_nav)
+
         nav = st.radio(
             "Navegación",
-            ["Inicio", "Mis grupos", "Partidos", "Ranking"],
+            nav_options,
+            index=default_idx,
             label_visibility="collapsed",
         )
 
@@ -42,10 +54,9 @@ if not is_logged_in():
 
 elif nav == "Inicio":
     st.title(f"¡Hola, {st.session_state.display_name}! 👋")
-    st.info("El prode del Mundial 2026 está en construcción. Los módulos de grupos, partidos y predicciones se van a ir habilitando de a uno.")
     st.markdown("""
     #### ¿Qué podés hacer?
-    - 🏟️ **Grupos**: crear un grupo privado y compartirlo con tus amigos
+    - 🏟️ **Mis grupos**: crear un grupo privado y compartirlo con tus amigos
     - ⚽ **Partidos**: predecir el resultado antes de que empiece
     - 🏆 **Ranking**: ver quién va punteando en tu grupo
 
@@ -60,8 +71,7 @@ elif nav == "Inicio":
     """)
 
 elif nav == "Mis grupos":
-    st.title("Mis grupos")
-    st.info("🔧 Módulo 2 — próximamente.")
+    groups_page.show()
 
 elif nav == "Partidos":
     st.title("Partidos")

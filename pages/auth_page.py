@@ -1,6 +1,7 @@
 import streamlit as st
 from modules.auth import authenticate_user, create_user, validate_register
 from utils.session import get_db_session, login_user, is_logged_in
+from modules.groups import get_group_by_token
 
 
 def show():
@@ -9,7 +10,19 @@ def show():
         return
 
     st.title("⚽ Mundial 2026 — Prode")
-    st.caption("Competí con amigos adivinando los resultados del Mundial.")
+
+    # Show invite banner if arriving via magic link
+    pending = st.session_state.get("pending_invite_token")
+    if pending:
+        db = get_db_session()
+        try:
+            group = get_group_by_token(db, pending)
+            if group:
+                st.success(f"🎉 Fuiste invitado al grupo **{group.name}**. Iniciá sesión o creá una cuenta para unirte.")
+        finally:
+            db.close()
+    else:
+        st.caption("Competí con amigos adivinando los resultados del Mundial.")
 
     tab_login, tab_register = st.tabs(["Iniciar sesión", "Crear cuenta"])
 
