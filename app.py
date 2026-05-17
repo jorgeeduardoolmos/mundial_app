@@ -1,7 +1,7 @@
 import streamlit as st
 from db.models import init_db
 from utils.session import init_session, is_logged_in, logout_user
-from views import auth_page, groups_page
+from views import auth_page, groups_page, matches_page
 
 st.set_page_config(
     page_title="Prode Mundial 2026",
@@ -74,8 +74,7 @@ elif nav == "Mis grupos":
     groups_page.show()
 
 elif nav == "Partidos":
-    st.title("Partidos")
-    st.info("🔧 Módulo 3 — próximamente.")
+    matches_page.show()
 
 elif nav == "Ranking":
     st.title("Ranking")
