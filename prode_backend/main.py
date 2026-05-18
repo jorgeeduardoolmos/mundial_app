@@ -33,7 +33,7 @@ app.add_middleware(
         "http://localhost:3000",        # desarrollo local
         "http://localhost:5500",        # Live Server de VSCode
         "http://127.0.0.1:5500",
-        "https://tu-frontend.vercel.app",  # reemplazar al deployar
+        "https://mundial-app-prode-frontend.vercel.app",  # reemplazar al deployar
     ],
     allow_credentials=True,
     allow_methods=["*"],
