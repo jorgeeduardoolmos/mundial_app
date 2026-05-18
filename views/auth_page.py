@@ -44,6 +44,25 @@ def _render_shell():
 .auth-field .stTextInput > div > div > input:focus {
     border-color: #c9a84c !important;
     box-shadow: 0 0 0 1px #c9a84c22, 0 0 16px #c9a84c11 !important;
+    outline: none !important;
+}
+/* Anular el rojo de Streamlit en cualquier estado */
+.auth-field .stTextInput > div > div {
+    border: none !important;
+    box-shadow: none !important;
+}
+.auth-field [data-baseweb="input"] {
+    border: none !important;
+    box-shadow: none !important;
+}
+.auth-field [data-baseweb="base-input"] {
+    background-color: #141414 !important;
+    border: 0.5px solid #c9a84c66 !important;
+    border-radius: 7px !important;
+}
+.auth-field [data-baseweb="base-input"]:focus-within {
+    border-color: #c9a84c !important;
+    box-shadow: 0 0 0 1px #c9a84c22 !important;
 }
 /* Botón entrar */
 .auth-submit .stFormSubmitButton > button {
@@ -61,7 +80,32 @@ def _render_shell():
 .auth-submit .stFormSubmitButton > button:hover {
     background-color: #d4b56a !important;
 }
-/* Tabs ocultos — manejamos el switch con session_state */
+/* Botón Crear Jugador — centrado */
+[data-testid="stAppViewContainer"] .auth-switch {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+[data-testid="stAppViewContainer"] .auth-switch .stButton {
+    display: flex !important;
+    justify-content: center !important;
+}
+[data-testid="stAppViewContainer"] .auth-switch .stButton > button {
+    background: transparent !important;
+    border: none !important;
+    color: #c9a84c !important;
+    font-size: 12px !important;
+    letter-spacing: 1px !important;
+    padding: 8px 0 !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
+[data-testid="stAppViewContainer"] .auth-switch .stButton > button:hover {
+    color: #d4b56a !important;
+    background: transparent !important;
+    border: none !important;
+}
+/* Tabs ocultos */
 .auth-tabs .stTabs [data-baseweb="tab-list"] { display: none !important; }
 .auth-tabs .stTabs [data-baseweb="tab-panel"] { padding: 0 !important; }
 </style>
@@ -142,8 +186,7 @@ def show():
                     db.close()
 
         # Switch a registro
-        st.markdown("""
-<div style="text-align:center;margin-top:20px;">""", unsafe_allow_html=True)
+        st.markdown('<div class="auth-switch">', unsafe_allow_html=True)
         if st.button("Crear Jugador", use_container_width=False, key="goto_register"):
             st.session_state.auth_mode = "register"
             st.rerun()
@@ -201,8 +244,7 @@ def show():
             finally:
                 db.close()
 
-        st.markdown("""
-<div style="text-align:center;margin-top:20px;">""", unsafe_allow_html=True)
+        st.markdown('<div class="auth-switch">', unsafe_allow_html=True)
         if st.button("← Volver", use_container_width=False, key="goto_login"):
             st.session_state.auth_mode = "login"
             st.rerun()
