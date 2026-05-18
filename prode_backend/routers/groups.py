@@ -21,7 +21,7 @@ from db.models import User
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 
-BASE_URL = "https://tu-frontend.vercel.app"  # se actualiza al deployar
+BASE_URL = "https://mundial-app-prode-frontend.vercel.app"  # se actualiza al deployar
 
 
 class CreateGroupRequest(BaseModel):
