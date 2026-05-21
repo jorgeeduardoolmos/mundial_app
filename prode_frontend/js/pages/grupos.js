@@ -1,41 +1,44 @@
-/* ── GRUPOS ──────────────────────────────────────────────────────────── */
+/* ── GRUPOS — Floodlight ─────────────────────────────────────────────── */
+
 async function renderGrupos(el) {
-  el.innerHTML = `<div class="loading">Cargando grupos...</div>`;
+  injectFloodlightStyles();
+  el.innerHTML = `<div class="fl-page">${flLoading()}</div>`;
 
   try {
     const groups = await api.groups.list();
     const session = getSession();
 
-    el.innerHTML = `
-      <div class="page-title">Mis grupos</div>
-      <div class="page-sub">Mundial 2026</div>
-      <div id="groups-list"></div>
+    el.innerHTML = `<div class="fl-page">
+      <div style="position:absolute;top:-100px;right:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(212,255,63,0.06),transparent 60%);pointer-events:none;"></div>
+      ${flPageTitle('GRUPOS','MUNDIAL 2026')}
 
-      <!-- Unirse con link -->
-      <div class="group-card" style="margin-bottom:12px;">
-        <div style="font-size:12px;font-weight:500;color:#f5f0ff;margin-bottom:8px;">Unirme a un grupo</div>
-        <div style="font-size:11px;color:#5a5488;margin-bottom:10px;">Pegá el link de invitación que te compartieron</div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" class="input-field" id="invite-input"
-            placeholder="https://mundial-app-prode-frontend.vercel.app/?invite=..."
-            style="flex:1;font-size:12px;padding:9px 12px;">
-          <button class="btn-primary" id="btn-join" style="padding:9px 16px;font-size:11px;letter-spacing:1px;white-space:nowrap;">
+      <div id="groups-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;"></div>
+
+      <div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px;margin-bottom:16px;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:6px;">Unirme a un grupo</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.35);letter-spacing:0.06em;margin-bottom:14px;">Pegá el link de invitación que te compartieron</div>
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="invite-input"
+            placeholder="https://.../?invite=..."
+            style="flex:1;min-width:0;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#F4F5FF;letter-spacing:0.04em;outline:none;"
+            onfocus="this.style.borderColor='rgba(212,255,63,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          <button id="btn-join"
+            style="background:#D4FF3F;color:#0A0B1E;border:none;border-radius:10px;padding:10px 20px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0;">
             Unirme
           </button>
         </div>
-        <div id="join-msg" style="font-size:11px;margin-top:8px;min-height:14px;"></div>
+        <div id="join-msg" style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:10px;min-height:14px;letter-spacing:0.04em;"></div>
       </div>
 
       <div id="create-group-section"></div>
-    `;
+    </div>`;
 
-    // Listener unirse
-    document.getElementById("btn-join").addEventListener("click", async () => {
+    const joinBtn = document.getElementById("btn-join");
+    joinBtn.addEventListener("click", async () => {
       const val = document.getElementById("invite-input").value.trim();
       const msgEl = document.getElementById("join-msg");
       msgEl.textContent = "";
 
-      // Extraer token del link o usar directo
       let token = val;
       try {
         const url = new URL(val);
@@ -43,32 +46,29 @@ async function renderGrupos(el) {
       } catch {}
 
       if (!token) {
-        msgEl.style.color = "#c04040";
+        msgEl.style.color = "#FF5C4D";
         msgEl.textContent = "Pegá un link de invitación válido.";
         return;
       }
 
-      const btn = document.getElementById("btn-join");
-      btn.disabled = true;
+      joinBtn.disabled = true;
       try {
         const res = await api.groups.join(token);
-        msgEl.style.color = "#F0C38E";
-        msgEl.textContent = `¡Te uniste a "${res.group_name}"!`;
+        msgEl.style.color = "#D4FF3F";
+        msgEl.textContent = `¡Te uniste a "${escHtml(res.group_name)}"!`;
         document.getElementById("invite-input").value = "";
         setTimeout(() => renderGrupos(el), 900);
       } catch (e) {
-        msgEl.style.color = "#c04040";
-        msgEl.textContent = e.message;
-        btn.disabled = false;
+        msgEl.style.color = "#FF5C4D";
+        msgEl.textContent = escHtml(e.message);
+        joinBtn.disabled = false;
       }
     });
 
-    // Enter en el input
     document.getElementById("invite-input").addEventListener("keydown", e => {
-      if (e.key === "Enter") document.getElementById("btn-join").click();
+      if (e.key === "Enter") joinBtn.click();
     });
 
-    // Lista de grupos
     const listEl = document.getElementById("groups-list");
     if (groups.length) {
       for (const g of groups) {
@@ -76,40 +76,56 @@ async function renderGrupos(el) {
         listEl.appendChild(buildGroupCard(g, members, session));
       }
     } else {
-      listEl.innerHTML = `<div class="empty" style="margin-bottom:16px;"><p>Todavía no pertenecés a ningún grupo.</p></div>`;
+      listEl.innerHTML = `<div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:40px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:12px;">👥</div>
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;text-transform:uppercase;margin-bottom:8px;">Todavía no tenés grupos</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.35);letter-spacing:0.06em;">Uníte con un link o creá tu propio grupo.</div>
+      </div>`;
     }
 
-    // Crear grupo
     document.getElementById("create-group-section").innerHTML = `
-      <div id="create-group-form" class="hidden" style="margin-bottom:12px;">
-        <div class="group-card">
-          <div class="input-group">
-            <div class="input-label">Nombre del grupo</div>
-            <input type="text" class="input-field" id="new-group-name" placeholder="Ej: Los del trabajo">
-          </div>
-          <div class="input-group">
-            <div class="input-label">Descripción (opcional)</div>
-            <input type="text" class="input-field" id="new-group-desc" placeholder="">
-          </div>
-          <div style="display:flex;gap:8px;margin-top:4px;">
-            <button class="btn-primary" id="btn-create-confirm" style="flex:1;padding:10px;">Crear grupo</button>
-            <button class="btn-ghost" id="btn-create-cancel">Cancelar</button>
-          </div>
-          <div id="create-group-error" style="font-size:11px;color:#c04040;margin-top:8px;"></div>
+      <div id="create-group-form" style="display:none;background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px;margin-bottom:16px;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;text-transform:uppercase;margin-bottom:18px;">Nuevo grupo</div>
+        <div style="margin-bottom:12px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.35);letter-spacing:0.1em;margin-bottom:6px;">NOMBRE DEL GRUPO</div>
+          <input type="text" id="new-group-name" placeholder="Ej: Los del trabajo"
+            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#F4F5FF;outline:none;box-sizing:border-box;"
+            onfocus="this.style.borderColor='rgba(212,255,63,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
         </div>
+        <div style="margin-bottom:18px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.35);letter-spacing:0.1em;margin-bottom:6px;">DESCRIPCIÓN (OPCIONAL)</div>
+          <input type="text" id="new-group-desc" placeholder=""
+            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#F4F5FF;outline:none;box-sizing:border-box;"
+            onfocus="this.style.borderColor='rgba(212,255,63,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button id="btn-create-confirm"
+            style="flex:1;background:#D4FF3F;color:#0A0B1E;border:none;border-radius:10px;padding:12px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;">
+            Crear grupo
+          </button>
+          <button id="btn-create-cancel"
+            style="background:rgba(255,255,255,0.05);color:rgba(244,245,255,0.55);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;white-space:nowrap;">
+            Cancelar
+          </button>
+        </div>
+        <div id="create-group-error" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF5C4D;margin-top:10px;min-height:14px;"></div>
       </div>
-      <button class="btn-ghost w-full" id="btn-show-create" style="padding:10px;">+ Crear nuevo grupo</button>
+      <button id="btn-show-create"
+        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;color:rgba(244,245,255,0.45);text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:background 0.15s;"
+        onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+        + Crear nuevo grupo
+      </button>
     `;
 
     document.getElementById("btn-show-create").addEventListener("click", () => {
-      document.getElementById("create-group-form").classList.remove("hidden");
-      document.getElementById("btn-show-create").classList.add("hidden");
+      document.getElementById("create-group-form").style.display = "block";
+      document.getElementById("btn-show-create").style.display = "none";
       document.getElementById("new-group-name").focus();
     });
 
     document.getElementById("btn-create-cancel").addEventListener("click", () => {
-      document.getElementById("create-group-form").classList.add("hidden");
-      document.getElementById("btn-show-create").classList.remove("hidden");
+      document.getElementById("create-group-form").style.display = "none";
+      document.getElementById("btn-show-create").style.display = "block";
     });
 
     document.getElementById("btn-create-confirm").addEventListener("click", async () => {
@@ -125,55 +141,73 @@ async function renderGrupos(el) {
         showToast(`Grupo "${name}" creado`);
         renderGrupos(el);
       } catch (e) {
-        errEl.textContent = e.message;
+        errEl.textContent = escHtml(e.message);
         btn.disabled = false;
       }
     });
 
   } catch (e) {
-    el.innerHTML = `<div class="empty"><p>${e.message}</p></div>`;
+    el.innerHTML = `<div class="fl-page">${flPageTitle('GRUPOS','MUNDIAL 2026')}<div style="color:#FF5C4D;font-family:'JetBrains Mono',monospace;font-size:13px;padding:24px;text-align:center;">${escHtml(e.message)}</div></div>`;
   }
 }
 
 function buildGroupCard(group, members, session) {
   const isOwner = group.owner_id === session.user_id;
   const card = document.createElement("div");
-  card.className = "group-card";
+  card.style.cssText = "background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;";
 
-  const visibleMembers = members.slice(0, 4);
-  const extra = members.length - visibleMembers.length;
+  const shown = members.slice(0, 6);
+  const extra = members.length - shown.length;
 
-  const chipsHtml = visibleMembers.map(m => {
+  const memberChips = shown.map(m => {
     const isMe = m.id === session.user_id;
-    const bg = isMe ? "background:#F0C38E15;color:#F0C38E;" : "background:#4a4578;color:#4d6d82;";
-    return `
-      <div class="member-chip">
-        <div class="member-chip-av" style="${bg}">${getInitials(m.display_name)}</div>
-        <div class="member-chip-name">${m.display_name.split(" ")[0]}</div>
-      </div>`;
-  }).join("") + (extra > 0 ? `
-    <div class="member-chip">
-      <div class="member-chip-av" style="background:#2a2548;color:#4a4578;">+${extra}</div>
-    </div>` : "");
+    const initials = getInitials(m.display_name);
+    const firstName = m.display_name.split(" ")[0];
+    const palette = ['#7BB4FF','#3B5BFF','#FF5C4D','#FFD23F','#00C46B','#FF7A1A','#C2185B'];
+    let h = 0; for (const c of firstName) h = (h*31+c.charCodeAt(0))&0x7fffffff;
+    const bg = isMe ? '#D4FF3F' : palette[h % palette.length];
+    const fg = isMe ? '#0A0B1E' : (bg === '#FFD23F' || bg === '#F4F5FF' ? '#0A0B1E' : '#F4F5FF');
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:13px;color:${fg};flex-shrink:0;${isMe?'box-shadow:0 0 0 2px #0A0B1E,0 0 0 4px #D4FF3F;':''}">
+        ${escHtml(initials)}
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${isMe?'#D4FF3F':'rgba(244,245,255,0.45)'};letter-spacing:0.04em;max-width:42px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;">${escHtml(firstName)}</div>
+    </div>`;
+  }).join("");
 
-  const ownerBadge = isOwner ? ' <span style="font-size:9px;color:#F0C38E;">creado por vos</span>' : "";
+  const extraChip = extra > 0
+    ? `<div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:12px;color:rgba(244,245,255,0.35);">+${extra}</div>
+       </div>`
+    : "";
+
+  const ownerBadge = isOwner
+    ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#D4FF3F;background:rgba(212,255,63,0.1);border:1px solid rgba(212,255,63,0.2);padding:2px 8px;border-radius:4px;letter-spacing:0.06em;flex-shrink:0;">TU GRUPO</span>`
+    : "";
 
   card.innerHTML = `
-    <div class="group-name">${group.name}</div>
-    <div class="group-meta">${members.length} miembro${members.length !== 1 ? "s" : ""}${ownerBadge}</div>
-    <div class="members-row">${chipsHtml}</div>
-    <div class="divider-fade"></div>
-    <div class="section-head">Link de invitación</div>
-    <div class="invite-box">
-      <span class="invite-url" id="invite-url-${group.id}">${group.invite_url}</span>
-      <span class="invite-copy" id="copy-btn-${group.id}">
-        <i class="ti ti-copy" aria-hidden="true"></i> copiar
-      </span>
+    <div style="padding:20px 22px 18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:22px;color:#F4F5FF;text-transform:uppercase;letter-spacing:0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(group.name)}</div>
+        ${ownerBadge}
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.32);letter-spacing:0.1em;margin-bottom:18px;">${members.length} MIEMBRO${members.length !== 1 ? 'S' : ''}</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">${memberChips}${extraChip}</div>
     </div>
-    ${isOwner ? `
-    <button class="btn-ghost" id="regen-btn-${group.id}" style="margin-top:8px;font-size:10px;padding:5px 10px;">
-      <i class="ti ti-refresh" aria-hidden="true"></i> Regenerar link
-    </button>` : ""}
+    <div style="border-top:1px solid rgba(255,255,255,0.06);padding:16px 22px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.32);letter-spacing:0.1em;margin-bottom:8px;">LINK DE INVITACIÓN</div>
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 14px;">
+        <span id="invite-url-${group.id}" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">${escHtml(group.invite_url)}</span>
+        <button id="copy-btn-${group.id}"
+          style="background:#D4FF3F;color:#0A0B1E;border:none;border-radius:7px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;letter-spacing:0.04em;">
+          COPIAR
+        </button>
+      </div>
+      ${isOwner ? `<button id="regen-btn-${group.id}"
+        style="margin-top:8px;background:transparent;border:none;color:rgba(244,245,255,0.22);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;padding:4px 0;letter-spacing:0.06em;">
+        ↺ Regenerar link
+      </button>` : ""}
+    </div>
   `;
 
   card.querySelector(`#copy-btn-${group.id}`).addEventListener("click", () => {
@@ -186,7 +220,7 @@ function buildGroupCard(group, members, session) {
     card.querySelector(`#regen-btn-${group.id}`).addEventListener("click", async () => {
       try {
         const res = await api.groups.regenerate(group.id);
-        document.getElementById(`invite-url-${group.id}`).textContent = res.invite_url;
+        document.getElementById(`invite-url-${group.id}`).textContent = escHtml(res.invite_url);
         group.invite_url = res.invite_url;
         showToast("Link regenerado");
       } catch (e) {

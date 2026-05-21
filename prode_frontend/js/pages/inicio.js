@@ -76,6 +76,38 @@ function injectFloodlightStyles() {
     .fl-rank-row { transition:background 150ms; }
     .fl-group-row { transition:background 150ms; }
     .fl-group-row:hover { background:rgba(255,255,255,0.025); }
+
+    /* ── Shared page styles ── */
+    .fl-page {
+      margin:-36px -48px; background:#0A0B1E; color:#F4F5FF;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+      padding:48px 40px 60px; min-height:calc(100vh - 60px); position:relative;
+    }
+    @media (max-width:768px) {
+      .fl-page { margin:-16px -16px -88px; padding:24px 20px 32px; }
+    }
+    .fl-tab {
+      background:transparent; border:1px solid rgba(255,255,255,0.08); border-radius:6px;
+      padding:6px 14px; font-family:'JetBrains Mono',monospace; font-size:11px;
+      font-weight:600; color:rgba(244,245,255,0.62); cursor:pointer;
+      letter-spacing:0.08em; transition:all 150ms; white-space:nowrap;
+    }
+    .fl-tab:hover { border-color:rgba(255,255,255,0.20); color:#F4F5FF; }
+    .fl-tab.active { background:rgba(212,255,63,0.10); border-color:rgba(212,255,63,0.35); color:#D4FF3F; }
+    .fl-input {
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+      border-radius:8px; color:#F4F5FF; font-family:'Big Shoulders Display',system-ui;
+      font-weight:800; font-size:20px; text-align:center; outline:none; transition:border-color 150ms;
+    }
+    .fl-input:focus { border-color:#D4FF3F; box-shadow:0 0 0 2px rgba(212,255,63,0.15); }
+    .fl-input::-webkit-outer-spin-button,.fl-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+    .fl-input[type=number] { -moz-appearance:textfield; }
+    .fl-collapse-body { display:none; }
+    .fl-collapse-body.open { display:block; }
+    .fl-group-hdr { cursor:pointer; transition:background 150ms; }
+    .fl-group-hdr:hover { background:rgba(255,255,255,0.025); }
+    .fl-admin-panel { display:none; padding:14px 20px; border-top:1px solid rgba(255,255,255,0.08); align-items:center; gap:10px; flex-wrap:wrap; }
+    .fl-admin-panel.visible { display:flex; }
     .fl-hero {
       padding:44px 40px 32px;
       display:grid; grid-template-columns:1fr 480px;
