@@ -59,6 +59,13 @@ def on_startup():
         inserted = seed_matches(db)
         if inserted:
             print(f"✓ {inserted} partidos cargados en la DB")
+        # Migración: renombrar "Semifinales" TBDs a "4tos de final"
+        updated = db.execute(
+            "UPDATE matches SET stage='4tos de final' WHERE stage='Semifinales' AND home_team LIKE 'Semi TBD%'"
+        ).rowcount
+        if updated:
+            db.commit()
+            print(f"✓ {updated} partidos migrados a '4tos de final'")
     finally:
         db.close()
 

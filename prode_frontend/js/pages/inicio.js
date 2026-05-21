@@ -136,58 +136,80 @@ function injectFloodlightStyles() {
   document.head.appendChild(s);
 }
 
-/* ── Team color map (Spanish backend names) ─────────────────────────────── */
+/* ── Team map (Spanish backend names → ISO 3166-1 alpha-2 for flagcdn.com) ── */
 const FL_TEAMS = {
-  'Argentina':{'code':'ARG','c1':'#7BB4FF','c2':'#F4F5FF'},
-  'Brasil':{'code':'BRA','c1':'#00C46B','c2':'#FFD23F'},
-  'Francia':{'code':'FRA','c1':'#3B5BFF','c2':'#FF5C4D'},
-  'España':{'code':'ESP','c1':'#FF5C4D','c2':'#FFD23F'},
-  'Inglaterra':{'code':'ING','c1':'#F4F5FF','c2':'#FF5C4D'},
-  'Alemania':{'code':'ALE','c1':'#1F2330','c2':'#FFD23F'},
-  'Portugal':{'code':'POR','c1':'#00C46B','c2':'#FF5C4D'},
-  'Italia':{'code':'ITA','c1':'#3B5BFF','c2':'#F4F5FF'},
-  'Uruguay':{'code':'URU','c1':'#7BB4FF','c2':'#1F2330'},
-  'Colombia':{'code':'COL','c1':'#FFD23F','c2':'#3B5BFF'},
-  'Paraguay':{'code':'PAR','c1':'#FF5C4D','c2':'#3B5BFF'},
-  'Chile':{'code':'CHI','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Ecuador':{'code':'ECU','c1':'#FFD23F','c2':'#3B5BFF'},
-  'Perú':{'code':'PER','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'México':{'code':'MEX','c1':'#00C46B','c2':'#FF5C4D'},
-  'EE.UU.':{'code':'USA','c1':'#3B5BFF','c2':'#FF5C4D'},
-  'Estados Unidos':{'code':'USA','c1':'#3B5BFF','c2':'#FF5C4D'},
-  'Canadá':{'code':'CAN','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Países Bajos':{'code':'NED','c1':'#FF7A1A','c2':'#3B5BFF'},
-  'Bélgica':{'code':'BEL','c1':'#1F2330','c2':'#FFD23F'},
-  'Croacia':{'code':'CRO','c1':'#FF5C4D','c2':'#3B5BFF'},
-  'Dinamarca':{'code':'DIN','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Suiza':{'code':'SUI','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Austria':{'code':'AUT','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Polonia':{'code':'POL','c1':'#F4F5FF','c2':'#FF5C4D'},
-  'Turquía':{'code':'TUR','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Rep. Checa':{'code':'CZE','c1':'#3B5BFF','c2':'#FF5C4D'},
-  'Ucrania':{'code':'UCR','c1':'#3B5BFF','c2':'#FFD23F'},
-  'Senegal':{'code':'SEN','c1':'#00C46B','c2':'#FFD23F'},
-  'Marruecos':{'code':'MAR','c1':'#C2185B','c2':'#00C46B'},
-  'Egipto':{'code':'EGI','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Túnez':{'code':'TUN','c1':'#FF5C4D','c2':'#F4F5FF'},
-  'Costa de Marfil':{'code':'CIV','c1':'#FF7A1A','c2':'#00C46B'},
-  'Nigeria':{'code':'NGA','c1':'#00C46B','c2':'#F4F5FF'},
-  'Ghana':{'code':'GHA','c1':'#FF5C4D','c2':'#FFD23F'},
-  'Camerún':{'code':'CMR','c1':'#00C46B','c2':'#FF5C4D'},
-  'Sudáfrica':{'code':'SAF','c1':'#00C46B','c2':'#FFD23F'},
-  'Argelia':{'code':'ALG','c1':'#00C46B','c2':'#F4F5FF'},
-  'Japón':{'code':'JPN','c1':'#F4F5FF','c2':'#FF5C4D'},
-  'Corea del Sur':{'code':'KOR','c1':'#F4F5FF','c2':'#3B5BFF'},
-  'Australia':{'code':'AUS','c1':'#FFD23F','c2':'#00C46B'},
-  'Irán':{'code':'IRN','c1':'#00C46B','c2':'#FF5C4D'},
-  'Arabia Saudita':{'code':'KSA','c1':'#00C46B','c2':'#F4F5FF'},
-  'Qatar':{'code':'QAT','c1':'#7A1F4A','c2':'#F4F5FF'},
-  'Irak':{'code':'IRQ','c1':'#FF5C4D','c2':'#1F2330'},
-  'Jordania':{'code':'JOR','c1':'#1F2330','c2':'#FF5C4D'},
-  'Uzbekistán':{'code':'UZB','c1':'#3B5BFF','c2':'#00C46B'},
-  'Nueva Zelanda':{'code':'NZL','c1':'#1F2330','c2':'#FF5C4D'},
-  'Haití':{'code':'HAI','c1':'#3B5BFF','c2':'#FF5C4D'},
-  'Escocia':{'code':'ESC','c1':'#3B5BFF','c2':'#F4F5FF'},
+  // CONMEBOL
+  'Argentina':      {code:'ARG',iso:'ar',  c1:'#7BB4FF',c2:'#F4F5FF'},
+  'Brasil':         {code:'BRA',iso:'br',  c1:'#00C46B',c2:'#FFD23F'},
+  'Uruguay':        {code:'URU',iso:'uy',  c1:'#7BB4FF',c2:'#1F2330'},
+  'Colombia':       {code:'COL',iso:'co',  c1:'#FFD23F',c2:'#3B5BFF'},
+  'Paraguay':       {code:'PAR',iso:'py',  c1:'#FF5C4D',c2:'#3B5BFF'},
+  'Chile':          {code:'CHI',iso:'cl',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Ecuador':        {code:'ECU',iso:'ec',  c1:'#FFD23F',c2:'#3B5BFF'},
+  'Perú':           {code:'PER',iso:'pe',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Bolivia':        {code:'BOL',iso:'bo',  c1:'#FF5C4D',c2:'#FFD23F'},
+  // UEFA
+  'Francia':        {code:'FRA',iso:'fr',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  'España':         {code:'ESP',iso:'es',  c1:'#FF5C4D',c2:'#FFD23F'},
+  'Inglaterra':     {code:'ING',iso:'gb-eng',c1:'#F4F5FF',c2:'#FF5C4D'},
+  'Alemania':       {code:'ALE',iso:'de',  c1:'#1F2330',c2:'#FFD23F'},
+  'Portugal':       {code:'POR',iso:'pt',  c1:'#00C46B',c2:'#FF5C4D'},
+  'Italia':         {code:'ITA',iso:'it',  c1:'#3B5BFF',c2:'#F4F5FF'},
+  'Países Bajos':   {code:'NED',iso:'nl',  c1:'#FF7A1A',c2:'#3B5BFF'},
+  'Bélgica':        {code:'BEL',iso:'be',  c1:'#1F2330',c2:'#FFD23F'},
+  'Croacia':        {code:'CRO',iso:'hr',  c1:'#FF5C4D',c2:'#3B5BFF'},
+  'Dinamarca':      {code:'DIN',iso:'dk',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Suiza':          {code:'SUI',iso:'ch',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Austria':        {code:'AUT',iso:'at',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Polonia':        {code:'POL',iso:'pl',  c1:'#F4F5FF',c2:'#FF5C4D'},
+  'Turquía':        {code:'TUR',iso:'tr',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Türkiye':        {code:'TUR',iso:'tr',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Ucrania':        {code:'UCR',iso:'ua',  c1:'#3B5BFF',c2:'#FFD23F'},
+  'Escocia':        {code:'ESC',iso:'gb-sct',c1:'#3B5BFF',c2:'#F4F5FF'},
+  'Noruega':        {code:'NOR',iso:'no',  c1:'#FF5C4D',c2:'#3B5BFF'},
+  'Suecia':         {code:'SWE',iso:'se',  c1:'#3B5BFF',c2:'#FFD23F'},
+  'Rep. Checa':     {code:'CZE',iso:'cz',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  'Chequia':        {code:'CZE',iso:'cz',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  'Bosnia y Her.':  {code:'BIH',iso:'ba',  c1:'#3B5BFF',c2:'#FFD23F'},
+  'Serbia':         {code:'SRB',iso:'rs',  c1:'#FF5C4D',c2:'#3B5BFF'},
+  // CONCACAF
+  'EE.UU.':         {code:'USA',iso:'us',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  'Estados Unidos': {code:'USA',iso:'us',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  'México':         {code:'MEX',iso:'mx',  c1:'#00C46B',c2:'#FF5C4D'},
+  'Canadá':         {code:'CAN',iso:'ca',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Haití':          {code:'HAI',iso:'ht',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  'Jamaica':        {code:'JAM',iso:'jm',  c1:'#00C46B',c2:'#FFD23F'},
+  'Costa Rica':     {code:'CRC',iso:'cr',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  'Honduras':       {code:'HON',iso:'hn',  c1:'#3B5BFF',c2:'#F4F5FF'},
+  'Panamá':         {code:'PAN',iso:'pa',  c1:'#FF5C4D',c2:'#3B5BFF'},
+  'Curazao':        {code:'CUW',iso:'cw',  c1:'#3B5BFF',c2:'#FFD23F'},
+  'Cabo Verde':     {code:'CPV',iso:'cv',  c1:'#3B5BFF',c2:'#FF5C4D'},
+  // CAF
+  'Senegal':        {code:'SEN',iso:'sn',  c1:'#00C46B',c2:'#FFD23F'},
+  'Marruecos':      {code:'MAR',iso:'ma',  c1:'#C2185B',c2:'#00C46B'},
+  'Egipto':         {code:'EGI',iso:'eg',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Túnez':          {code:'TUN',iso:'tn',  c1:'#FF5C4D',c2:'#F4F5FF'},
+  'Costa de Marfil':{code:'CIV',iso:'ci',  c1:'#FF7A1A',c2:'#00C46B'},
+  'Nigeria':        {code:'NGA',iso:'ng',  c1:'#00C46B',c2:'#F4F5FF'},
+  'Ghana':          {code:'GHA',iso:'gh',  c1:'#FF5C4D',c2:'#FFD23F'},
+  'Camerún':        {code:'CMR',iso:'cm',  c1:'#00C46B',c2:'#FF5C4D'},
+  'Sudáfrica':      {code:'SAF',iso:'za',  c1:'#00C46B',c2:'#FFD23F'},
+  'Argelia':        {code:'ALG',iso:'dz',  c1:'#00C46B',c2:'#F4F5FF'},
+  'Mali':           {code:'MLI',iso:'ml',  c1:'#00C46B',c2:'#FFD23F'},
+  'Malí':           {code:'MLI',iso:'ml',  c1:'#00C46B',c2:'#FFD23F'},
+  'RD Congo':       {code:'COD',iso:'cd',  c1:'#3B5BFF',c2:'#FFD23F'},
+  // AFC
+  'Japón':          {code:'JPN',iso:'jp',  c1:'#F4F5FF',c2:'#FF5C4D'},
+  'Corea del Sur':  {code:'KOR',iso:'kr',  c1:'#F4F5FF',c2:'#3B5BFF'},
+  'Australia':      {code:'AUS',iso:'au',  c1:'#FFD23F',c2:'#00C46B'},
+  'Irán':           {code:'IRN',iso:'ir',  c1:'#00C46B',c2:'#FF5C4D'},
+  'Arabia Saudita': {code:'KSA',iso:'sa',  c1:'#00C46B',c2:'#F4F5FF'},
+  'Qatar':          {code:'QAT',iso:'qa',  c1:'#7A1F4A',c2:'#F4F5FF'},
+  'Irak':           {code:'IRQ',iso:'iq',  c1:'#FF5C4D',c2:'#1F2330'},
+  'Jordania':       {code:'JOR',iso:'jo',  c1:'#1F2330',c2:'#FF5C4D'},
+  'Uzbekistán':     {code:'UZB',iso:'uz',  c1:'#3B5BFF',c2:'#00C46B'},
+  // OFC
+  'Nueva Zelanda':  {code:'NZL',iso:'nz',  c1:'#1F2330',c2:'#FF5C4D'},
 };
 
 function flTeam(name) {
@@ -195,7 +217,7 @@ function flTeam(name) {
   const code = name.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase() || '???';
   const palette = ['#3B5BFF','#FF5C4D','#FFD23F','#00C46B','#FF7A1A','#7BB4FF'];
   const h = [...(name||'')].reduce((a,c)=>a+c.charCodeAt(0),0);
-  return {code, c1:palette[h%palette.length], c2:'#F4F5FF'};
+  return {code, iso:null, c1:palette[h%palette.length], c2:'#F4F5FF'};
 }
 
 function flLight(c) { return c==='#F4F5FF'||c==='#FFD23F'; }
@@ -205,18 +227,17 @@ function escHtml(s) {
 }
 
 /* ── TeamChip HTML ─────────────────────────────────────────────────────── */
-function chipHTML(code, c1, c2, size, r) {
-  const fs = Math.round(size*0.36);
-  const tc = flLight(c2)?'#0A0B1E':'#F4F5FF';
-  const sh = flLight(c2)?'':'text-shadow:0 1px 2px rgba(0,0,0,0.5);';
-  return `<div style="width:${size}px;height:${size}px;border-radius:${r}px;position:relative;overflow:hidden;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);">
-    <div style="position:absolute;inset:0;background:${c1};"></div>
-    <div style="position:absolute;inset:0;background:${c2};clip-path:polygon(100% 0,100% 100%,0 100%);"></div>
-    <div style="position:absolute;inset:0;display:grid;place-items:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:${fs}px;color:${tc};letter-spacing:0.02em;${sh}">${escHtml(code.slice(0,3))}</div>
-  </div>`;
+function chipHTML(code, iso, size, r) {
+  size = size || 24;
+  r = r !== undefined ? r : Math.round(size * 0.18);
+  if (iso) {
+    return `<div style="width:${size}px;height:${size}px;border-radius:${r}px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);"><img src="https://flagcdn.com/w40/${iso}.png" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="${escHtml(code)}"></div>`;
+  }
+  return `<div style="width:${size}px;height:${size}px;border-radius:${r}px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:${Math.round(size*0.35)}px;color:rgba(244,245,255,0.3);">?</div>`;
 }
 function chipByName(name, size, r) {
-  const t=flTeam(name); return chipHTML(t.code,t.c1,t.c2,size,r);
+  const t = flTeam(name);
+  return chipHTML(t.code, t.iso, size, r);
 }
 
 /* ── Date helpers ──────────────────────────────────────────────────────── */
@@ -350,11 +371,11 @@ function tickerHTML(items) {
     const h=flTeam(m.home_team),a=flTeam(m.away_team);
     return `<div style="display:flex;align-items:center;gap:10px;padding-right:28px;border-right:1px solid rgba(255,255,255,0.08);min-width:${itemW}px;">
       <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.38);letter-spacing:0.04em;">FT</span>
-      ${chipHTML(h.code,h.c1,h.c2,20,4)}
+      ${chipHTML(h.code,h.iso,20,4)}
       <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;color:#F4F5FF;">${escHtml(h.code)}</span>
       <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#D4FF3F;font-variant-numeric:tabular-nums;">${m.home_goals}–${m.away_goals}</span>
       <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;color:#F4F5FF;">${escHtml(a.code)}</span>
-      ${chipHTML(a.code,a.c1,a.c2,20,4)}
+      ${chipHTML(a.code,a.iso,20,4)}
     </div>`;
   }).join('');
   return `<div class="fl-ticker-wrap">
@@ -389,11 +410,10 @@ function nextMatchHTML(m, predState, hasGroup) {
       <div style="position:absolute;inset:0;opacity:0.5;pointer-events:none;background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(212,255,63,0.06),transparent 70%),repeating-linear-gradient(90deg,transparent 0 80px,rgba(255,255,255,0.02) 80px 81px);"></div>
 
       <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:0;">
-        <div class="fl-team-chip-lg" style="width:88px;height:88px;border-radius:14px;position:relative;overflow:hidden;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);">
-          <div style="position:absolute;inset:0;background:${h.c1};"></div>
-          <div style="position:absolute;inset:0;background:${h.c2};clip-path:polygon(100% 0,100% 100%,0 100%);"></div>
-          <div class="fl-chip-code-lg" style="position:absolute;inset:0;display:grid;place-items:center;font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:30px;color:${flLight(h.c2)?'#0A0B1E':'#F4F5FF'};letter-spacing:0.02em;">${escHtml(h.code.slice(0,3))}</div>
-        </div>
+        ${h.iso
+          ? `<div class="fl-team-chip-lg" style="width:88px;height:88px;border-radius:14px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);"><img src="https://flagcdn.com/w160/${h.iso}.png" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="${escHtml(h.code)}"></div>`
+          : `<div class="fl-team-chip-lg" style="width:88px;height:88px;border-radius:14px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:30px;color:rgba(244,245,255,0.3);">?</div>`
+        }
         <div>
           <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:34px;line-height:0.95;color:#F4F5FF;text-transform:uppercase;letter-spacing:0.005em;">${escHtml(m.home_team)}</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;margin-top:5px;text-transform:uppercase;">${escHtml(m.stage||'')}</div>
@@ -403,11 +423,10 @@ function nextMatchHTML(m, predState, hasGroup) {
       <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:44px;color:rgba(244,245,255,0.38);letter-spacing:0.06em;padding:0 8px;position:relative;z-index:1;">VS</div>
 
       <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:0;flex-direction:row-reverse;">
-        <div class="fl-team-chip-lg" style="width:88px;height:88px;border-radius:14px;position:relative;overflow:hidden;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);">
-          <div style="position:absolute;inset:0;background:${a.c1};"></div>
-          <div style="position:absolute;inset:0;background:${a.c2};clip-path:polygon(100% 0,100% 100%,0 100%);"></div>
-          <div class="fl-chip-code-lg" style="position:absolute;inset:0;display:grid;place-items:center;font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:30px;color:${flLight(a.c2)?'#0A0B1E':'#F4F5FF'};letter-spacing:0.02em;">${escHtml(a.code.slice(0,3))}</div>
-        </div>
+        ${a.iso
+          ? `<div class="fl-team-chip-lg" style="width:88px;height:88px;border-radius:14px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);"><img src="https://flagcdn.com/w160/${a.iso}.png" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="${escHtml(a.code)}"></div>`
+          : `<div class="fl-team-chip-lg" style="width:88px;height:88px;border-radius:14px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:30px;color:rgba(244,245,255,0.3);">?</div>`
+        }
         <div style="text-align:right;">
           <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:34px;line-height:0.95;color:#F4F5FF;text-transform:uppercase;letter-spacing:0.005em;">${escHtml(m.away_team)}</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;margin-top:5px;text-transform:uppercase;">${escHtml(m.stage||'')}</div>
@@ -467,7 +486,7 @@ function matchRowHTML(m, pred) {
     <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.38);letter-spacing:0.05em;">${ft?'FINAL':escHtml(m.match_datetime_str||'')}</div>
     <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;">
       <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:17px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(m.home_team)}</span>
-      ${chipHTML(h.code,h.c1,h.c2,24,5)}
+      ${chipHTML(h.code,h.iso,24,5)}
     </div>
     <div style="display:flex;align-items:center;gap:5px;padding:4px 10px;background:${sbg};border:1px solid rgba(255,255,255,0.08);border-radius:8px;">
       <span style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:${sc};font-variant-numeric:tabular-nums;line-height:1;">${ft?m.home_goals:'—'}</span>
@@ -475,7 +494,7 @@ function matchRowHTML(m, pred) {
       <span style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:${sc};font-variant-numeric:tabular-nums;line-height:1;">${ft?m.away_goals:'—'}</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-      ${chipHTML(a.code,a.c1,a.c2,24,5)}
+      ${chipHTML(a.code,a.iso,24,5)}
       <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:17px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(m.away_team)}</span>
     </div>
     <div style="text-align:right;">${badge}</div>
@@ -504,7 +523,7 @@ function groupTableHTML(gt) {
     return `<div class="fl-group-row" style="display:grid;grid-template-columns:28px 1fr repeat(5,34px) 48px;gap:8px;padding:10px 4px;align-items:center;border-bottom:${i<gt.rows.length-1?'1px solid rgba(255,255,255,0.08)':'none'};margin-left:${q?'-4px':'0'};padding-left:${q?'8px':'4px'};border-left:${q?'2px solid #D4FF3F':'2px solid transparent'};">
       <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;color:${q?'#D4FF3F':'rgba(244,245,255,0.62)'};text-align:center;">${i+1}</div>
       <div style="display:flex;align-items:center;gap:8px;">
-        ${chipHTML(t.code,t.c1,t.c2,20,4)}
+        ${chipHTML(t.code,t.iso,20,4)}
         <span style="font-size:13px;font-weight:600;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.name)}</span>
       </div>
       <span style="${sc}">${r.pj}</span><span style="${sc}">${r.g}</span><span style="${sc}">${r.e}</span><span style="${sc}">${r.p}</span>

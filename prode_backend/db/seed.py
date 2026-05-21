@@ -139,11 +139,11 @@ FIXTURES = [
     ("Cuartos TBD 13","Cuartos TBD 14",et_to_arg(7, 7,12),  "Cuartos de final"),
     ("Cuartos TBD 15","Cuartos TBD 16",et_to_arg(7, 7,16),  "Cuartos de final"),
 
-    # ── SEMIFINALES ───────────────────────────────────────────────────────
-    ("Semi TBD 1",    "Semi TBD 2",    et_to_arg(7, 9,16),  "Semifinales"),
-    ("Semi TBD 3",    "Semi TBD 4",    et_to_arg(7,10,15),  "Semifinales"),
-    ("Semi TBD 5",    "Semi TBD 6",    et_to_arg(7,11,17),  "Semifinales"),
-    ("Semi TBD 7",    "Semi TBD 8",    et_to_arg(7,11,21),  "Semifinales"),
+    # ── 4TOS DE FINAL ─────────────────────────────────────────────────────
+    ("Semi TBD 1",    "Semi TBD 2",    et_to_arg(7, 9,16),  "4tos de final"),
+    ("Semi TBD 3",    "Semi TBD 4",    et_to_arg(7,10,15),  "4tos de final"),
+    ("Semi TBD 5",    "Semi TBD 6",    et_to_arg(7,11,17),  "4tos de final"),
+    ("Semi TBD 7",    "Semi TBD 8",    et_to_arg(7,11,21),  "4tos de final"),
 
     # ── SEMIFINALES RONDA 2 ───────────────────────────────────────────────
     ("SF TBD 1",      "SF TBD 2",      et_to_arg(7,14,15),  "Semifinales"),

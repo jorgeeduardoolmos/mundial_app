@@ -3,17 +3,18 @@
 const STAGE_ORDER = [
   "Grupo A","Grupo B","Grupo C","Grupo D","Grupo E","Grupo F",
   "Grupo G","Grupo H","Grupo I","Grupo J","Grupo K","Grupo L",
-  "Octavos","Cuartos de final","Semifinales","Tercer puesto","Final"
+  "Octavos","Cuartos de final","4tos de final","Semifinales","Final","Tercer puesto"
 ];
 const GROUP_STAGES = ["Grupo A","Grupo B","Grupo C","Grupo D","Grupo E","Grupo F",
                       "Grupo G","Grupo H","Grupo I","Grupo J","Grupo K","Grupo L"];
-const KNOCKOUT_STAGES = ["Octavos","Cuartos de final","Semifinales","Tercer puesto","Final"];
+const KNOCKOUT_STAGES = ["Octavos","Cuartos de final","4tos de final","Semifinales","Final","Tercer puesto"];
 const KNOCKOUT_LABELS = {
   "Octavos": "16vos de final",
   "Cuartos de final": "8vos de final",
+  "4tos de final": "4tos de Final",
   "Semifinales": "Semifinales",
-  "Tercer puesto": "Tercer y cuarto puesto",
-  "Final": "Final"
+  "Final": "Final",
+  "Tercer puesto": "3er y 4to puesto"
 };
 const TEAM_NAMES = { "Chequia": "Rep. Checa", "Türkiye": "Turquía" };
 function teamName(n) { return TEAM_NAMES[n] || n; }
