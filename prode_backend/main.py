@@ -13,6 +13,7 @@ Documentación automática:
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from db.models import init_db, SessionLocal
 from db.seed import seed_matches
 from routers import auth, groups, matches, predictions, ranking
@@ -60,12 +61,12 @@ def on_startup():
         if inserted:
             print(f"✓ {inserted} partidos cargados en la DB")
         # Migración: renombrar "Semifinales" TBDs a "4tos de final"
-        updated = db.execute(
+        result = db.execute(text(
             "UPDATE matches SET stage='4tos de final' WHERE stage='Semifinales' AND home_team LIKE 'Semi TBD%'"
-        ).rowcount
-        if updated:
+        ))
+        if result.rowcount:
             db.commit()
-            print(f"✓ {updated} partidos migrados a '4tos de final'")
+            print(f"✓ {result.rowcount} partidos migrados a '4tos de final'")
     finally:
         db.close()
 
