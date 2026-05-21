@@ -124,6 +124,9 @@ function initApp() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Ping silencioso para despertar Railway antes de que el usuario haga algo
+  fetch(`${API_URL}/`).catch(() => {});
+
   initAuth();
 
   const params = new URLSearchParams(window.location.search);

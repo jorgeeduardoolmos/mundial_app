@@ -71,10 +71,8 @@ async function renderGrupos(el) {
 
     const listEl = document.getElementById("groups-list");
     if (groups.length) {
-      for (const g of groups) {
-        const members = await api.groups.members(g.id);
-        listEl.appendChild(buildGroupCard(g, members, session));
-      }
+      const allMembers = await Promise.all(groups.map(g => api.groups.members(g.id)));
+      groups.forEach((g, i) => listEl.appendChild(buildGroupCard(g, allMembers[i], session)));
     } else {
       listEl.innerHTML = `<div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:40px;text-align:center;">
         <div style="font-size:28px;margin-bottom:12px;">👥</div>

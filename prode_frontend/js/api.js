@@ -8,9 +8,30 @@
 
 const API_URL = "https://mundialapp-prode.up.railway.app";
 
-/** Hace un request al backend y devuelve los datos o lanza un error. */
+/* ── Caché en memoria ────────────────────────────────────────────────── */
+// Los GETs se cachean 45 segundos. Cualquier mutación (POST/PUT) limpia
+// el caché para que el próximo render traiga datos frescos.
+const _cache = new Map();
+const _CACHE_TTL = 45_000;
+
+function _cacheGet(key) {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > _CACHE_TTL) { _cache.delete(key); return null; }
+  return entry.data;
+}
+function _cacheSet(key, data) { _cache.set(key, { data, ts: Date.now() }); }
+function _cacheClear() { _cache.clear(); }
+
+/* ── apiFetch ────────────────────────────────────────────────────────── */
 async function apiFetch(path, options = {}) {
   const token = localStorage.getItem("token");
+  const isGet = !options.method || options.method === "GET";
+
+  if (isGet) {
+    const hit = _cacheGet(path);
+    if (hit !== null) return hit;
+  }
 
   const headers = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -26,7 +47,16 @@ async function apiFetch(path, options = {}) {
     throw new Error(msg || "Error desconocido");
   }
 
-  return res.json();
+  const data = await res.json();
+
+  if (isGet) {
+    _cacheSet(path, data);
+  } else {
+    // Cualquier mutación invalida el caché completo
+    _cacheClear();
+  }
+
+  return data;
 }
 
 /* ── Auth ────────────────────────────────────────────────────────────── */
