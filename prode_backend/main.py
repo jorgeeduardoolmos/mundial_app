@@ -61,12 +61,17 @@ def on_startup():
         if inserted:
             print(f"✓ {inserted} partidos cargados en la DB")
         # Migración: renombrar "Semifinales" TBDs a "4tos de final"
-        result = db.execute(text(
-            "UPDATE matches SET stage='4tos de final' WHERE stage='Semifinales' AND home_team LIKE 'Semi TBD%'"
-        ))
-        if result.rowcount:
-            db.commit()
-            print(f"✓ {result.rowcount} partidos migrados a '4tos de final'")
+        try:
+            result = db.execute(text(
+                "UPDATE matches SET stage='4tos de final' "
+                "WHERE stage='Semifinales' AND home_team LIKE 'Semi TBD%'"
+            ))
+            if result.rowcount:
+                db.commit()
+                print(f"✓ {result.rowcount} partidos migrados a '4tos de final'")
+        except Exception as e:
+            db.rollback()
+            print(f"⚠ Migración stage omitida: {e}")
     finally:
         db.close()
 
