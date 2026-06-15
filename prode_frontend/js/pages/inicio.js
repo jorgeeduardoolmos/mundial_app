@@ -261,16 +261,7 @@ function getTodayOrUpcoming(matches) {
 }
 
 /* ── Group table calc ──────────────────────────────────────────────────── */
-function calcGroupTable(nextMatch, allMatches) {
-  if (!nextMatch) return null;
-  const grp = (nextMatch.stage||'').match(/Grupo\s+([A-L])/i);
-  if (!grp) return null;
-  const gId = grp[1].toUpperCase();
-  const grpMs = allMatches.filter(m=>{
-    const g=(m.stage||'').match(/Grupo\s+([A-L])/i);
-    return g && g[1].toUpperCase()===gId;
-  });
-  if (!grpMs.length) return null;
+function _buildGroupTable(gId, grpMs) {
   const teams = [...new Set(grpMs.flatMap(m=>[m.home_team,m.away_team]))];
   const st = {};
   teams.forEach(t=>{st[t]={pj:0,g:0,e:0,p:0,gf:0,gc:0,pts:0};});
@@ -291,6 +282,31 @@ function calcGroupTable(nextMatch, allMatches) {
       return (sb.gf-sb.gc)-(sa.gf-sa.gc);
     }).map(name=>({name,...st[name]}))
   };
+}
+
+function calcGroupTable(nextMatch, allMatches) {
+  if (!nextMatch) return null;
+  const grp = (nextMatch.stage||'').match(/Grupo\s+([A-L])/i);
+  if (!grp) return null;
+  const gId = grp[1].toUpperCase();
+  const grpMs = allMatches.filter(m=>{
+    const g=(m.stage||'').match(/Grupo\s+([A-L])/i);
+    return g && g[1].toUpperCase()===gId;
+  });
+  if (!grpMs.length) return null;
+  return _buildGroupTable(gId, grpMs);
+}
+
+function calcAllGroupTables(allMatches) {
+  const byGroup = {};
+  allMatches.forEach(m=>{
+    const g=(m.stage||'').match(/Grupo\s+([A-L])/i);
+    if (!g) return;
+    const gId = g[1].toUpperCase();
+    if (!byGroup[gId]) byGroup[gId] = [];
+    byGroup[gId].push(m);
+  });
+  return 'ABCDEFGHIJKL'.split('').filter(l=>byGroup[l]).map(l=>_buildGroupTable(l, byGroup[l]));
 }
 
 /* ── Card wrapper ──────────────────────────────────────────────────────── */
@@ -509,29 +525,58 @@ function todayCard(title, matches, myPreds) {
 }
 
 /* ── Group table card ──────────────────────────────────────────────────── */
-function groupTableHTML(gt) {
-  if (!gt) return '';
-  const hdr = `<div style="display:grid;grid-template-columns:28px 1fr repeat(5,34px) 48px;gap:8px;padding:0 4px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;border-bottom:1px solid rgba(255,255,255,0.08);">
+function _groupTableInner(gt) {
+  const hdr = `<div style="display:grid;grid-template-columns:22px 1fr repeat(5,28px) 40px;gap:6px;padding:0 4px 8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;border-bottom:1px solid rgba(255,255,255,0.08);">
     <span></span><span>EQUIPO</span>
     <span style="text-align:right">PJ</span><span style="text-align:right">G</span><span style="text-align:right">E</span><span style="text-align:right">P</span><span style="text-align:right">±</span><span style="text-align:right">PTS</span>
   </div>`;
-  const sc = 'font-family:\'JetBrains Mono\',monospace;font-size:12px;color:rgba(244,245,255,0.62);text-align:right;font-variant-numeric:tabular-nums;';
+  const sc = 'font-family:\'JetBrains Mono\',monospace;font-size:11px;color:rgba(244,245,255,0.62);text-align:right;font-variant-numeric:tabular-nums;';
   const rows = gt.rows.map((r,i)=>{
     const t=flTeam(r.name);
     const q=i<2;
     const diff=r.gf-r.gc;
-    return `<div class="fl-group-row" style="display:grid;grid-template-columns:28px 1fr repeat(5,34px) 48px;gap:8px;padding:10px 4px;align-items:center;border-bottom:${i<gt.rows.length-1?'1px solid rgba(255,255,255,0.08)':'none'};margin-left:${q?'-4px':'0'};padding-left:${q?'8px':'4px'};border-left:${q?'2px solid #D4FF3F':'2px solid transparent'};">
-      <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;color:${q?'#D4FF3F':'rgba(244,245,255,0.62)'};text-align:center;">${i+1}</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        ${chipHTML(t.code,t.iso,20,4)}
-        <span style="font-size:13px;font-weight:600;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.name)}</span>
+    return `<div class="fl-group-row" style="display:grid;grid-template-columns:22px 1fr repeat(5,28px) 40px;gap:6px;padding:8px 4px;align-items:center;border-bottom:${i<gt.rows.length-1?'1px solid rgba(255,255,255,0.08)':'none'};margin-left:${q?'-4px':'0'};padding-left:${q?'8px':'4px'};border-left:${q?'2px solid #D4FF3F':'2px solid transparent'};">
+      <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:13px;color:${q?'#D4FF3F':'rgba(244,245,255,0.62)'};text-align:center;">${i+1}</div>
+      <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+        ${chipHTML(t.code,t.iso,18,4)}
+        <span style="font-size:12px;font-weight:600;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(r.name)}</span>
       </div>
       <span style="${sc}">${r.pj}</span><span style="${sc}">${r.g}</span><span style="${sc}">${r.e}</span><span style="${sc}">${r.p}</span>
       <span style="${sc}">${diff>0?'+'+diff:diff}</span>
-      <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:17px;color:${q?'#D4FF3F':'#F4F5FF'};text-align:right;font-variant-numeric:tabular-nums;">${r.pts}</span>
+      <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;color:${q?'#D4FF3F':'#F4F5FF'};text-align:right;font-variant-numeric:tabular-nums;">${r.pts}</span>
     </div>`;
   }).join('');
-  return card(`${cardHead('Tabla del grupo',`GRUPO ${gt.gId}`)}${hdr}${rows}`);
+  return `${hdr}${rows}`;
+}
+
+function groupTableHTML(gt) {
+  if (!gt) return '';
+  return card(`${cardHead('Tabla del grupo',`GRUPO ${gt.gId}`)}${_groupTableInner(gt)}`);
+}
+
+function allGroupsHTML(tables) {
+  if (!tables || !tables.length) return '';
+  const cards = tables.map(gt=>`
+    <div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:18px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:rgba(244,245,255,0.38);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;">Tabla del grupo</div>
+      <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:22px;color:#F4F5FF;letter-spacing:0.01em;text-transform:uppercase;margin-bottom:14px;">GRUPO ${escHtml(gt.gId)}</div>
+      ${_groupTableInner(gt)}
+    </div>`).join('');
+  return `<div class="fl-all-groups-wrap" style="padding:0 40px 60px;position:relative;z-index:1;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.38);letter-spacing:0.16em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+      <span style="display:inline-block;width:28px;height:1px;background:rgba(244,245,255,0.2);flex-shrink:0;"></span>
+      TABLAS DE POSICIONES
+    </div>
+    <div id="fl-all-groups-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+      ${cards}
+    </div>
+  </div>
+  <style>
+    @media(max-width:1100px){#fl-all-groups-grid{grid-template-columns:repeat(3,1fr)!important;}}
+    @media(max-width:768px){#fl-all-groups-grid{grid-template-columns:repeat(2,1fr)!important;}}
+    @media(max-width:480px){#fl-all-groups-grid{grid-template-columns:1fr!important;}}
+    @media(max-width:768px){.fl-all-groups-wrap{padding:0 20px 40px!important;}}
+  </style>`;
 }
 
 /* ── Ranking card ──────────────────────────────────────────────────────── */
@@ -617,7 +662,7 @@ function sinPredecirCard(count, hasGroup) {
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
   const {s,selectedGroup,rankingData,myPreds,nextOpen,tickerItems,today,
-         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt} = d;
+         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables} = d;
   const hasGroup = !!selectedGroup;
 
   const leftCol = `<div style="display:flex;flex-direction:column;gap:28px;">
@@ -638,6 +683,8 @@ function buildDashboard(d) {
     ${heroHTML(s,pos,total,pts,ptsToLeader,ptsToNext,exactos,hasGroup)}
     ${tickerHTML(tickerItems)}
     <div class="fl-main-grid">${leftCol}${rightCol}</div>
+    <div style="height:1px;background:rgba(255,255,255,0.06);margin:0 40px;position:relative;z-index:1;"></div>
+    ${allGroupsHTML(allGroupTables)}
     <div class="fl-footer" style="border-top:1px solid rgba(255,255,255,0.08);padding:18px 40px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;position:relative;z-index:1;">
       <span>PRODE · MUNDIAL 2026</span>
       <span>104 PARTIDOS · 12 GRUPOS</span>
@@ -778,12 +825,13 @@ async function renderInicio(el) {
   };
 
   const gt = calcGroupTable(nextOpen, matches);
+  const allGroupTables = calcAllGroupTables(matches);
 
   el.innerHTML = buildDashboard({
     s, selectedGroup, rankingData, myPreds,
     nextOpen, tickerItems, today,
     pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-    predState, gt,
+    predState, gt, allGroupTables,
   });
 
   wirePredictorInteractions(nextOpen, predState, selectedGroup?.id);
