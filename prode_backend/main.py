@@ -87,8 +87,11 @@ def debug_sheets():
     if not sheet_id:
         return {"error": "Falta GOOGLE_SHEET_ID en Railway"}
     try:
+        # Resetear caché para forzar reconexión
+        import db.sheets as sh
+        sh._spreadsheet = None
         sp = _get_spreadsheet()
         tabs = [ws.title for ws in sp.worksheets()]
-        return {"status": "ok", "sheet_title": sp.title, "tabs": tabs}
+        return {"status": "ok", "sheet_title": sp.title, "tabs": tabs, "sheet_id_used": sheet_id}
     except Exception as e:
-        return {"error": str(e), "type": type(e).__name__}
+        return {"error": str(e), "type": type(e).__name__, "sheet_id_used": sheet_id}
