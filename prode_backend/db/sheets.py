@@ -11,6 +11,7 @@ Configuración (variables de entorno en Railway):
 """
 import os
 import json
+import re
 import time
 import gspread
 import gspread.utils
@@ -21,28 +22,33 @@ from datetime import datetime, timedelta
 def _parse_dt(val) -> str:
     """
     Convierte cualquier formato de fecha que devuelva Google Sheets a ISO string.
-    Sheets puede devolver: ISO string, 'M/D/YYYY H:MM:SS', o serial numérico.
+    Sheets devuelve: '2026-06-12 0:00:00' (hora sin zero-pad), serial numérico, etc.
     """
     s = str(val).strip()
-    # 1. Ya es ISO
+
+    # Normalizar hora sin zero-pad: "2026-06-12 0:00:00" → "2026-06-12 00:00:00"
+    s = re.sub(r'(\d{4}-\d{2}-\d{2}) (\d):', r'\1 0\2:', s)
+
+    # 1. ISO / ISO-like con espacio en vez de T
     try:
-        datetime.fromisoformat(s)
-        return s
+        return datetime.fromisoformat(s).isoformat()
     except ValueError:
         pass
-    # 2. Formato Sheets: M/D/YYYY H:MM:SS  o  M/D/YYYY
-    for fmt in ("%m/%d/%Y %H:%M:%S", "%d/%m/%Y %H:%M:%S",
-                "%m/%d/%Y", "%Y-%m-%d %H:%M:%S"):
+
+    # 2. Formatos Sheets: M/D/YYYY HH:MM:SS  o  DD/MM/YYYY HH:MM:SS
+    for fmt in ("%m/%d/%Y %H:%M:%S", "%d/%m/%Y %H:%M:%S", "%m/%d/%Y"):
         try:
             return datetime.strptime(s, fmt).isoformat()
         except ValueError:
             pass
+
     # 3. Serial numérico de Sheets (días desde 30-dic-1899)
     try:
         return (datetime(1899, 12, 30) + timedelta(days=float(s))).isoformat()
     except (ValueError, TypeError):
         pass
-    return s
+
+    return s  # fallback: devolvemos tal cual
 
 # ── Conexión ───────────────────────────────────────────────────────────────
 

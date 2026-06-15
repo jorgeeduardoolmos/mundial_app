@@ -22,10 +22,15 @@ def is_open_for_prediction(match: dict) -> bool:
 
 def get_upcoming_matches(limit: int = 10) -> list[dict]:
     now = datetime.utcnow()
-    upcoming = [
-        m for m in get_all_matches()
-        if not m["is_finished"] and datetime.fromisoformat(m["match_datetime"]) >= now
-    ]
+    upcoming = []
+    for m in get_all_matches():
+        if m["is_finished"]:
+            continue
+        try:
+            if datetime.fromisoformat(m["match_datetime"]) >= now:
+                upcoming.append(m)
+        except ValueError:
+            pass
     return upcoming[:limit]
 
 
