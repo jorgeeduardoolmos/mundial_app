@@ -12,8 +12,10 @@ Para correr en local:
     pip install -r requirements.txt
     uvicorn main:app --reload
 """
-from fastapi import FastAPI
+import traceback
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from db.sheets import ensure_worksheets
 from db.seed import seed_matches
 from routers import auth, groups, matches, predictions, ranking
@@ -37,6 +39,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Error handler (muestra el error real en lugar de 500 genérico) ────────
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "type": type(exc).__name__},
+    )
 
 # ── Routers ───────────────────────────────────────────────────────────────
 app.include_router(auth.router)
@@ -64,3 +74,21 @@ def on_startup():
 @app.get("/", tags=["health"])
 def root():
     return {"status": "ok", "app": "Prode Mundial 2026", "db": "Google Sheets"}
+
+@app.get("/debug/sheets", tags=["health"])
+def debug_sheets():
+    """Diagnóstico: prueba la conexión a Google Sheets."""
+    import os
+    from db.sheets import _get_spreadsheet
+    creds = os.environ.get("GOOGLE_SHEETS_CREDS")
+    sheet_id = os.environ.get("GOOGLE_SHEET_ID")
+    if not creds:
+        return {"error": "Falta GOOGLE_SHEETS_CREDS en Railway"}
+    if not sheet_id:
+        return {"error": "Falta GOOGLE_SHEET_ID en Railway"}
+    try:
+        sp = _get_spreadsheet()
+        tabs = [ws.title for ws in sp.worksheets()]
+        return {"status": "ok", "sheet_title": sp.title, "tabs": tabs}
+    except Exception as e:
+        return {"error": str(e), "type": type(e).__name__}
