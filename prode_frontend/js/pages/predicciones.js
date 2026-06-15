@@ -312,8 +312,12 @@ function attachSaveListeners(body, groupId) {
       const gId = parseInt(btn.dataset.groupId);
       const msgEl = document.getElementById(`msg-${stageKey}`);
 
+      // Solo guardar los partidos del card de esta fase, no de todos los grupos
+      const card = document.getElementById(`card-open-${stageKey}`);
+      if (!card) return;
+
       const toSave = [];
-      body.querySelectorAll(`.match-pred-row[data-match-id]`).forEach(row => {
+      card.querySelectorAll(`.match-pred-row[data-match-id]`).forEach(row => {
         const matchId = parseInt(row.dataset.matchId);
         const hInput = document.getElementById(`ph-${matchId}`);
         const aInput = document.getElementById(`pa-${matchId}`);
@@ -332,7 +336,9 @@ function attachSaveListeners(body, groupId) {
       if (msgEl) msgEl.textContent = "";
 
       try {
-        await Promise.all(toSave.map(p => api.predictions.save(p.matchId, gId, p.hg, p.ag)));
+        for (const p of toSave) {
+          await api.predictions.save(p.matchId, gId, p.hg, p.ag);
+        }
         if (msgEl) { msgEl.style.color = "#D4FF3F"; msgEl.textContent = `${toSave.length} predicción${toSave.length>1?"es":""} guardada${toSave.length>1?"s":""}`; }
         setTimeout(() => loadPredicciones(gId), 800);
       } catch (e) {
