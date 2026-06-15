@@ -45,8 +45,8 @@ def validate_register(username: str, email: str, password: str, confirm: str) ->
         errors.append("El email no parece válido.")
     if get_user_by_email(email.strip().lower()):
         errors.append("Ya existe una cuenta con ese email.")
-    if len(password) < 6:
-        errors.append("La contraseña debe tener al menos 6 caracteres.")
+    if len(password) < 3:
+        errors.append("La contraseña debe tener al menos 3 caracteres.")
     if password != confirm:
         errors.append("Las contraseñas no coinciden.")
     return errors
