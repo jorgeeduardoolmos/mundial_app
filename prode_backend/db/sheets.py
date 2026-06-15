@@ -1,54 +1,19 @@
 """
-db/sheets.py — Capa de datos con Google Sheets
-================================================
-Reemplaza SQLAlchemy + PostgreSQL.
-Cada pestaña del spreadsheet es una "tabla":
-  users | matches | groups | group_members | predictions
+db/sheets.py — Google Sheets como base de datos (solo datos dinámicos)
+======================================================================
+Pestañas:
+  users | groups | group_members | predictions | results
 
-Configuración (variables de entorno en Railway):
-  GOOGLE_SHEETS_CREDS  → contenido JSON del Service Account
-  GOOGLE_SHEET_ID      → ID del spreadsheet (de la URL de la planilla)
+Los partidos (equipos, fechas, fases) están hardcodeados en db/matches_data.py.
+Solo los RESULTADOS (goles) se guardan en la pestaña 'results'.
 """
 import os
 import json
-import re
 import time
 import gspread
 import gspread.utils
 from google.oauth2.service_account import Credentials
-from datetime import datetime, timedelta
-
-
-def _parse_dt(val) -> str:
-    """
-    Convierte cualquier formato de fecha que devuelva Google Sheets a ISO string.
-    Sheets devuelve: '2026-06-12 0:00:00' (hora sin zero-pad), serial numérico, etc.
-    """
-    s = str(val).strip()
-
-    # Normalizar hora sin zero-pad: "2026-06-12 0:00:00" → "2026-06-12 00:00:00"
-    s = re.sub(r'(\d{4}-\d{2}-\d{2}) (\d):', r'\1 0\2:', s)
-
-    # 1. ISO / ISO-like con espacio en vez de T
-    try:
-        return datetime.fromisoformat(s).isoformat()
-    except ValueError:
-        pass
-
-    # 2. Formatos Sheets: M/D/YYYY HH:MM:SS  o  DD/MM/YYYY HH:MM:SS
-    for fmt in ("%m/%d/%Y %H:%M:%S", "%d/%m/%Y %H:%M:%S", "%m/%d/%Y"):
-        try:
-            return datetime.strptime(s, fmt).isoformat()
-        except ValueError:
-            pass
-
-    # 3. Serial numérico de Sheets (días desde 30-dic-1899)
-    try:
-        return (datetime(1899, 12, 30) + timedelta(days=float(s))).isoformat()
-    except (ValueError, TypeError):
-        pass
-
-    return s  # fallback: devolvemos tal cual
+from datetime import datetime
 
 # ── Conexión ───────────────────────────────────────────────────────────────
 
@@ -64,19 +29,14 @@ def _get_spreadsheet():
     global _spreadsheet
     if _spreadsheet is not None:
         return _spreadsheet
-
     creds_json = os.environ.get("GOOGLE_SHEETS_CREDS")
     if not creds_json:
         raise RuntimeError("Falta la variable GOOGLE_SHEETS_CREDS en Railway.")
-
-    creds_dict = json.loads(creds_json)
-    creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+    creds = Credentials.from_service_account_info(json.loads(creds_json), scopes=SCOPES)
     client = gspread.authorize(creds)
-
     sheet_id = os.environ.get("GOOGLE_SHEET_ID")
     if not sheet_id:
         raise RuntimeError("Falta la variable GOOGLE_SHEET_ID en Railway.")
-
     _spreadsheet = client.open_by_key(sheet_id)
     return _spreadsheet
 
@@ -86,10 +46,9 @@ def get_worksheet(name: str) -> gspread.Worksheet:
 
 
 # ── Caché en memoria (10 seg TTL) ─────────────────────────────────────────
-# Evita martillar la Sheets API en cada request.
 
 _cache: dict[str, tuple[list, float]] = {}
-_CACHE_TTL = 10  # segundos
+_CACHE_TTL = 10
 
 
 def _get_records(tab: str) -> list[dict]:
@@ -108,19 +67,18 @@ def _invalidate(tab: str):
     _cache.pop(tab, None)
 
 
-# ── Setup: crear pestañas si no existen ───────────────────────────────────
+# ── Setup: crear pestañas ─────────────────────────────────────────────────
 
 HEADERS = {
-    "users":        ["id", "username", "email", "hashed_password", "display_name", "is_active", "created_at"],
-    "matches":      ["id", "home_team", "away_team", "match_datetime", "stage", "home_goals", "away_goals", "is_finished"],
-    "groups":       ["id", "name", "description", "invite_token", "owner_id", "created_at"],
-    "group_members":["id", "group_id", "user_id", "joined_at"],
-    "predictions":  ["id", "user_id", "match_id", "group_id", "predicted_home_goals", "predicted_away_goals", "points_earned", "created_at", "updated_at"],
+    "users":         ["id", "username", "email", "hashed_password", "display_name", "is_active", "created_at"],
+    "groups":        ["id", "name", "description", "invite_token", "owner_id", "created_at"],
+    "group_members": ["id", "group_id", "user_id", "joined_at"],
+    "predictions":   ["id", "user_id", "match_id", "group_id", "predicted_home_goals", "predicted_away_goals", "points_earned", "created_at", "updated_at"],
+    "results":       ["match_id", "home_goals", "away_goals"],
 }
 
 
 def ensure_worksheets():
-    """Crea las pestañas requeridas si no existen y les pone encabezados."""
     sp = _get_spreadsheet()
     existing = {ws.title for ws in sp.worksheets()}
     for name, headers in HEADERS.items():
@@ -134,7 +92,7 @@ def ensure_worksheets():
                 ws.append_row(headers)
 
 
-# ── Helpers de conversión ─────────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────────────────
 
 def _bool(val) -> bool:
     return str(val).upper() in ("TRUE", "1", "YES")
@@ -144,21 +102,17 @@ def _int_or_none(val) -> int | None:
     return int(val) if str(val).strip() not in ("", "None") else None
 
 
-def _parse_dt(val) -> datetime:
-    return datetime.fromisoformat(str(val))
-
-
 # ── USERS ─────────────────────────────────────────────────────────────────
 
 def _cook_user(r: dict) -> dict:
     return {
-        "id":             int(r["id"]),
-        "username":       str(r["username"]),
-        "email":          str(r["email"]),
-        "hashed_password":str(r["hashed_password"]),
-        "display_name":   str(r["display_name"]),
-        "is_active":      _bool(r.get("is_active", True)),
-        "created_at":     str(r.get("created_at", "")),
+        "id":              int(r["id"]),
+        "username":        str(r["username"]),
+        "email":           str(r["email"]),
+        "hashed_password": str(r["hashed_password"]),
+        "display_name":    str(r["display_name"]),
+        "is_active":       _bool(r.get("is_active", True)),
+        "created_at":      str(r.get("created_at", "")),
     }
 
 
@@ -187,66 +141,53 @@ def create_user(username: str, email: str, hashed_password: str, display_name: s
     now = datetime.utcnow().isoformat()
     ws.append_row([next_id, username.strip().lower(), email.strip().lower(),
                    hashed_password, display_name.strip(), True, now],
-                  value_input_option="USER_ENTERED")
+                  value_input_option="RAW")
     _invalidate("users")
-    return {"id": next_id, "username": username.strip().lower(), "email": email.strip().lower(),
-            "display_name": display_name.strip(), "is_active": True}
+    return {"id": next_id, "username": username.strip().lower(),
+            "email": email.strip().lower(), "display_name": display_name.strip(), "is_active": True}
 
 
-# ── MATCHES ───────────────────────────────────────────────────────────────
+# ── RESULTS (resultados de partidos) ──────────────────────────────────────
 
-def _cook_match(r: dict) -> dict:
-    return {
-        "id":             int(r["id"]),
-        "home_team":      str(r["home_team"]),
-        "away_team":      str(r["away_team"]),
-        "match_datetime": _parse_dt(r["match_datetime"]),   # robusto vs formato Sheets
-        "stage":          str(r["stage"]),
-        "home_goals":     _int_or_none(r.get("home_goals", "")),
-        "away_goals":     _int_or_none(r.get("away_goals", "")),
-        "is_finished":    _bool(r.get("is_finished", False)),
-    }
-
-
-def get_all_matches() -> list[dict]:
-    rows = _get_records("matches")
-    return [_cook_match(r) for r in sorted(rows, key=lambda r: str(r["match_datetime"]))]
+def get_all_results() -> dict[int, dict]:
+    """Devuelve dict match_id → {home_goals, away_goals}."""
+    rows = _get_records("results")
+    out = {}
+    for r in rows:
+        try:
+            mid = int(r["match_id"])
+            out[mid] = {
+                "home_goals": int(r["home_goals"]),
+                "away_goals": int(r["away_goals"]),
+            }
+        except (ValueError, KeyError):
+            pass
+    return out
 
 
-def get_match_by_id(match_id: int) -> dict | None:
-    return next((m for m in get_all_matches() if m["id"] == match_id), None)
-
-
-def set_match_result_in_sheet(match_id: int, home_goals: int, away_goals: int) -> bool:
-    ws = get_worksheet("matches")
+def set_result_in_sheet(match_id: int, home_goals: int, away_goals: int) -> bool:
+    """Inserta o actualiza el resultado de un partido."""
+    ws = get_worksheet("results")
     rows = ws.get_all_records()
-    headers = ws.row_values(1)
-    col_hg = headers.index("home_goals") + 1
-    col_ag = headers.index("away_goals") + 1
-    col_fin = headers.index("is_finished") + 1
     for i, row in enumerate(rows):
-        if int(row["id"]) == match_id:
-            sheet_row = i + 2
-            ws.batch_update([
-                {"range": gspread.utils.rowcol_to_a1(sheet_row, col_hg),  "values": [[home_goals]]},
-                {"range": gspread.utils.rowcol_to_a1(sheet_row, col_ag),  "values": [[away_goals]]},
-                {"range": gspread.utils.rowcol_to_a1(sheet_row, col_fin), "values": [["TRUE"]]},
-            ])
-            _invalidate("matches")
-            return True
-    return False
-
-
-def seed_matches_to_sheet(match_rows: list[list]) -> int:
-    """Inserta filas si la hoja de matches está vacía. Retorna cantidad insertada."""
-    ws = get_worksheet("matches")
-    existing = ws.get_all_records()
-    if existing:
-        return 0
-    # RAW: las fechas ISO se guardan como texto, sin que Sheets las convierta
-    ws.append_rows(match_rows, value_input_option="RAW")
-    _invalidate("matches")
-    return len(match_rows)
+        try:
+            if int(row["match_id"]) == match_id:
+                sheet_row = i + 2
+                headers = ws.row_values(1)
+                col_hg = headers.index("home_goals") + 1
+                col_ag = headers.index("away_goals") + 1
+                ws.batch_update([
+                    {"range": gspread.utils.rowcol_to_a1(sheet_row, col_hg), "values": [[home_goals]]},
+                    {"range": gspread.utils.rowcol_to_a1(sheet_row, col_ag), "values": [[away_goals]]},
+                ])
+                _invalidate("results")
+                return True
+        except (ValueError, KeyError):
+            pass
+    # No existe → insertar fila nueva
+    ws.append_row([match_id, home_goals, away_goals], value_input_option="RAW")
+    _invalidate("results")
+    return True
 
 
 # ── GROUPS ────────────────────────────────────────────────────────────────
@@ -280,7 +221,7 @@ def create_group_in_sheet(name: str, description: str, owner_id: int, invite_tok
     next_id = max((int(r["id"]) for r in groups), default=0) + 1
     now = datetime.utcnow().isoformat()
     ws.append_row([next_id, name.strip(), description.strip(), invite_token, owner_id, now],
-                  value_input_option="USER_ENTERED")
+                  value_input_option="RAW")
     _invalidate("groups")
     return {"id": next_id, "name": name.strip(), "description": description.strip(),
             "invite_token": invite_token, "owner_id": owner_id}
@@ -302,10 +243,10 @@ def update_group_token(group_id: int, new_token: str):
 
 def _cook_member(r: dict) -> dict:
     return {
-        "id":       int(r["id"]),
-        "group_id": int(r["group_id"]),
-        "user_id":  int(r["user_id"]),
-        "joined_at":str(r.get("joined_at", "")),
+        "id":        int(r["id"]),
+        "group_id":  int(r["group_id"]),
+        "user_id":   int(r["user_id"]),
+        "joined_at": str(r.get("joined_at", "")),
     }
 
 
@@ -329,7 +270,7 @@ def add_member(group_id: int, user_id: int) -> bool:
     members = _get_records("group_members")
     next_id = max((int(r["id"]) for r in members), default=0) + 1
     now = datetime.utcnow().isoformat()
-    ws.append_row([next_id, group_id, user_id, now], value_input_option="USER_ENTERED")
+    ws.append_row([next_id, group_id, user_id, now], value_input_option="RAW")
     _invalidate("group_members")
     return True
 
@@ -356,7 +297,8 @@ def get_all_predictions() -> list[dict]:
 
 def get_prediction(user_id: int, match_id: int, group_id: int) -> dict | None:
     return next((p for p in get_all_predictions()
-                 if p["user_id"] == user_id and p["match_id"] == match_id and p["group_id"] == group_id), None)
+                 if p["user_id"] == user_id and p["match_id"] == match_id
+                 and p["group_id"] == group_id), None)
 
 
 def get_user_predictions_in_group(user_id: int, group_id: int) -> list[dict]:
@@ -373,7 +315,6 @@ def save_prediction_in_sheet(user_id: int, match_id: int, group_id: int,
                               home_goals: int, away_goals: int) -> tuple[bool, str]:
     existing = get_prediction(user_id, match_id, group_id)
     now = datetime.utcnow().isoformat()
-
     if existing:
         ws = get_worksheet("predictions")
         rows = ws.get_all_records()
@@ -382,9 +323,8 @@ def save_prediction_in_sheet(user_id: int, match_id: int, group_id: int,
         col_ag  = headers.index("predicted_away_goals") + 1
         col_upd = headers.index("updated_at") + 1
         for i, row in enumerate(rows):
-            if (int(row["user_id"]) == user_id and
-                    int(row["match_id"]) == match_id and
-                    int(row["group_id"]) == group_id):
+            if (int(row["user_id"]) == user_id and int(row["match_id"]) == match_id
+                    and int(row["group_id"]) == group_id):
                 sheet_row = i + 2
                 ws.batch_update([
                     {"range": gspread.utils.rowcol_to_a1(sheet_row, col_hg),  "values": [[home_goals]]},
@@ -400,36 +340,32 @@ def save_prediction_in_sheet(user_id: int, match_id: int, group_id: int,
         next_id = max((int(r["id"]) for r in preds), default=0) + 1
         ws.append_row([next_id, user_id, match_id, group_id,
                        home_goals, away_goals, "", now, now],
-                      value_input_option="USER_ENTERED")
+                      value_input_option="RAW")
         _invalidate("predictions")
         return True, "¡Predicción guardada!"
 
 
 def score_predictions_for_match(match_id: int, home_goals: int, away_goals: int) -> int:
-    """Calcula y graba los puntos de todas las predicciones de un partido (batch)."""
-    from modules.predictions import calculate_points  # importación diferida
+    from modules.predictions import calculate_points
     ws = get_worksheet("predictions")
     rows = ws.get_all_records()
     headers = ws.row_values(1)
     col_pts = headers.index("points_earned") + 1
-
     updates = []
     for i, row in enumerate(rows):
-        if int(row["match_id"]) == match_id:
-            pts = calculate_points(
-                int(row["predicted_home_goals"]),
-                int(row["predicted_away_goals"]),
-                home_goals,
-                away_goals,
-            )
-            sheet_row = i + 2
-            updates.append({
-                "range":  gspread.utils.rowcol_to_a1(sheet_row, col_pts),
-                "values": [[pts]],
-            })
-
+        try:
+            if int(row["match_id"]) == match_id:
+                pts = calculate_points(
+                    int(row["predicted_home_goals"]), int(row["predicted_away_goals"]),
+                    home_goals, away_goals,
+                )
+                updates.append({
+                    "range":  gspread.utils.rowcol_to_a1(i + 2, col_pts),
+                    "values": [[pts]],
+                })
+        except (ValueError, KeyError):
+            pass
     if updates:
         ws.batch_update(updates)
         _invalidate("predictions")
-
     return len(updates)

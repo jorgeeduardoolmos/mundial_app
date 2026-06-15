@@ -17,7 +17,6 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from db.sheets import ensure_worksheets
-from db.seed import seed_matches
 from routers import auth, groups, matches, predictions, ranking
 
 app = FastAPI(
@@ -63,9 +62,6 @@ def on_startup():
     try:
         ensure_worksheets()
         print("✓ Google Sheets conectado.")
-        inserted = seed_matches()
-        if inserted:
-            print(f"✓ {inserted} partidos cargados en la planilla.")
     except Exception as e:
         print(f"⚠ Error en startup: {e}")
 
