@@ -15,7 +15,34 @@ import time
 import gspread
 import gspread.utils
 from google.oauth2.service_account import Credentials
-from datetime import datetime
+from datetime import datetime, timedelta
+
+
+def _parse_dt(val) -> str:
+    """
+    Convierte cualquier formato de fecha que devuelva Google Sheets a ISO string.
+    Sheets puede devolver: ISO string, 'M/D/YYYY H:MM:SS', o serial numérico.
+    """
+    s = str(val).strip()
+    # 1. Ya es ISO
+    try:
+        datetime.fromisoformat(s)
+        return s
+    except ValueError:
+        pass
+    # 2. Formato Sheets: M/D/YYYY H:MM:SS  o  M/D/YYYY
+    for fmt in ("%m/%d/%Y %H:%M:%S", "%d/%m/%Y %H:%M:%S",
+                "%m/%d/%Y", "%Y-%m-%d %H:%M:%S"):
+        try:
+            return datetime.strptime(s, fmt).isoformat()
+        except ValueError:
+            pass
+    # 3. Serial numérico de Sheets (días desde 30-dic-1899)
+    try:
+        return (datetime(1899, 12, 30) + timedelta(days=float(s))).isoformat()
+    except (ValueError, TypeError):
+        pass
+    return s
 
 # ── Conexión ───────────────────────────────────────────────────────────────
 
@@ -167,7 +194,7 @@ def _cook_match(r: dict) -> dict:
         "id":             int(r["id"]),
         "home_team":      str(r["home_team"]),
         "away_team":      str(r["away_team"]),
-        "match_datetime": str(r["match_datetime"]),
+        "match_datetime": _parse_dt(r["match_datetime"]),   # robusto vs formato Sheets
         "stage":          str(r["stage"]),
         "home_goals":     _int_or_none(r.get("home_goals", "")),
         "away_goals":     _int_or_none(r.get("away_goals", "")),
@@ -210,7 +237,8 @@ def seed_matches_to_sheet(match_rows: list[list]) -> int:
     existing = ws.get_all_records()
     if existing:
         return 0
-    ws.append_rows(match_rows, value_input_option="USER_ENTERED")
+    # RAW: las fechas ISO se guardan como texto, sin que Sheets las convierta
+    ws.append_rows(match_rows, value_input_option="RAW")
     _invalidate("matches")
     return len(match_rows)
 
