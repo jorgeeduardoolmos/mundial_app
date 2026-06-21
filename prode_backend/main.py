@@ -211,6 +211,31 @@ def execute_id_migration():
     }
 
 
+@app.post("/admin/create-user-and-add-to-group", tags=["admin"])
+def create_user_and_add_to_group(username: str, password: str, display_name: str, group_name: str):
+    """Crea un usuario y lo agrega a un grupo existente por nombre."""
+    from modules.auth import get_user_by_username, create_user
+    from db.sheets import get_all_groups, add_member
+
+    if get_user_by_username(username):
+        return {"error": f"El usuario '{username}' ya existe."}
+
+    groups = [g for g in get_all_groups() if g["name"].lower() == group_name.lower()]
+    if not groups:
+        return {"error": f"No se encontró el grupo '{group_name}'."}
+
+    user = create_user(username, f"{username}@prode.com", password, display_name)
+    add_member(groups[0]["id"], user["id"])
+
+    return {
+        "message": "Usuario creado y agregado al grupo.",
+        "user_id": user["id"],
+        "username": user["username"],
+        "display_name": user["display_name"],
+        "group": groups[0]["name"],
+    }
+
+
 @app.post("/admin/create-los-locos-adams", tags=["admin"])
 def create_los_locos_adams():
     """Crea el grupo 'Los Locos Adams' y agrega a Director, Nani y Benja."""
