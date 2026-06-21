@@ -71,6 +71,26 @@ def on_startup():
 def root():
     return {"status": "ok", "app": "Prode Mundial 2026", "db": "Google Sheets"}
 
+@app.get("/debug/results", tags=["health"])
+def debug_results():
+    """Diagnóstico: muestra el contenido real de la pestaña results."""
+    try:
+        from db.sheets import get_worksheet, get_all_results
+        ws = get_worksheet("results")
+        headers = ws.row_values(1)
+        all_values = ws.get_all_values()
+        rows = all_values[:8]  # header + primeras 7 filas
+        parsed = get_all_results()
+        return {
+            "headers_row1": headers,
+            "raw_rows": rows,
+            "total_data_rows": len(all_values) - 1,
+            "parsed_results_count": len(parsed),
+            "parsed_sample": dict(list(parsed.items())[:5]),
+        }
+    except Exception as e:
+        return {"error": str(e), "type": type(e).__name__}
+
 @app.get("/debug/sheets", tags=["health"])
 def debug_sheets():
     """Diagnóstico: prueba la conexión a Google Sheets."""
