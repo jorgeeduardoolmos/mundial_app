@@ -281,7 +281,9 @@ function _buildGroupTable(gId, grpMs) {
     rows: teams.sort((a,b)=>{
       const sa=st[a],sb=st[b];
       if(sb.pts!==sa.pts) return sb.pts-sa.pts;
-      return (sb.gf-sb.gc)-(sa.gf-sa.gc);
+      const dg = (sb.gf-sb.gc)-(sa.gf-sa.gc);
+      if(dg!==0) return dg;
+      return sb.gf-sa.gf; // goles a favor como 3er criterio FIFA
     }).map(name=>({name,...st[name]}))
   };
 }
