@@ -478,6 +478,102 @@ function liveMatchHTML(m, matchPreds) {
   return card(content, {padded:false, extraStyle:'overflow:hidden;border-color:rgba(255,92,77,0.25);box-shadow:0 0 0 1px rgba(255,92,77,0.08),0 16px 48px -16px rgba(255,92,77,0.18);'});
 }
 
+/* ── Upcoming Matches (next 3) ─────────────────────────────────────────── */
+function upcomingMatchCardHTML(m, memberPreds, predState, hasGroup, showForm) {
+  const h = flTeam(m.home_team), a = flTeam(m.away_team);
+  const colors = ['#D4FF3F','#3B5BFF','#FF5C4D','#FFD23F','#FF7A1A','#7BB4FF'];
+
+  const memberRows = (memberPreds||[]).map((p, i) => {
+    const hasPred = p.predicted_home_goals !== null && p.predicted_away_goals !== null;
+    const av = escHtml(getInitials(p.display_name||''));
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;${i>0?'border-top:1px solid rgba(255,255,255,0.05)':''}">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:${colors[i%colors.length]};display:grid;place-items:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:9px;color:#0A0B1E;flex-shrink:0;">${av}</div>
+        <span style="font-size:12px;font-weight:500;color:rgba(244,245,255,0.75);">${escHtml(p.display_name||'')}</span>
+      </div>
+      ${hasPred
+        ? `<span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#D4FF3F;font-variant-numeric:tabular-nums;">${p.predicted_home_goals} — ${p.predicted_away_goals}</span>`
+        : `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.22);letter-spacing:0.08em;">sin predecir</span>`
+      }
+    </div>`;
+  }).join('');
+
+  const predsSection = hasGroup && memberPreds?.length
+    ? `<div style="margin-top:12px;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:rgba(244,245,255,0.30);letter-spacing:0.14em;margin-bottom:8px;">PRONÓSTICOS</div>
+        ${memberRows}
+      </div>` : '';
+
+  let formSection = '';
+  if (showForm) {
+    if (m.is_open) {
+      const btnSaved = predState.saved;
+      const btnBg = btnSaved ? 'rgba(212,255,63,0.15)' : '#D4FF3F';
+      const btnColor = btnSaved ? '#D4FF3F' : '#0A0B1E';
+      const btnBorder = btnSaved ? 'border:1px solid #D4FF3F;' : '';
+      const btnText = btnSaved ? '✓ ACTUALIZAR' : 'Guardar →';
+      formSection = `
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:rgba(244,245,255,0.38);letter-spacing:0.14em;margin-bottom:10px;">TU PRONÓSTICO</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border-radius:14px;padding:8px 10px;border:1px solid rgba(255,255,255,0.08);">
+              <button class="fl-score-btn" id="fl-dec-h" style="width:32px;height:32px;font-size:18px;">−</button>
+              <div id="fl-num-h" class="fl-score-num" style="font-size:52px;min-width:40px;">${predState.hg}</div>
+              <button class="fl-score-btn" id="fl-inc-h" style="width:32px;height:32px;font-size:18px;">+</button>
+            </div>
+            <span style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:32px;color:rgba(244,245,255,0.28);">—</span>
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border-radius:14px;padding:8px 10px;border:1px solid rgba(255,255,255,0.08);">
+              <button class="fl-score-btn" id="fl-dec-a" style="width:32px;height:32px;font-size:18px;">−</button>
+              <div id="fl-num-a" class="fl-score-num" style="font-size:52px;min-width:40px;">${predState.ag}</div>
+              <button class="fl-score-btn" id="fl-inc-a" style="width:32px;height:32px;font-size:18px;">+</button>
+            </div>
+            <button id="fl-save-btn" class="fl-save-btn" style="flex:1;min-width:100px;padding:12px 16px;font-size:14px;background:${btnBg};color:${btnColor};${btnBorder}${!hasGroup?'opacity:0.4;cursor:not-allowed;':''}"
+              ${!hasGroup?'disabled':''}>${btnText}</button>
+          </div>
+        </div>`;
+    } else {
+      formSection = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.22);letter-spacing:0.08em;">PREDICCIONES CERRADAS</div>`;
+    }
+  }
+
+  const flagEl = (iso, code, flip) => iso
+    ? `<div style="width:56px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);"><img src="https://flagcdn.com/w80/${iso}.png" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="${escHtml(code)}"></div>`
+    : `<div style="width:56px;height:56px;border-radius:10px;flex-shrink:0;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;color:rgba(244,245,255,0.2);">?</div>`;
+
+  const content = `
+    <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#D4FF3F;letter-spacing:0.14em;padding:3px 8px;border-radius:4px;background:rgba(212,255,63,0.10);border:1px solid rgba(212,255,63,0.20);">PRÓXIMO PARTIDO</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.45);letter-spacing:0.05em;">${escHtml(m.match_datetime_str||'')} · ${escHtml(m.stage||'')}</span>
+    </div>
+    <div style="padding:20px 20px 0;">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          ${flagEl(h.iso, h.code)}
+          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;line-height:1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;">${escHtml(m.home_team)}</div>
+        </div>
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:28px;color:rgba(244,245,255,0.25);padding:0 4px;">VS</div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-direction:row-reverse;">
+          ${flagEl(a.iso, a.code)}
+          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;line-height:1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;text-align:right;">${escHtml(m.away_team)}</div>
+        </div>
+      </div>
+      ${predsSection}
+      ${formSection}
+    </div>
+    <div style="height:20px;"></div>`;
+
+  return card(content, {padded:false, glow: showForm && m.is_open, extraStyle:'overflow:hidden;'});
+}
+
+function upcomingMatchesHTML(next3Maps, predState, hasGroup) {
+  if (!next3Maps?.length) return card(`<div style="text-align:center;padding:40px 0;">
+    <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;color:rgba(244,245,255,0.38);text-transform:uppercase;">Sin partidos próximos</div>
+  </div>`);
+  return next3Maps.map(({match, preds}, i) =>
+    upcomingMatchCardHTML(match, preds, predState, hasGroup, i === 0)
+  ).join('');
+}
+
 /* ── Next Match card ───────────────────────────────────────────────────── */
 function nextMatchHTML(m, predState, hasGroup, matchPreds) {
   if (!m) return card(`<div style="text-align:center;padding:40px 0;">
@@ -772,14 +868,14 @@ function sinPredecirCard(count, hasGroup) {
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
   const {s,selectedGroup,allRankings,myPreds,nextOpen,tickerItems,today,
-         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,matchPreds,liveMaps} = d;
+         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps} = d;
   const hasGroup = !!selectedGroup;
 
   const liveCards = (liveMaps||[]).map(({match,preds}) => liveMatchHTML(match, preds)).join('');
 
   const leftCol = `<div style="display:flex;flex-direction:column;gap:28px;">
     ${liveCards}
-    ${nextMatchHTML(nextOpen, predState, hasGroup, matchPreds)}
+    ${upcomingMatchesHTML(next3Maps, predState, hasGroup)}
     ${groupTableHTML(gt)}
   </div>`;
 
@@ -956,24 +1052,54 @@ async function renderInicio(el) {
     saving: false,
   };
 
-  // Pronósticos de todos los miembros para el próximo partido
-  let matchPreds = [];
-  if (nextOpen && selectedGroup) {
-    try { matchPreds = await api.predictions.forMatch(nextOpen.id, selectedGroup.id); }
-    catch { matchPreds = []; }
+  // Próximos 3 partidos con predicciones mergeadas de todos los grupos
+  const next3 = matches.filter(m =>
+    !m.is_finished && !m.home_team.includes('TBD') && !m.away_team.includes('TBD')
+  ).slice(0, 3);
+
+  let next3Maps = next3.map(m => ({ match: m, preds: [] }));
+  if (groups.length) {
+    try {
+      const predsMatrix = await Promise.all(
+        next3.map(m => Promise.all(
+          groups.map(g => api.predictions.forMatch(m.id, g.id).catch(() => []))
+        ))
+      );
+      next3Maps = next3.map((m, i) => {
+        const seen = new Set();
+        const merged = [];
+        for (const groupPreds of predsMatrix[i]) {
+          for (const p of groupPreds) {
+            if (!seen.has(p.user_id)) { seen.add(p.user_id); merged.push(p); }
+          }
+        }
+        return { match: m, preds: merged };
+      });
+    } catch { /* mantener next3Maps vacíos */ }
   }
 
-  // Partidos en vivo + pronósticos del grupo para cada uno
+  // Partidos en vivo con predicciones mergeadas de todos los grupos
   let liveMaps = [];
   try {
     const liveList = await api.matches.live();
-    if (liveList.length && selectedGroup) {
-      const predsPerMatch = await Promise.all(
-        liveList.map(m => api.predictions.forMatch(m.id, selectedGroup.id).catch(() => []))
+    if (liveList.length && groups.length) {
+      const livePredsMatrix = await Promise.all(
+        liveList.map(m => Promise.all(
+          groups.map(g => api.predictions.forMatch(m.id, g.id).catch(() => []))
+        ))
       );
-      liveMaps = liveList.map((m, i) => ({ match: m, preds: predsPerMatch[i] }));
+      liveMaps = liveList.map((m, i) => {
+        const seen = new Set();
+        const merged = [];
+        for (const gp of livePredsMatrix[i]) {
+          for (const p of gp) {
+            if (!seen.has(p.user_id)) { seen.add(p.user_id); merged.push(p); }
+          }
+        }
+        return { match: m, preds: merged };
+      });
     } else {
-      liveMaps = liveList.map(m => ({ match: m, preds: [] }));
+      liveMaps = liveList?.map(m => ({ match: m, preds: [] })) || [];
     }
   } catch { liveMaps = []; }
 
@@ -984,7 +1110,7 @@ async function renderInicio(el) {
     s, selectedGroup, allRankings, myPreds,
     nextOpen, tickerItems, today,
     pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-    predState, gt, allGroupTables, matchPreds, liveMaps,
+    predState, gt, allGroupTables, next3Maps, liveMaps,
   });
 
   wirePredictorInteractions(nextOpen, predState, selectedGroup?.id);
