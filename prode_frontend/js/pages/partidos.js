@@ -84,17 +84,26 @@ function renderMatchList(stageFilter) {
         const matchId = parseInt(btn.dataset.matchId);
         const hg = parseInt(document.getElementById(`hg-${matchId}`).value);
         const ag = parseInt(document.getElementById(`ag-${matchId}`).value);
+        if (isNaN(hg) || isNaN(ag)) { showToast("Ingresá ambos goles"); return; }
         btn.disabled = true;
+        btn.textContent = "GUARDANDO...";
         try {
           await api.matches.setResult(matchId, hg, ag);
-          showToast("Resultado guardado");
-          const updated = await api.matches.list();
-          window._allMatches = updated;
+          // Actualización local inmediata — no esperamos re-fetch del servidor
+          const m = window._allMatches.find(x => x.id === matchId);
+          if (m) {
+            m.is_finished = true;
+            m.home_goals  = hg;
+            m.away_goals  = ag;
+            m.is_open     = false;
+          }
           const activeTab = document.querySelector("#stage-tabs-p .fl-tab.active");
           renderMatchList(activeTab ? activeTab.dataset.stage : "Todas");
+          showToast(`✓ ${hg} — ${ag} guardado`);
         } catch (e) {
           showToast("Error: " + e.message);
           btn.disabled = false;
+          btn.textContent = "GUARDAR";
         }
       });
     });
@@ -123,7 +132,7 @@ function matchRow(m, isAdmin, hasBorder) {
       : `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.04);color:rgba(244,245,255,0.28);letter-spacing:0.06em;">CERRADO</span>`;
 
   const editBtn = (isAdmin && m.is_finished)
-    ? `<button class="btn-set-result" data-match-id="${m.id}" style="background:transparent;border:none;color:rgba(244,245,255,0.22);cursor:pointer;font-size:12px;padding:2px 4px;line-height:1;" title="Editar resultado">✏️</button>`
+    ? `<button class="btn-set-result" data-match-id="${m.id}" style="background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:5px;color:rgba(244,245,255,0.38);cursor:pointer;font-size:10px;padding:2px 7px;line-height:1.4;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;" title="Editar resultado">EDITAR</button>`
     : "";
 
   let adminPanel = "";
