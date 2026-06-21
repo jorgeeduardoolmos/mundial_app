@@ -61,12 +61,25 @@ def _pred_to_response(p: dict, m: dict) -> PredictionResponse:
 
 @router.post("", status_code=200)
 def save(body: SavePredictionRequest, user: dict = Depends(get_current_user)):
+    from db.sheets import get_all_group_members
+
+    # Guardar en el grupo solicitado (valida que esté abierto)
     ok, msg = save_prediction(
         user["id"], body.match_id, body.group_id,
         body.predicted_home_goals, body.predicted_away_goals,
     )
     if not ok:
         raise HTTPException(status_code=400, detail=msg)
+
+    # Replicar a todos los otros grupos del usuario automáticamente
+    other_group_ids = {
+        m["group_id"] for m in get_all_group_members()
+        if m["user_id"] == user["id"] and m["group_id"] != body.group_id
+    }
+    for gid in other_group_ids:
+        save_prediction(user["id"], body.match_id, gid,
+                        body.predicted_home_goals, body.predicted_away_goals)
+
     pred = get_prediction(user["id"], body.match_id, body.group_id)
     match = get_match_by_id(body.match_id)
     return {"message": msg, "prediction": _pred_to_response(pred, match)}

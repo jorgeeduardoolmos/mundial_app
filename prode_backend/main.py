@@ -211,6 +211,54 @@ def execute_id_migration():
     }
 
 
+@app.post("/admin/copy-preds-to-locos-adams", tags=["admin"])
+def copy_preds_to_locos_adams():
+    """Copia las predicciones existentes de Director, Nani y Benja al grupo Los Locos Adams."""
+    from modules.auth import get_user_by_username
+    from db.sheets import get_all_groups, get_all_predictions, save_prediction_in_sheet
+
+    target_group = next((g for g in get_all_groups() if g["name"].lower() == "los locos adams"), None)
+    if not target_group:
+        return {"error": "No se encontró el grupo 'Los Locos Adams'."}
+    target_gid = target_group["id"]
+
+    usernames = ["director", "nani", "benja"]
+    users = {u: get_user_by_username(u) for u in usernames}
+    missing = [u for u, v in users.items() if not v]
+    if missing:
+        return {"error": f"Usuarios no encontrados: {missing}"}
+
+    user_ids = {v["id"] for v in users.values()}
+    all_preds = get_all_predictions()
+
+    # Predicciones de estos usuarios en cualquier grupo (tomamos la más reciente por match)
+    by_user_match = {}
+    for p in all_preds:
+        if p["user_id"] in user_ids:
+            key = (p["user_id"], p["match_id"])
+            if key not in by_user_match:
+                by_user_match[key] = p
+
+    # Predicciones que ya existen en el grupo destino
+    existing = {(p["user_id"], p["match_id"]) for p in all_preds if p["group_id"] == target_gid}
+
+    copied, skipped = 0, 0
+    for (uid, mid), p in by_user_match.items():
+        if (uid, mid) in existing:
+            skipped += 1
+            continue
+        save_prediction_in_sheet(uid, mid, target_gid,
+                                 p["predicted_home_goals"], p["predicted_away_goals"])
+        copied += 1
+
+    return {
+        "message": "Listo.",
+        "group": target_group["name"],
+        "predictions_copied": copied,
+        "already_existed": skipped,
+    }
+
+
 @app.post("/admin/bulk-create-locos-adams", tags=["admin"])
 def bulk_create_locos_adams():
     """Crea sofi, tomas, vicente y pedro y los agrega a Los Locos Adams."""
