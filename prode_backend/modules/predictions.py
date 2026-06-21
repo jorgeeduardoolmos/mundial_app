@@ -6,22 +6,19 @@ from modules.matches import get_match_by_id, is_open_for_prediction
 
 def calculate_points(pred_home: int, pred_away: int, real_home: int, real_away: int) -> int:
     """
-    Reglas:
-    - Acertaste quién ganó (o empate): 2 pts
-    - Acertaste goles del ganador:     2 pts
-    - Acertaste goles del perdedor:    2 pts
-    - Empate exacto (ambos goles):    +4 pts extra
+    Reglas (fase de grupos):
+    - Acertaste quién ganó (o empate): 4 pts
+    - Acertaste goles del ganador:     2 pts  (solo si hubo ganador)
+    - Acertaste goles del perdedor:    2 pts  (solo si hubo ganador)
+    Máx: 8 pts (partido con ganador) / 4 pts (empate)
     """
     points = 0
     pred_result = _result(pred_home, pred_away)
     real_result = _result(real_home, real_away)
 
     if pred_result == real_result:
-        points += 2
-        if real_result == "draw":
-            if pred_home == real_home and pred_away == real_away:
-                points += 4
-        else:
+        points += 4
+        if real_result != "draw":
             winner_pred = pred_home if real_result == "home" else pred_away
             winner_real = real_home if real_result == "home" else real_away
             if winner_pred == winner_real:

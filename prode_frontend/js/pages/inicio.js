@@ -714,18 +714,17 @@ function rankingCard(rankingData, userId, hasGroup) {
 /* ── Points card ───────────────────────────────────────────────────────── */
 function pointsCard() {
   const rules=[
-    {l:'Ganador o empate',v:'2 pts',accent:false},
-    {l:'Goles del ganador',v:'2 pts',accent:false},
-    {l:'Goles del perdedor',v:'2 pts',accent:false},
-    {l:'Marcador exacto empate',v:'+4 pts',accent:true},
+    {l:'Ganador o empate',v:'4 pts'},
+    {l:'Goles del ganador',v:'2 pts'},
+    {l:'Goles del perdedor',v:'2 pts'},
   ];
-  const rows = rules.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:${r.accent?'rgba(255,210,63,0.08)':'rgba(255,255,255,0.025)'};border:1px solid ${r.accent?'rgba(255,210,63,0.25)':'rgba(255,255,255,0.08)'};">
+  const rows = rules.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);">
     <span style="font-size:13px;font-weight:500;color:#F4F5FF;">${r.l}</span>
-    <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:${r.accent?'#FFD23F':'#D4FF3F'};letter-spacing:0.02em;">${r.v}</span>
+    <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#D4FF3F;letter-spacing:0.02em;">${r.v}</span>
   </div>`).join('');
   return card(`${cardHead('CÓMO SE CALCULA','PUNTOS')}<div style="display:flex;flex-direction:column;gap:10px;">${rows}</div>
     <div style="margin-top:14px;padding:10px 14px;background:rgba(255,255,255,0.02);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.62);text-align:center;letter-spacing:0.04em;">
-      Máx <b style="color:#F4F5FF;">6 PTS</b> por partido · Empate exacto <b style="color:#FFD23F;">8 PTS</b>
+      Máx <b style="color:#F4F5FF;">8 PTS</b> por partido con ganador · <b style="color:#F4F5FF;">4 PTS</b> por empate
     </div>`);
 }
 

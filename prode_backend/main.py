@@ -211,6 +211,21 @@ def execute_id_migration():
     }
 
 
+@app.post("/admin/rescore-all", tags=["admin"])
+def rescore_all():
+    """Recalcula points_earned para todas las predicciones de partidos ya terminados."""
+    from modules.matches import get_all_matches
+    from db.sheets import score_predictions_for_match
+    finished = [m for m in get_all_matches() if m["is_finished"]]
+    total_updated = 0
+    detail = []
+    for m in finished:
+        updated = score_predictions_for_match(m["id"], m["home_goals"], m["away_goals"])
+        total_updated += updated
+        detail.append({"match_id": m["id"], "match": f"{m['home_team']} vs {m['away_team']}", "predictions_updated": updated})
+    return {"matches_rescored": len(finished), "predictions_updated": total_updated, "detail": detail}
+
+
 @app.get("/debug/sheets", tags=["health"])
 def debug_sheets():
     """Diagnóstico: prueba la conexión a Google Sheets."""
