@@ -50,7 +50,7 @@ def is_open_for_prediction(match: dict) -> bool:
     except (ValueError, TypeError):
         return False
     now = datetime.utcnow()
-    return (not match["is_finished"]) and (dt - now > timedelta(hours=1))
+    return (not match["is_finished"]) and (dt - now > timedelta(minutes=15))
 
 
 def get_upcoming_matches(limit: int = 10) -> list[dict]:

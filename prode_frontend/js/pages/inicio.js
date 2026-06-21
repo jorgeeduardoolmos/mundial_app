@@ -836,7 +836,7 @@ function pointsCard() {
       <span style="font-size:16px;flex-shrink:0;margin-top:1px;">⏱</span>
       <div>
         <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:13px;color:#D4FF3F;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Ventana de predicción</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.50);letter-spacing:0.04em;line-height:1.6;">Las predicciones cierran <b style="color:rgba(244,245,255,0.75);">1 hora antes</b> del pitazo inicial. Pasado ese límite, el pronóstico queda sellado.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.50);letter-spacing:0.04em;line-height:1.6;">Las predicciones cierran <b style="color:rgba(244,245,255,0.75);">15 minutos antes</b> del pitazo inicial. Pasado ese límite, el pronóstico queda sellado.</div>
       </div>
     </div>`);
 }
