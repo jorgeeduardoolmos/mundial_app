@@ -114,6 +114,8 @@ const api = {
 
     upcoming: (limit = 10) => apiFetch(`/matches/upcoming?limit=${limit}`),
 
+    live: () => apiFetch('/matches/live'),
+
     setResult: (matchId, homeGoals, awayGoals) =>
       apiFetch(`/matches/${matchId}/result`, {
         method: "PUT",

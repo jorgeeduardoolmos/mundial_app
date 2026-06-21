@@ -62,6 +62,14 @@ def get_upcoming_matches(limit: int = 10) -> list[dict]:
     return upcoming[:limit]
 
 
+def get_live_matches() -> list[dict]:
+    now = datetime.utcnow()
+    return [
+        m for m in get_all_matches()
+        if not m["is_finished"] and datetime.fromisoformat(m["match_datetime"]) <= now
+    ]
+
+
 def set_match_result(match_id: int, home_goals: int, away_goals: int) -> tuple[bool, str]:
     if match_id not in matches_data.MATCHES_BY_ID:
         return False, "Partido no encontrado."

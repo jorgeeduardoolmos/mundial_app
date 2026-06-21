@@ -409,6 +409,75 @@ function tickerHTML(items) {
   </div>`;
 }
 
+/* ── Live Match card ───────────────────────────────────────────────────── */
+function liveMatchHTML(m, matchPreds) {
+  const h = flTeam(m.home_team), a = flTeam(m.away_team);
+  const colors = ['#D4FF3F','#3B5BFF','#FF5C4D','#FFD23F','#FF7A1A','#7BB4FF'];
+
+  const memberRows = (matchPreds||[]).map((p,i) => {
+    const hasPred = p.predicted_home_goals !== null && p.predicted_away_goals !== null;
+    const av = escHtml(getInitials(p.display_name||''));
+    const avBg = colors[i % colors.length];
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;${i>0?'border-top:1px solid rgba(255,255,255,0.05)':''}">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:${avBg};display:grid;place-items:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:10px;color:#0A0B1E;flex-shrink:0;">${av}</div>
+        <span style="font-size:13px;font-weight:500;color:#F4F5FF;">${escHtml(p.display_name||'')}</span>
+      </div>
+      ${hasPred
+        ? `<span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#D4FF3F;font-variant-numeric:tabular-nums;letter-spacing:0.02em;">${p.predicted_home_goals} — ${p.predicted_away_goals}</span>`
+        : `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.25);letter-spacing:0.08em;">sin predecir</span>`
+      }
+    </div>`;
+  }).join('');
+
+  const groupPredsSection = matchPreds?.length
+    ? `<div style="padding:0 26px 26px;">
+        <div style="padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:rgba(244,245,255,0.35);letter-spacing:0.14em;margin-bottom:10px;">PRONÓSTICOS DEL GRUPO</div>
+          ${memberRows}
+        </div>
+      </div>` : '';
+
+  const flagDiv = (team, flip) => {
+    const t = flTeam(team);
+    const inner = t.iso
+      ? `<img src="https://flagcdn.com/w160/${t.iso}.png" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="${escHtml(t.code)}">`
+      : `<span style="font-size:22px;color:rgba(244,245,255,0.3);">?</span>`;
+    return `<div style="width:72px;height:72px;border-radius:12px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;">${inner}</div>`;
+  };
+
+  const content = `
+    <div style="padding:18px 26px;border-bottom:1px solid rgba(255,92,77,0.15);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="fl-live-dot"></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#FF5C4D;letter-spacing:0.14em;padding:4px 9px;border-radius:5px;background:rgba(255,92,77,0.10);border:1px solid rgba(255,92,77,0.25);">EN VIVO</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.55);letter-spacing:0.06em;">${escHtml(m.stage||'')}</span>
+    </div>
+
+    <div style="padding:28px 36px 24px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;position:relative;">
+      <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(255,92,77,0.07),transparent 70%);"></div>
+
+      <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;">
+        ${flagDiv(m.home_team)}
+        <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:28px;line-height:0.95;color:#F4F5FF;text-transform:uppercase;">${escHtml(m.home_team)}</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;padding:0 8px;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:48px;color:#F4F5FF;font-variant-numeric:tabular-nums;letter-spacing:0.04em;line-height:1;">—&thinsp;:&thinsp;—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#FF5C4D;letter-spacing:0.12em;opacity:0.85;">EN CURSO</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;flex-direction:row-reverse;">
+        ${flagDiv(m.away_team)}
+        <div style="text-align:right;flex:1;min-width:0;">
+          <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:28px;line-height:0.95;color:#F4F5FF;text-transform:uppercase;">${escHtml(m.away_team)}</div>
+        </div>
+      </div>
+    </div>
+    ${groupPredsSection}`;
+
+  return card(content, {padded:false, extraStyle:'overflow:hidden;border-color:rgba(255,92,77,0.25);box-shadow:0 0 0 1px rgba(255,92,77,0.08),0 16px 48px -16px rgba(255,92,77,0.18);'});
+}
+
 /* ── Next Match card ───────────────────────────────────────────────────── */
 function nextMatchHTML(m, predState, hasGroup, matchPreds) {
   if (!m) return card(`<div style="text-align:center;padding:40px 0;">
@@ -687,10 +756,13 @@ function sinPredecirCard(count, hasGroup) {
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
   const {s,selectedGroup,rankingData,myPreds,nextOpen,tickerItems,today,
-         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,matchPreds} = d;
+         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,matchPreds,liveMaps} = d;
   const hasGroup = !!selectedGroup;
 
+  const liveCards = (liveMaps||[]).map(({match,preds}) => liveMatchHTML(match, preds)).join('');
+
   const leftCol = `<div style="display:flex;flex-direction:column;gap:28px;">
+    ${liveCards}
     ${nextMatchHTML(nextOpen, predState, hasGroup, matchPreds)}
     ${groupTableHTML(gt)}
   </div>`;
@@ -865,6 +937,20 @@ async function renderInicio(el) {
     catch { matchPreds = []; }
   }
 
+  // Partidos en vivo + pronósticos del grupo para cada uno
+  let liveMaps = [];
+  try {
+    const liveList = await api.matches.live();
+    if (liveList.length && selectedGroup) {
+      const predsPerMatch = await Promise.all(
+        liveList.map(m => api.predictions.forMatch(m.id, selectedGroup.id).catch(() => []))
+      );
+      liveMaps = liveList.map((m, i) => ({ match: m, preds: predsPerMatch[i] }));
+    } else {
+      liveMaps = liveList.map(m => ({ match: m, preds: [] }));
+    }
+  } catch { liveMaps = []; }
+
   const gt = calcGroupTable(nextOpen, matches);
   const allGroupTables = calcAllGroupTables(matches);
 
@@ -872,7 +958,7 @@ async function renderInicio(el) {
     s, selectedGroup, rankingData, myPreds,
     nextOpen, tickerItems, today,
     pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-    predState, gt, allGroupTables, matchPreds,
+    predState, gt, allGroupTables, matchPreds, liveMaps,
   });
 
   wirePredictorInteractions(nextOpen, predState, selectedGroup?.id);

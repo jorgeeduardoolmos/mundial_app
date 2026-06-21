@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime
 from core.deps import get_current_user
 from modules.matches import (
-    get_all_matches, get_upcoming_matches, get_match_by_id,
+    get_all_matches, get_upcoming_matches, get_live_matches, get_match_by_id,
     set_match_result, get_stages, is_open_for_prediction,
     format_match_datetime_str,
 )
@@ -64,6 +64,11 @@ def list_stages(user: dict = Depends(get_current_user)):
 @router.get("/upcoming", response_model=list[MatchResponse])
 def upcoming(limit: int = 10, user: dict = Depends(get_current_user)):
     return [_match_to_response(m) for m in get_upcoming_matches(limit)]
+
+
+@router.get("/live", response_model=list[MatchResponse])
+def live(user: dict = Depends(get_current_user)):
+    return [_match_to_response(m) for m in get_live_matches()]
 
 
 @router.put("/{match_id}/result")
