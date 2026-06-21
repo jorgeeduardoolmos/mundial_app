@@ -12,7 +12,7 @@ from modules.predictions import score_all_predictions_for_match
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
-ADMIN_USERS = {"jorgeeduardoolmos", "papa"}
+ADMIN_USERS = {"jorgeeduardoolmos", "director"}
 
 
 class MatchResponse(BaseModel):

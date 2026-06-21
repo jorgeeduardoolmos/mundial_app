@@ -1,6 +1,6 @@
 /* ── PARTIDOS — Floodlight ───────────────────────────────────────────── */
 
-const ADMIN_USER = "papa";
+const ADMIN_USER = "director";
 
 async function renderPartidos(el) {
   injectFloodlightStyles();
