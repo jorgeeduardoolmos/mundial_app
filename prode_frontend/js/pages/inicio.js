@@ -226,6 +226,12 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function getInitials(name) {
+  const parts = String(name||'').trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return String(name||'').slice(0,2).toUpperCase();
+}
+
 /* ── TeamChip HTML ─────────────────────────────────────────────────────── */
 function chipHTML(code, iso, size, r) {
   size = size || 24;
@@ -404,7 +410,7 @@ function tickerHTML(items) {
 }
 
 /* ── Next Match card ───────────────────────────────────────────────────── */
-function nextMatchHTML(m, predState, hasGroup) {
+function nextMatchHTML(m, predState, hasGroup, matchPreds) {
   if (!m) return card(`<div style="text-align:center;padding:40px 0;">
     <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;color:rgba(244,245,255,0.38);text-transform:uppercase;letter-spacing:0.04em;">Sin partidos abiertos</div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.25);margin-top:8px;letter-spacing:0.08em;">Los próximos abrirán antes de cada partido</div>
@@ -416,6 +422,31 @@ function nextMatchHTML(m, predState, hasGroup) {
   const btnColor = btnSaved ? '#D4FF3F' : '#0A0B1E';
   const btnBorder = btnSaved ? 'border:1px solid #D4FF3F;' : '';
   const btnText = btnSaved ? '✓ ACTUALIZAR PRONÓSTICO' : 'Guardar pronóstico →';
+
+  // Pronósticos del grupo para este partido
+  const colors = ['#D4FF3F','#3B5BFF','#FF5C4D','#FFD23F','#FF7A1A','#7BB4FF'];
+  const memberRows = (matchPreds||[]).map((p,i) => {
+    const hasPred = p.predicted_home_goals !== null && p.predicted_away_goals !== null;
+    const av = escHtml(getInitials(p.display_name||''));
+    const avBg = colors[i % colors.length];
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;${i>0?'border-top:1px solid rgba(255,255,255,0.05)':''}">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:${avBg};display:grid;place-items:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:10px;color:#0A0B1E;flex-shrink:0;">${av}</div>
+        <span style="font-size:13px;font-weight:500;color:#F4F5FF;">${escHtml(p.display_name||'')}</span>
+      </div>
+      ${hasPred
+        ? `<span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#D4FF3F;font-variant-numeric:tabular-nums;letter-spacing:0.02em;">${p.predicted_home_goals} — ${p.predicted_away_goals}</span>`
+        : `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.25);letter-spacing:0.08em;">sin predecir</span>`
+      }
+    </div>`;
+  }).join('');
+
+  const groupPredsSection = hasGroup && matchPreds?.length
+    ? `<div style="margin-top:14px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:rgba(244,245,255,0.35);letter-spacing:0.14em;margin-bottom:10px;">PRONÓSTICOS DEL GRUPO</div>
+        ${memberRows}
+      </div>`
+    : '';
 
   const content = `
     <div style="padding:20px 26px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -454,7 +485,7 @@ function nextMatchHTML(m, predState, hasGroup) {
       </div>
     </div>
 
-    <div id="fl-predictor-grid" style="padding:0 36px 36px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:end;">
+    <div id="fl-predictor-grid" style="padding:0 36px 36px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;">
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.38);letter-spacing:0.14em;margin-bottom:14px;">TU PRONÓSTICO</div>
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
@@ -470,23 +501,13 @@ function nextMatchHTML(m, predState, hasGroup) {
             <button class="fl-score-btn" id="fl-inc-a" style="width:38px;height:38px;font-size:21px;" aria-label="Más">+</button>
           </div>
         </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.62);letter-spacing:0.08em;">PRONÓSTICOS DEL GRUPO</div>
-        <div>
-          <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;">
-            <div style="flex:1;background:#3B5BFF;"></div>
-            <div style="flex:0.5;background:rgba(244,245,255,0.38);"></div>
-            <div style="flex:0.3;background:#FF5C4D;"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.62);">
-            <span>${escHtml(h.code)}</span><span>X</span><span>${escHtml(a.code)}</span>
-          </div>
-        </div>
-        <button id="fl-save-btn" class="fl-save-btn" style="margin-top:8px;padding:16px 24px;font-size:17px;background:${btnBg};color:${btnColor};${btnBorder}${!hasGroup?'opacity:0.4;cursor:not-allowed;':''}"
+        <button id="fl-save-btn" class="fl-save-btn" style="margin-top:16px;padding:16px 24px;font-size:17px;background:${btnBg};color:${btnColor};${btnBorder}${!hasGroup?'opacity:0.4;cursor:not-allowed;':''}"
           ${!hasGroup?'disabled':''}>
           ${btnText}
         </button>
+      </div>
+      <div>
+        ${groupPredsSection}
       </div>
     </div>`;
 
@@ -666,12 +687,11 @@ function sinPredecirCard(count, hasGroup) {
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
   const {s,selectedGroup,rankingData,myPreds,nextOpen,tickerItems,today,
-         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables} = d;
+         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,matchPreds} = d;
   const hasGroup = !!selectedGroup;
 
   const leftCol = `<div style="display:flex;flex-direction:column;gap:28px;">
-    ${nextMatchHTML(nextOpen, predState, hasGroup)}
-    ${todayCard(today.title, today.list, myPreds)}
+    ${nextMatchHTML(nextOpen, predState, hasGroup, matchPreds)}
     ${groupTableHTML(gt)}
   </div>`;
 
@@ -838,6 +858,13 @@ async function renderInicio(el) {
     saving: false,
   };
 
+  // Pronósticos de todos los miembros para el próximo partido
+  let matchPreds = [];
+  if (nextOpen && selectedGroup) {
+    try { matchPreds = await api.predictions.forMatch(nextOpen.id, selectedGroup.id); }
+    catch { matchPreds = []; }
+  }
+
   const gt = calcGroupTable(nextOpen, matches);
   const allGroupTables = calcAllGroupTables(matches);
 
@@ -845,7 +872,7 @@ async function renderInicio(el) {
     s, selectedGroup, rankingData, myPreds,
     nextOpen, tickerItems, today,
     pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-    predState, gt, allGroupTables,
+    predState, gt, allGroupTables, matchPreds,
   });
 
   wirePredictorInteractions(nextOpen, predState, selectedGroup?.id);

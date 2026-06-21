@@ -125,6 +125,8 @@ const api = {
   predictions: {
     list: (groupId) => apiFetch(`/predictions?group_id=${groupId}`),
 
+    forMatch: (matchId, groupId) => apiFetch(`/predictions/match/${matchId}?group_id=${groupId}`),
+
     save: (matchId, groupId, homeGoals, awayGoals) =>
       apiFetch("/predictions", {
         method: "POST",

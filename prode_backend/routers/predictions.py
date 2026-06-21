@@ -80,14 +80,30 @@ def list_my_predictions(group_id: int = Query(...), user: dict = Depends(get_cur
             if p["match_id"] in matches_by_id]
 
 
-@router.get("/match/{match_id}", response_model=list[PredictionResponse])
+@router.get("/match/{match_id}")
 def list_match_predictions(
     match_id: int,
     group_id: int = Query(...),
     user: dict = Depends(get_current_user),
 ):
+    """Devuelve los pronósticos de todos los miembros del grupo para un partido."""
+    from db.sheets import get_user_by_id, get_members_of_group
     match = get_match_by_id(match_id)
-    if not match or not match["is_finished"]:
-        raise HTTPException(status_code=403, detail="Las predicciones solo se muestran después del partido.")
+    if not match:
+        raise HTTPException(status_code=404, detail="Partido no encontrado.")
     preds = get_predictions_for_match(match_id, group_id)
-    return [_pred_to_response(p, match) for p in preds]
+    preds_by_user = {p["user_id"]: p for p in preds}
+    members = get_members_of_group(group_id)
+    result = []
+    for m in members:
+        u = get_user_by_id(m["user_id"])
+        if not u:
+            continue
+        p = preds_by_user.get(m["user_id"])
+        result.append({
+            "user_id":              m["user_id"],
+            "display_name":         u.get("display_name") or u.get("username", ""),
+            "predicted_home_goals": p["predicted_home_goals"] if p else None,
+            "predicted_away_goals": p["predicted_away_goals"] if p else None,
+        })
+    return result
