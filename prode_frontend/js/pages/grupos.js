@@ -14,7 +14,7 @@ async function renderGrupos(el) {
 
       <div id="groups-list" style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px;"></div>
 
-      <div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px;margin-bottom:16px;">
+      <div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px;">
         <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:6px;">Unirme a un grupo</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.35);letter-spacing:0.06em;margin-bottom:14px;">Pegá el link de invitación que te compartieron</div>
         <div style="display:flex;gap:10px;">
@@ -29,8 +29,6 @@ async function renderGrupos(el) {
         </div>
         <div id="join-msg" style="font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:10px;min-height:14px;letter-spacing:0.04em;"></div>
       </div>
-
-      <div id="create-group-section"></div>
     </div>`;
 
     const joinBtn = document.getElementById("btn-join");
@@ -77,72 +75,9 @@ async function renderGrupos(el) {
       listEl.innerHTML = `<div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:40px;text-align:center;">
         <div style="font-size:28px;margin-bottom:12px;">👥</div>
         <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;text-transform:uppercase;margin-bottom:8px;">Todavía no tenés grupos</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.35);letter-spacing:0.06em;">Uníte con un link o creá tu propio grupo.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.35);letter-spacing:0.06em;">Uníte con el link de invitación que te compartieron.</div>
       </div>`;
     }
-
-    document.getElementById("create-group-section").innerHTML = `
-      <div id="create-group-form" style="display:none;background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px;margin-bottom:16px;">
-        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;text-transform:uppercase;margin-bottom:18px;">Nuevo grupo</div>
-        <div style="margin-bottom:12px;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.35);letter-spacing:0.1em;margin-bottom:6px;">NOMBRE DEL GRUPO</div>
-          <input type="text" id="new-group-name" placeholder="Ej: Los del trabajo"
-            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#F4F5FF;outline:none;box-sizing:border-box;"
-            onfocus="this.style.borderColor='rgba(212,255,63,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-        </div>
-        <div style="margin-bottom:18px;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.35);letter-spacing:0.1em;margin-bottom:6px;">DESCRIPCIÓN (OPCIONAL)</div>
-          <input type="text" id="new-group-desc" placeholder=""
-            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#F4F5FF;outline:none;box-sizing:border-box;"
-            onfocus="this.style.borderColor='rgba(212,255,63,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
-        </div>
-        <div style="display:flex;gap:10px;">
-          <button id="btn-create-confirm"
-            style="flex:1;background:#D4FF3F;color:#0A0B1E;border:none;border-radius:10px;padding:12px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;">
-            Crear grupo
-          </button>
-          <button id="btn-create-cancel"
-            style="background:rgba(255,255,255,0.05);color:rgba(244,245,255,0.55);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;white-space:nowrap;">
-            Cancelar
-          </button>
-        </div>
-        <div id="create-group-error" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#FF5C4D;margin-top:10px;min-height:14px;"></div>
-      </div>
-      <button id="btn-show-create"
-        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:15px;color:rgba(244,245,255,0.45);text-transform:uppercase;letter-spacing:0.04em;cursor:pointer;transition:background 0.15s;"
-        onmouseover="this.style.background='rgba(255,255,255,0.07)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
-        + Crear nuevo grupo
-      </button>
-    `;
-
-    document.getElementById("btn-show-create").addEventListener("click", () => {
-      document.getElementById("create-group-form").style.display = "block";
-      document.getElementById("btn-show-create").style.display = "none";
-      document.getElementById("new-group-name").focus();
-    });
-
-    document.getElementById("btn-create-cancel").addEventListener("click", () => {
-      document.getElementById("create-group-form").style.display = "none";
-      document.getElementById("btn-show-create").style.display = "block";
-    });
-
-    document.getElementById("btn-create-confirm").addEventListener("click", async () => {
-      const name = document.getElementById("new-group-name").value.trim();
-      const desc = document.getElementById("new-group-desc").value.trim();
-      const errEl = document.getElementById("create-group-error");
-      errEl.textContent = "";
-      if (!name) { errEl.textContent = "El nombre es requerido."; return; }
-      const btn = document.getElementById("btn-create-confirm");
-      btn.disabled = true;
-      try {
-        await api.groups.create(name, desc);
-        showToast(`Grupo "${name}" creado`);
-        renderGrupos(el);
-      } catch (e) {
-        errEl.textContent = escHtml(e.message);
-        btn.disabled = false;
-      }
-    });
 
   } catch (e) {
     el.innerHTML = `<div class="fl-page">${flPageTitle('GRUPOS','MUNDIAL 2026')}<div style="color:#FF5C4D;font-family:'JetBrains Mono',monospace;font-size:13px;padding:24px;text-align:center;">${escHtml(e.message)}</div></div>`;
