@@ -55,9 +55,9 @@ _RAW = [
     (35, "Ecuador",         "Curazao",          _utc(6,20,21),    "Grupo E"),
     (36, "Túnez",           "Japón",            _utc(6,21,12),    "Grupo F"),
     (37, "España",          "Arabia Saudita",   _utc(6,21,15),    "Grupo H"),
-    (38, "Uruguay",         "Cabo Verde",       _utc(6,21,15),    "Grupo H"),
-    (39, "Bélgica",         "Irán",             _utc(6,21,18),    "Grupo G"),
-    (40, "Nueva Zelanda",   "Egipto",           _utc(6,21,18),    "Grupo G"),
+    (38, "Uruguay",         "Cabo Verde",       _utc(6,21,18),    "Grupo H"),
+    (39, "Bélgica",         "Irán",             _utc(6,21,15),    "Grupo G"),
+    (40, "Nueva Zelanda",   "Egipto",           _utc(6,21,21),    "Grupo G"),
 
     # ══ JORNADA 3 — Jun 22-28 ════════════════════════════════════════════════
     (41, "Argentina",       "Austria",          _utc(6,22,13),    "Grupo J"),

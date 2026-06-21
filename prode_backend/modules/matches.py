@@ -5,8 +5,10 @@ Los partidos (equipos, fechas, fases) vienen de db/matches_data.py (código).
 Los resultados (goles) vienen de la pestaña 'results' de Google Sheets.
 """
 import copy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from db import matches_data, sheets
+
+_ART = timezone(timedelta(hours=-3))  # Argentina (UTC-3, sin horario de verano en junio)
 
 
 def _merge_results(base_match: dict) -> dict:
@@ -79,7 +81,8 @@ def format_match_datetime(dt: datetime) -> str:
     DAYS   = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
     MONTHS = ["", "ene", "feb", "mar", "abr", "may", "jun",
               "jul", "ago", "sep", "oct", "nov", "dic"]
-    return f"{DAYS[dt.weekday()]} {dt.day} {MONTHS[dt.month]} — {dt.strftime('%H:%M')} hs"
+    dt_art = dt.replace(tzinfo=timezone.utc).astimezone(_ART)
+    return f"{DAYS[dt_art.weekday()]} {dt_art.day} {MONTHS[dt_art.month]} — {dt_art.strftime('%H:%M')} hs"
 
 
 def format_match_datetime_str(dt_str: str) -> str:
