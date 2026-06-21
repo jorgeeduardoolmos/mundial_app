@@ -211,6 +211,47 @@ def execute_id_migration():
     }
 
 
+@app.post("/admin/create-los-locos-adams", tags=["admin"])
+def create_los_locos_adams():
+    """Crea el grupo 'Los Locos Adams' y agrega a Director, Nani y Benja."""
+    from modules.auth import get_user_by_username
+    from modules.groups import create_group
+    from db.sheets import add_member, get_all_groups
+
+    # Verificar que el grupo no exista ya
+    existing = [g for g in get_all_groups() if g["name"].lower() == "los locos adams"]
+    if existing:
+        return {"error": "El grupo 'Los Locos Adams' ya existe.", "group_id": existing[0]["id"]}
+
+    usernames = ["director", "nani", "benja"]
+    users = {}
+    missing = []
+    for uname in usernames:
+        u = get_user_by_username(uname)
+        if u:
+            users[uname] = u
+        else:
+            missing.append(uname)
+    if missing:
+        return {"error": f"Usuarios no encontrados: {missing}. Verificá los usernames en el Sheet."}
+
+    # Crear grupo con Director como owner
+    group = create_group("Los Locos Adams", "", users["director"]["id"])
+
+    # Agregar los tres miembros
+    added = []
+    for uname, u in users.items():
+        add_member(group["id"], u["id"])
+        added.append(uname)
+
+    return {
+        "message": "Grupo creado exitosamente.",
+        "group_id": group["id"],
+        "group_name": group["name"],
+        "members_added": added,
+    }
+
+
 @app.post("/admin/rescore-all", tags=["admin"])
 def rescore_all():
     """Recalcula points_earned para todas las predicciones de partidos ya terminados."""
