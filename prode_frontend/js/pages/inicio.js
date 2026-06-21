@@ -257,7 +257,9 @@ function getTodayOrUpcoming(matches) {
     const todayM = matches.filter(m => !m.is_finished && parseMatchDate(m.match_datetime_str)===today);
     if (todayM.length) return {title:'HOY', list:todayM.slice(0,6)};
   } catch(e){}
-  return {title:'PRÓXIMOS', list:matches.filter(m=>m.is_open).slice(0,5)};
+  // matches ya viene ordenado por fecha desde renderInicio
+  const upcoming = matches.filter(m => m.is_open && !m.home_team.includes('TBD') && !m.away_team.includes('TBD'));
+  return {title:'PRÓXIMOS', list:upcoming.slice(0,5)};
 }
 
 /* ── Group table calc ──────────────────────────────────────────────────── */
@@ -773,6 +775,9 @@ async function renderInicio(el) {
   injectFloodlightStyles();
   el.innerHTML = `<div style="min-height:60vh;display:flex;align-items:center;justify-content:center;background:#0A0B1E;margin:-36px -48px;font-family:'JetBrains Mono',monospace;color:rgba(244,245,255,0.3);font-size:12px;letter-spacing:0.14em;">CARGANDO...</div>`;
 
+  // Forzar datos frescos en Inicio para que los resultados siempre estén actualizados
+  _cacheClear();
+
   let groups=[], matches=[];
   try {
     [groups, matches] = await Promise.all([api.groups.list(), api.matches.list()]);
@@ -792,6 +797,9 @@ async function renderInicio(el) {
     } catch { myPreds=[]; rankingData=null; }
   }
 
+  // Ordenar por fecha para que "próximo" sea el real
+  matches.sort((a,b) => a.match_datetime < b.match_datetime ? -1 : 1);
+
   const openMatches = matches.filter(m=>m.is_open);
   const finishedMatches = matches.filter(m=>m.is_finished);
   const nextOpen = openMatches[0] || null;
@@ -809,9 +817,13 @@ async function renderInicio(el) {
     ? Math.max(0, (rankingData.entries[pos-2]?.total_pts??0)-pts)
     : 0;
 
+  // Excluir partidos TBD (eliminatorias sin equipos definidos) del contador
+  const predictableOpen = openMatches.filter(m =>
+    !m.home_team.includes('TBD') && !m.away_team.includes('TBD')
+  );
   const unpredicted = selectedGroup
-    ? openMatches.filter(m=>!myPreds.find(p=>p.match_id===m.id)).length
-    : openMatches.length;
+    ? predictableOpen.filter(m=>!myPreds.find(p=>p.match_id===m.id)).length
+    : predictableOpen.length;
 
   const today = getTodayOrUpcoming(matches);
   const tickerItems = finishedMatches.slice(-10).reverse();
