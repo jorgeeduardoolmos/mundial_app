@@ -64,54 +64,6 @@ function initAuth() {
     });
   });
 
-  // Registro
-  document.getElementById("btn-register").addEventListener("click", async () => {
-    const display_name = document.getElementById("reg-display").value.trim();
-    const username = document.getElementById("reg-username").value.trim();
-    const email = document.getElementById("reg-email").value.trim();
-    const password = document.getElementById("reg-password").value;
-    const confirm = document.getElementById("reg-confirm").value;
-    const errEl = document.getElementById("register-error");
-    errEl.textContent = "";
-
-    if (!display_name || !username || !email || !password) {
-      errEl.textContent = "Completá todos los campos.";
-      return;
-    }
-    if (password !== confirm) {
-      errEl.textContent = "Las contraseñas no coinciden.";
-      return;
-    }
-
-    const btn = document.getElementById("btn-register");
-    btn.disabled = true;
-    btn.textContent = "...";
-
-    try {
-      const data = await api.auth.register(username, email, password, display_name);
-      saveSession(data);
-      initApp();
-    } catch (e) {
-      errEl.textContent = e.message;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Crear Jugador";
-    }
-  });
-
-  // Switch login ↔ registro
-  document.getElementById("goto-register").addEventListener("click", () => {
-    document.getElementById("login-form").classList.add("hidden");
-    document.getElementById("register-form").classList.remove("hidden");
-    document.getElementById("register-error").textContent = "";
-  });
-
-  document.getElementById("goto-login").addEventListener("click", () => {
-    document.getElementById("register-form").classList.add("hidden");
-    document.getElementById("login-form").classList.remove("hidden");
-    document.getElementById("login-error").textContent = "";
-  });
-
   // Logout
   document.getElementById("btn-logout").addEventListener("click", () => {
     clearSession();
