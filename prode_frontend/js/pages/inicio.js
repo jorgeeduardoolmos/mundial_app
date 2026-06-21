@@ -696,19 +696,22 @@ function rankRowHTML(e, idx, isYou) {
   </div>`;
 }
 
-function rankingCard(rankingData, userId, hasGroup) {
+function rankingCard(rankingData, userId, hasGroup, groupName) {
   if (!hasGroup) return card(`<div style="text-align:center;padding:24px 0;">
     <div style="font-size:28px;margin-bottom:12px;">🏆</div>
     <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;text-transform:uppercase;margin-bottom:8px;">¡Sumate a un grupo!</div>
-    <div style="font-size:13px;color:rgba(244,245,255,0.62);line-height:1.5;margin-bottom:16px;">Competí con tus amigos. Creá uno o pedile el link mágico a alguien.</div>
+    <div style="font-size:13px;color:rgba(244,245,255,0.62);line-height:1.5;margin-bottom:16px;">Competí con tus amigos. Pedile el link de invitación a alguien.</div>
     <button style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#D4FF3F;background:transparent;border:1px solid rgba(212,255,63,0.25);border-radius:8px;padding:8px 16px;cursor:pointer;letter-spacing:0.08em;" data-nav="grupos">IR A GRUPOS →</button>
   </div>`);
 
-  if (!rankingData?.entries?.length) return card(`${cardHead('LIGA','RANKING')}<div style="text-align:center;padding:20px 0;font-size:13px;color:rgba(244,245,255,0.38);">Todavía no hay puntos en el grupo.</div>`);
+  const title = groupName ? escHtml(groupName.toUpperCase()) : 'RANKING';
+  const eyebrow = rankingData?.entries?.length ? `${rankingData.entries.length} JUGADORES` : 'LIGA';
+
+  if (!rankingData?.entries?.length) return card(`${cardHead(eyebrow, title)}<div style="text-align:center;padding:20px 0;font-size:13px;color:rgba(244,245,255,0.38);">Todavía no hay puntos en el grupo.</div>`);
 
   const viewAll = `<button style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.62);letter-spacing:0.08em;background:transparent;border:0;cursor:pointer;" data-nav="ranking">VER TODO →</button>`;
   const rows = rankingData.entries.map((e,i)=>rankRowHTML(e,i,e.user_id===userId)).join('');
-  return card(`<div style="padding:22px 26px 12px;">${cardHead(`LIGA · ${rankingData.entries.length} JUGADORES`,'RANKING',viewAll)}</div><div style="padding:0 14px 16px;">${rows}</div>`, {padded:false});
+  return card(`<div style="padding:22px 26px 12px;">${cardHead(eyebrow, title, viewAll)}</div><div style="padding:0 14px 16px;">${rows}</div>`, {padded:false});
 }
 
 /* ── Points card ───────────────────────────────────────────────────────── */
@@ -754,7 +757,7 @@ function sinPredecirCard(count, hasGroup) {
 
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
-  const {s,selectedGroup,rankingData,myPreds,nextOpen,tickerItems,today,
+  const {s,selectedGroup,allRankings,myPreds,nextOpen,tickerItems,today,
          pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,matchPreds,liveMaps} = d;
   const hasGroup = !!selectedGroup;
 
@@ -766,8 +769,12 @@ function buildDashboard(d) {
     ${groupTableHTML(gt)}
   </div>`;
 
+  const rankingCards = hasGroup
+    ? (allRankings||[]).map(({group, data}) => rankingCard(data, s.user_id, true, group.name)).join('')
+    : rankingCard(null, s.user_id, false);
+
   const rightCol = `<div style="display:flex;flex-direction:column;gap:28px;">
-    ${rankingCard(rankingData, s.user_id, hasGroup)}
+    ${rankingCards}
     ${pointsCard()}
     ${sinPredecirCard(unpredicted, hasGroup)}
   </div>`;
@@ -880,15 +887,18 @@ async function renderInicio(el) {
   }
 
   const selectedGroup = groups[0] || null;
-  let myPreds=[], rankingData=null;
+  let myPreds=[], allRankings=[];
   if (selectedGroup) {
     try {
-      [myPreds, rankingData] = await Promise.all([
+      const [preds, ...rankingResults] = await Promise.all([
         api.predictions.list(selectedGroup.id),
-        api.ranking.get(selectedGroup.id),
+        ...groups.map(g => api.ranking.get(g.id)),
       ]);
-    } catch { myPreds=[]; rankingData=null; }
+      myPreds = preds;
+      allRankings = groups.map((g, i) => ({ group: g, data: rankingResults[i] }));
+    } catch { myPreds=[]; allRankings=[]; }
   }
+  const rankingData = allRankings[0]?.data || null;
 
   // Ordenar por fecha para que "próximo" sea el real
   matches.sort((a,b) => a.match_datetime < b.match_datetime ? -1 : 1);
@@ -954,7 +964,7 @@ async function renderInicio(el) {
   const allGroupTables = calcAllGroupTables(matches);
 
   el.innerHTML = buildDashboard({
-    s, selectedGroup, rankingData, myPreds,
+    s, selectedGroup, allRankings, myPreds,
     nextOpen, tickerItems, today,
     pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
     predState, gt, allGroupTables, matchPreds, liveMaps,
