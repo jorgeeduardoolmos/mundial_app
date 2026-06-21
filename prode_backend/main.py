@@ -211,6 +211,36 @@ def execute_id_migration():
     }
 
 
+@app.post("/admin/bulk-create-locos-adams", tags=["admin"])
+def bulk_create_locos_adams():
+    """Crea sofi, tomas, vicente y pedro y los agrega a Los Locos Adams."""
+    from modules.auth import get_user_by_username, create_user
+    from db.sheets import get_all_groups, add_member
+
+    groups = [g for g in get_all_groups() if g["name"].lower() == "los locos adams"]
+    if not groups:
+        return {"error": "No se encontró el grupo 'Los Locos Adams'."}
+    group_id = groups[0]["id"]
+
+    new_users = [
+        ("sofi",    "playa",   "Sofi"),
+        ("tomas",   "cabeza",  "Tomas"),
+        ("vicente", "pelota",  "Vicente"),
+        ("pedro",   "palmera", "Pedro"),
+    ]
+
+    results = []
+    for username, password, display_name in new_users:
+        if get_user_by_username(username):
+            results.append({"username": username, "status": "ya existe, se saltea"})
+            continue
+        user = create_user(username, f"{username}@prode.com", password, display_name)
+        add_member(group_id, user["id"])
+        results.append({"username": username, "status": "creado y agregado"})
+
+    return {"group": groups[0]["name"], "results": results}
+
+
 @app.post("/admin/create-user-and-add-to-group", tags=["admin"])
 def create_user_and_add_to_group(username: str, password: str, display_name: str, group_name: str):
     """Crea un usuario y lo agrega a un grupo existente por nombre."""
