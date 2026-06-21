@@ -5,6 +5,7 @@ from core.deps import get_current_user
 from modules.predictions import (
     save_prediction, get_prediction,
     get_user_predictions_in_group, get_predictions_for_match,
+    calculate_points,
 )
 from modules.matches import get_match_by_id, format_match_datetime_str, get_all_matches
 
@@ -34,13 +35,21 @@ class PredictionResponse(BaseModel):
 
 
 def _pred_to_response(p: dict, m: dict) -> PredictionResponse:
+    # Calcular puntos on-the-fly desde los resultados actuales del sheet
+    if m["is_finished"] and m["home_goals"] is not None and m["away_goals"] is not None:
+        pts = calculate_points(
+            p["predicted_home_goals"], p["predicted_away_goals"],
+            m["home_goals"], m["away_goals"],
+        )
+    else:
+        pts = None
     return PredictionResponse(
         id=p["id"],
         match_id=p["match_id"],
         group_id=p["group_id"],
         predicted_home_goals=p["predicted_home_goals"],
         predicted_away_goals=p["predicted_away_goals"],
-        points_earned=p["points_earned"],
+        points_earned=pts,
         match_home_team=m["home_team"],
         match_away_team=m["away_team"],
         match_datetime_str=format_match_datetime_str(m["match_datetime"]),
