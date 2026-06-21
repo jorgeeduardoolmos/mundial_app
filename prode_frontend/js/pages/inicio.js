@@ -556,6 +556,7 @@ function nextMatchHTML(m, predState, hasGroup, matchPreds) {
 
     <div id="fl-predictor-grid" style="padding:0 36px 36px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;">
       <div>
+        ${m.is_open ? `
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.38);letter-spacing:0.14em;margin-bottom:14px;">TU PRONÓSTICO</div>
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border-radius:18px;padding:10px 14px;border:1px solid rgba(255,255,255,0.08);">
@@ -574,6 +575,12 @@ function nextMatchHTML(m, predState, hasGroup, matchPreds) {
           ${!hasGroup?'disabled':''}>
           ${btnText}
         </button>
+        ` : `
+        <div style="padding:20px 0;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.38);letter-spacing:0.14em;margin-bottom:8px;">TU PRONÓSTICO</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.30);letter-spacing:0.06em;">Predicciones cerradas</div>
+        </div>
+        `}
       </div>
       <div>
         ${groupPredsSection}
@@ -797,7 +804,7 @@ function buildDashboard(d) {
 
 /* ── Interactions ──────────────────────────────────────────────────────── */
 function wirePredictorInteractions(match, predState, groupId) {
-  if (!match) return;
+  if (!match || !match.is_open) return;
   const numH = document.getElementById('fl-num-h');
   const numA = document.getElementById('fl-num-a');
   const saveBtn = document.getElementById('fl-save-btn');
@@ -905,7 +912,10 @@ async function renderInicio(el) {
 
   const openMatches = matches.filter(m=>m.is_open);
   const finishedMatches = matches.filter(m=>m.is_finished);
-  const nextOpen = openMatches[0] || null;
+  // Próximo por horario (no terminado y no TBD), independientemente de si acepta predicciones
+  const nextOpen = matches.find(m =>
+    !m.is_finished && !m.home_team.includes('TBD') && !m.away_team.includes('TBD')
+  ) || openMatches[0] || null;
 
   const scored = myPreds.filter(p=>p.points_earned!==null);
   const exactos = scored.filter(p=>(p.points_earned||0)>=6).length;
