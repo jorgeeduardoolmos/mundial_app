@@ -150,16 +150,20 @@ def create_user(username: str, email: str, hashed_password: str, display_name: s
 # ── RESULTS (resultados de partidos) ──────────────────────────────────────
 
 def get_all_results() -> dict[int, dict]:
-    """Devuelve dict match_id → {home_goals, away_goals}."""
+    """Devuelve dict match_id → {home_goals, away_goals}.
+    Acepta columna 'match_id' o 'id' en el sheet."""
     rows = _get_records("results")
     out = {}
     for r in rows:
         try:
-            mid = int(r["match_id"])
-            out[mid] = {
-                "home_goals": int(r["home_goals"]),
-                "away_goals": int(r["away_goals"]),
-            }
+            mid = int(r.get("match_id") or r.get("id") or 0)
+            if not mid:
+                continue
+            hg = str(r.get("home_goals", "")).strip()
+            ag = str(r.get("away_goals", "")).strip()
+            if hg == "" or ag == "":
+                continue  # partido sin resultado todavía
+            out[mid] = {"home_goals": int(hg), "away_goals": int(ag)}
         except (ValueError, KeyError):
             pass
     return out
