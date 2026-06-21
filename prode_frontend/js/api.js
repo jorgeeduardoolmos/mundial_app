@@ -24,7 +24,7 @@ function _cacheSet(key, data) { _cache.set(key, { data, ts: Date.now() }); }
 function _cacheClear() { _cache.clear(); }
 
 /* ── apiFetch ────────────────────────────────────────────────────────── */
-async function apiFetch(path, options = {}) {
+async function apiFetch(path, options = {}, _attempt = 0) {
   const token = localStorage.getItem("token");
   const isGet = !options.method || options.method === "GET";
 
@@ -36,10 +36,20 @@ async function apiFetch(path, options = {}) {
   const headers = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: { ...headers, ...(options.headers || {}) },
-  });
+  let res;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: { ...headers, ...(options.headers || {}) },
+    });
+  } catch (networkErr) {
+    // Railway dormido o error de red transitorio — reintentamos hasta 3 veces
+    if (_attempt < 3) {
+      await new Promise(r => setTimeout(r, 1200 * (_attempt + 1)));
+      return apiFetch(path, options, _attempt + 1);
+    }
+    throw new Error("Sin conexión con el servidor. Reintentá en unos segundos.");
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Error de red" }));
@@ -52,7 +62,6 @@ async function apiFetch(path, options = {}) {
   if (isGet) {
     _cacheSet(path, data);
   } else {
-    // Cualquier mutación invalida el caché completo
     _cacheClear();
   }
 

@@ -338,6 +338,7 @@ function attachSaveListeners(body, groupId) {
       try {
         for (const p of toSave) {
           await api.predictions.save(p.matchId, gId, p.hg, p.ag);
+          await new Promise(r => setTimeout(r, 300));
         }
         if (msgEl) { msgEl.style.color = "#D4FF3F"; msgEl.textContent = `${toSave.length} predicción${toSave.length>1?"es":""} guardada${toSave.length>1?"s":""}`; }
         setTimeout(() => loadPredicciones(gId), 800);
