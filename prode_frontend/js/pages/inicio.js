@@ -830,7 +830,7 @@ function pointsCard() {
     <span style="font-size:13px;font-weight:500;color:#F4F5FF;">${r.l}</span>
     <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#D4FF3F;letter-spacing:0.02em;">${r.v}</span>
   </div>`).join('');
-  return card(`${cardHead('CÓMO SE CALCULA','PUNTOS')}<div style="display:flex;flex-direction:column;gap:10px;">${rows}</div>
+  return card(`${cardHead('SISTEMA DE PUNTOS','CÁLCULO')}<div style="display:flex;flex-direction:column;gap:10px;">${rows}</div>
     <div style="margin-top:14px;padding:10px 14px;background:rgba(255,255,255,0.02);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.62);text-align:center;letter-spacing:0.04em;">
       Máx <b style="color:#F4F5FF;">8 PTS</b> por partido si aciertas todo (resultado + ambos goles)
     </div>
@@ -840,6 +840,26 @@ function pointsCard() {
         <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:13px;color:#D4FF3F;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Ventana de predicción</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.50);letter-spacing:0.04em;line-height:1.6;">Las predicciones cierran <b style="color:rgba(244,245,255,0.75);">15 minutos antes</b> del pitazo inicial. Pasado ese límite, el pronóstico queda sellado.</div>
       </div>
+    </div>`);
+}
+
+/* ── Premios card ──────────────────────────────────────────────────────────── */
+function premiosCard() {
+  const premios = [
+    {pos: '1º LUGAR', premio: 'Camiseta Argentina Original'},
+    {pos: '2º LUGAR', premio: 'Caja de Bombones + Caja Chocolates'},
+    {pos: '3º LUGAR', premio: 'Premio Sorpresa'},
+    {pos: '4º LUGAR', premio: 'Pote de Bombones'},
+  ];
+  const rows = premios.map((p, i) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);">
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.4);letter-spacing:0.06em;margin-bottom:2px;">${p.pos}</div>
+      <div style="font-size:13px;font-weight:500;color:#F4F5FF;">${p.premio}</div>
+    </div>
+  </div>`).join('');
+  return card(`${cardHead('PREMIOS','CLASIFICACIÓN')}<div style="display:flex;flex-direction:column;gap:10px;">${rows}</div>
+    <div style="margin-top:14px;padding:10px 14px;background:rgba(212,255,63,0.04);border:1px solid rgba(212,255,63,0.12);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(212,255,63,0.75);text-align:center;letter-spacing:0.04em;">
+      🏆 Se premian los 4 mejores puntajes finales
     </div>`);
 }
 
@@ -888,6 +908,7 @@ function buildDashboard(d) {
   const rightCol = `<div style="display:flex;flex-direction:column;gap:28px;">
     ${rankingCards}
     ${pointsCard()}
+    ${premiosCard()}
     ${sinPredecirCard(unpredicted, hasGroup)}
   </div>`;
 
