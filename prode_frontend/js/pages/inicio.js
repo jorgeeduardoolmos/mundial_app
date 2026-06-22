@@ -615,25 +615,16 @@ function todayMatchCardHTML(m, isFirst) {
   let predsSection = '';
   if (window._todayAllGroupPreds && window._todayAllGroupPreds[m.id]?.length) {
     const preds = window._todayAllGroupPreds[m.id];
-    const predsHtml = preds.slice(0, 5).map(p =>
+    const predsHtml = preds.map(p =>
       `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04);">
         <span style="color:rgba(244,245,255,0.75);">${escHtml(p.display_name)}</span>
         <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;color:#D4FF3F;">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
       </div>`
     ).join('');
-    if (preds.length > 5) {
-      predsSection = `<div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.04);">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.3);letter-spacing:0.06em;margin-bottom:6px;">PRONÓSTICOS</div>
-        <div style="background:rgba(255,255,255,0.02);border-radius:6px;overflow:hidden;">${predsHtml}
-          <div style="padding:6px 10px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.25);">+${preds.length - 5} más</div>
-        </div>
-      </div>`;
-    } else {
-      predsSection = `<div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.04);">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.3);letter-spacing:0.06em;margin-bottom:6px;">PRONÓSTICOS</div>
-        <div style="background:rgba(255,255,255,0.02);border-radius:6px;overflow:hidden;">${predsHtml}</div>
-      </div>`;
-    }
+    predsSection = `<div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.04);">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.3);letter-spacing:0.06em;margin-bottom:6px;">PRONÓSTICOS (${preds.length})</div>
+      <div style="background:rgba(255,255,255,0.02);border-radius:6px;overflow:hidden;">${predsHtml}</div>
+    </div>`;
   }
 
   const content = `
