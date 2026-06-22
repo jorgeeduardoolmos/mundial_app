@@ -150,10 +150,11 @@ function renderPredBody(body, stages, stageMap, predsByMatch, groupId, allMatche
   const isAll = filter === "all";
 
   if (isAll) {
-    // Mostrar todos los partidos ordenados cronológicamente
-    const sorted = [...allMatches].sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+    // Mostrar solo partidos abiertos, ordenados cronológicamente
+    const openMatches = allMatches.filter(m => m.is_open);
+    const sorted = [...openMatches].sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
     const html = sorted.map(m => buildMatchRow(m, predsByMatch, groupId)).join('');
-    body.innerHTML = html || `<div style="text-align:center;padding:48px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.3);">No hay partidos para mostrar todavía.</div>`;
+    body.innerHTML = html || `<div style="text-align:center;padding:48px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.3);">No hay partidos abiertos para predecir.</div>`;
   } else {
     let html = "";
     stages.filter(s => s === filter).forEach(stage => { html += buildStageBlock(stage, stageMap[stage], predsByMatch, groupId); });
