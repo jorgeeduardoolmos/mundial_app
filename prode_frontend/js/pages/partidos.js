@@ -1,19 +1,29 @@
 /* ── PARTIDOS — Floodlight ───────────────────────────────────────────── */
 
-const ADMIN_USER = "director";
-
 async function renderPartidos(el) {
   injectFloodlightStyles();
   el.innerHTML = `<div class="fl-page">${flLoading()}</div>`;
 
   try {
-    const [stages, matches] = await Promise.all([
+    const [stages, matches, groups] = await Promise.all([
       api.matches.stages(),
       api.matches.list(),
+      api.groups.list(),
     ]);
 
-    const session = getSession();
-    const isAdmin = session.username === ADMIN_USER;
+    // Solo mostrar partidos finalizados
+    const finishedMatches = matches.filter(m => m.is_finished);
+
+    // Obtener todas mis predicciones de todos los grupos
+    const allMyPreds = {};
+    for (const group of groups) {
+      const preds = await api.predictions.list(group.id);
+      preds.forEach(p => {
+        if (!allMyPreds[p.match_id]) {
+          allMyPreds[p.match_id] = p;
+        }
+      });
+    }
 
     const tabsHtml = ["Todas", ...stages].map((s, i) =>
       `<button class="fl-tab ${i===0?'active':''}" data-stage="${escHtml(s)}" style="white-space:nowrap;">${escHtml(s)}</button>`
@@ -28,8 +38,8 @@ async function renderPartidos(el) {
       <div id="matches-body"></div>
     </div>`;
 
-    window._allMatches = matches;
-    window._isAdmin = isAdmin;
+    window._allMatches = finishedMatches;
+    window._allMyPreds = allMyPreds;
 
     document.getElementById("stage-tabs-p").querySelectorAll(".fl-tab").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -48,9 +58,12 @@ async function renderPartidos(el) {
 
 function renderMatchList(stageFilter) {
   const body = document.getElementById("matches-body");
-  const matches = stageFilter === "Todas"
+  let matches = stageFilter === "Todas"
     ? window._allMatches
     : window._allMatches.filter(m => m.stage === stageFilter);
+
+  // Ordenar cronológicamente
+  matches = matches.slice().sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
   const byDate = {};
   matches.forEach(m => {
@@ -67,111 +80,65 @@ function renderMatchList(stageFilter) {
         <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
       </div>
       <div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;margin-bottom:20px;">
-        ${group.map((m, i) => matchRow(m, window._isAdmin, i < group.length - 1)).join("")}
+        ${group.map((m, i) => matchRow(m, i < group.length - 1)).join("")}
       </div>`;
   }
 
   if (!html) html = `<div style="text-align:center;padding:48px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.3);">No hay partidos en esta fase.</div>`;
   body.innerHTML = html;
-
-  if (window._isAdmin) {
-    body.querySelectorAll(".btn-set-result").forEach(btn => {
-      btn.addEventListener("click", () => toggleAdminPanel(parseInt(btn.dataset.matchId)));
-    });
-
-    body.querySelectorAll(".btn-confirm-result").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const matchId = parseInt(btn.dataset.matchId);
-        const hg = parseInt(document.getElementById(`hg-${matchId}`).value);
-        const ag = parseInt(document.getElementById(`ag-${matchId}`).value);
-        if (isNaN(hg) || isNaN(ag)) { showToast("Ingresá ambos goles"); return; }
-        btn.disabled = true;
-        btn.textContent = "GUARDANDO...";
-        try {
-          await api.matches.setResult(matchId, hg, ag);
-          // Actualización local inmediata — no esperamos re-fetch del servidor
-          const m = window._allMatches.find(x => x.id === matchId);
-          if (m) {
-            m.is_finished = true;
-            m.home_goals  = hg;
-            m.away_goals  = ag;
-            m.is_open     = false;
-          }
-          const activeTab = document.querySelector("#stage-tabs-p .fl-tab.active");
-          renderMatchList(activeTab ? activeTab.dataset.stage : "Todas");
-          showToast(`✓ ${hg} — ${ag} guardado`);
-        } catch (e) {
-          showToast("Error: " + e.message);
-          btn.disabled = false;
-          btn.textContent = "GUARDAR";
-        }
-      });
-    });
-  }
 }
 
-function toggleAdminPanel(matchId) {
-  const panel = document.getElementById(`admin-panel-${matchId}`);
-  if (!panel) return;
-  panel.classList.toggle("visible");
-}
-
-function matchRow(m, isAdmin, hasBorder) {
-  const time = m.match_datetime_str.split("—")[1]?.trim() || "";
+function matchRow(m, hasBorder) {
   const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
   const away = typeof teamName === "function" ? teamName(m.away_team) : m.away_team;
+  const pred = window._allMyPreds[m.id];
 
-  const centerEl = m.is_finished
-    ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:22px;color:#F4F5FF;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:4px 14px;white-space:nowrap;">${m.home_goals} — ${m.away_goals}</div>`
-    : `<div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.3);letter-spacing:0.08em;">${escHtml(time) || 'vs'}</div>`;
-
-  const badge = m.is_finished
-    ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.04);color:rgba(244,245,255,0.28);letter-spacing:0.06em;">FT</span>`
-    : m.is_open
-      ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(212,255,63,0.1);color:#D4FF3F;border:1px solid rgba(212,255,63,0.25);letter-spacing:0.06em;">ABIERTO</span>`
-      : `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.04);color:rgba(244,245,255,0.28);letter-spacing:0.06em;">CERRADO</span>`;
-
-  const editBtn = (isAdmin && m.is_finished)
-    ? `<button class="btn-set-result" data-match-id="${m.id}" style="background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:5px;color:rgba(244,245,255,0.38);cursor:pointer;font-size:10px;padding:2px 7px;line-height:1.4;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;" title="Editar resultado">EDITAR</button>`
-    : "";
-
-  let adminPanel = "";
-  if (isAdmin) {
-    const hVal = m.is_finished ? m.home_goals : 0;
-    const aVal = m.is_finished ? m.away_goals : 0;
-    adminPanel = `
-      <div class="fl-admin-panel${m.is_finished ? '' : ' visible'}" id="admin-panel-${m.id}"
-        style="flex-direction:row;align-items:center;gap:10px;padding:10px 18px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(212,255,63,0.03);">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(212,255,63,0.5);letter-spacing:0.1em;flex-shrink:0;">ADMIN</span>
-        <input id="hg-${m.id}" type="number" min="0" max="20" value="${hVal}"
-          style="width:38px;height:30px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:7px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#F4F5FF;-moz-appearance:textfield;outline:none;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.25);">—</span>
-        <input id="ag-${m.id}" type="number" min="0" max="20" value="${aVal}"
-          style="width:38px;height:30px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:7px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#F4F5FF;-moz-appearance:textfield;outline:none;">
-        <button class="btn-confirm-result" data-match-id="${m.id}"
-          style="background:#D4FF3F;color:#0A0B1E;border:none;border-radius:8px;padding:6px 14px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;flex-shrink:0;">
-          ${m.is_finished ? "ACTUALIZAR" : "GUARDAR"}
-        </button>
-        ${m.is_finished ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.22);letter-spacing:0.04em;">se recalculan puntajes</span>` : ""}
-      </div>`;
+  // Calcular puntos
+  let pts = 0;
+  if (pred && m.home_goals !== null && m.away_goals !== null) {
+    if (pred.predicted_home_goals === m.home_goals) pts += 2;
+    if (pred.predicted_away_goals === m.away_goals) pts += 2;
+    const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
+                     : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
+    const realResult = m.home_goals > m.away_goals ? "home"
+                     : m.away_goals > m.home_goals ? "away" : "draw";
+    if (predResult === realResult) pts += 4;
   }
 
+  // Mostrar pronóstico vs resultado
+  const predDisplay = pred
+    ? `<div style="text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.4);letter-spacing:0.06em;margin-bottom:2px;">mi pronóstico</div>
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:14px;color:rgba(212,255,63,0.9);">${pred.predicted_home_goals}—${pred.predicted_away_goals}</div>
+      </div>`
+    : `<div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.2);">sin predecir</div>`;
+
+  const resultDisplay = `<div style="text-align:center;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.4);letter-spacing:0.06em;margin-bottom:2px;">resultado</div>
+    <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:16px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>
+  </div>`;
+
+  const pointsDisplay = `<div style="text-align:center;background:rgba(212,255,63,0.08);border:1px solid rgba(212,255,63,0.25);border-radius:8px;padding:6px 12px;min-width:50px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(212,255,63,0.6);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px;">pts</div>
+    <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:18px;color:#D4FF3F;">${pts}</div>
+  </div>`;
+
   return `
-    <div>
-      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:14px 18px;${hasBorder?'border-bottom:1px solid rgba(255,255,255,0.05);':''}">
-        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
-          ${chipByName(home,22,4)}
-          <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:15px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
-          ${centerEl}
-          <div style="display:flex;align-items:center;gap:5px;">${badge}${editBtn}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;">
-          <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:15px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
-          ${chipByName(away,22,4)}
-        </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;${hasBorder?'border-bottom:1px solid rgba(255,255,255,0.05);':''}">
+      <div style="flex:1;display:flex;align-items:center;gap:8px;min-width:0;">
+        ${chipByName(home,20,4)}
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:14px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
       </div>
-      ${adminPanel}
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        ${predDisplay}
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.2);">vs</div>
+        ${resultDisplay}
+        <div style="width:1px;height:40px;background:rgba(255,255,255,0.08);"></div>
+        ${pointsDisplay}
+      </div>
+      <div style="flex:1;display:flex;align-items:center;gap:8px;justify-content:flex-end;min-width:0;">
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:14px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
+        ${chipByName(away,20,4)}
+      </div>
     </div>`;
 }
