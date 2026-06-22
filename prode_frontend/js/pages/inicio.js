@@ -820,9 +820,9 @@ function rankingCard(rankingData, userId, hasGroup, groupName) {
 /* ── Points card ───────────────────────────────────────────────────────── */
 function pointsCard() {
   const rules=[
-    {l:'Ganador o empate',v:'4 pts'},
-    {l:'Goles del ganador',v:'2 pts'},
-    {l:'Goles del perdedor',v:'2 pts'},
+    {l:'Goles del equipo local',v:'2 pts'},
+    {l:'Goles del equipo visitante',v:'2 pts'},
+    {l:'Resultado (ganador/empate)',v:'4 pts'},
   ];
   const rows = rules.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);">
     <span style="font-size:13px;font-weight:500;color:#F4F5FF;">${r.l}</span>
@@ -830,7 +830,7 @@ function pointsCard() {
   </div>`).join('');
   return card(`${cardHead('CÓMO SE CALCULA','PUNTOS')}<div style="display:flex;flex-direction:column;gap:10px;">${rows}</div>
     <div style="margin-top:14px;padding:10px 14px;background:rgba(255,255,255,0.02);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.62);text-align:center;letter-spacing:0.04em;">
-      Máx <b style="color:#F4F5FF;">8 PTS</b> por partido con ganador · <b style="color:#F4F5FF;">4 PTS</b> por empate
+      Máx <b style="color:#F4F5FF;">8 PTS</b> por partido si aciertas todo (resultado + ambos goles)
     </div>
     <div style="margin-top:10px;padding:14px 16px;background:rgba(212,255,63,0.04);border:1px solid rgba(212,255,63,0.12);border-radius:10px;display:flex;align-items:flex-start;gap:10px;">
       <span style="font-size:16px;flex-shrink:0;margin-top:1px;">⏱</span>
