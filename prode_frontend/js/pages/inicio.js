@@ -262,7 +262,7 @@ function getTodayFinished(matches) {
   try {
     const nowArg = new Date(Date.now() - 3*3600*1000);
     const today = nowArg.toISOString().slice(0,10);
-    return matches.filter(m => m.is_finished && parseMatchDate(m.match_datetime_str)===today);
+    return matches.filter(m => m.is_finished && m.match_datetime.slice(0,10)===today);
   } catch(e){}
   return [];
 }
