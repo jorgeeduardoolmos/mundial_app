@@ -43,38 +43,72 @@ async function renderPredicciones(el) {
     return;
   }
 
+  const groupSelectHtml = groups.length > 1
+    ? `<select id="pred-group-filter" style="background:#14172E;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.75);cursor:pointer;letter-spacing:0.06em;">
+        <option value="">Ver Todos</option>
+        ${groups.map(g => `<option value="${g.id}">${escHtml(g.name)}</option>`).join('')}
+      </select>`
+    : '';
+
   el.innerHTML = `<div class="fl-page">
     <div style="position:absolute;top:-100px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(212,255,63,0.06),transparent 60%);pointer-events:none;"></div>
-    ${flPageTitle('PREDICCIONES','MUNDIAL 2026')}
-    <div id="pred-sub" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;margin-bottom:24px;margin-top:-20px;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;">
+      ${flPageTitle('PREDICCIONES','MUNDIAL 2026')}
+      ${groupSelectHtml}
+    </div>
+    <div id="pred-sub" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;margin-bottom:16px;margin-top:-16px;"></div>
     <div id="stage-tabs" style="display:flex;gap:6px;align-items:center;flex-wrap:nowrap;overflow-x:auto;margin-bottom:24px;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;"></div>
     <div id="pred-body"></div>
   </div>`;
 
-  loadPredicciones(groups[0].id);
+  const select = document.getElementById("pred-group-filter");
+  if (select) {
+    select.addEventListener("change", () => {
+      _currentStageFilter = "all";
+      loadPredicciones(select.value || null);
+    });
+  }
+
+  loadPredicciones(null);
 }
 
 let _currentStageFilter = "all";
+let _currentGroupId = null;
 
 async function loadPredicciones(groupId) {
+  _currentGroupId = groupId;
   const body = document.getElementById("pred-body");
   if (body) body.innerHTML = flLoading('CARGANDO...');
 
   try {
-    const [matches, myPreds] = await Promise.all([
+    const groups = await api.groups.list();
+    const allPreds = [];
+
+    if (groupId) {
+      // Mostrar solo predicciones de este grupo
+      const preds = await api.predictions.list(groupId);
+      allPreds.push(...preds);
+    } else {
+      // Mostrar todas las predicciones de todos los grupos
+      for (const g of groups) {
+        const preds = await api.predictions.list(g.id);
+        allPreds.push(...preds);
+      }
+    }
+
+    const [matches] = await Promise.all([
       api.matches.list(),
-      api.predictions.list(groupId),
     ]);
 
     const predsByMatch = {};
-    myPreds.forEach(p => { predsByMatch[p.match_id] = p; });
+    allPreds.forEach(p => { predsByMatch[p.match_id] = p; });
 
     const openMatches = matches.filter(m => m.is_open);
-    const scoredPreds = myPreds.filter(p => p.points_earned !== null);
+    const scoredPreds = allPreds.filter(p => p.points_earned !== null);
     const totalPts = scoredPreds.reduce((sum, p) => sum + (p.points_earned || 0), 0);
 
     const subEl = document.getElementById("pred-sub");
-    if (subEl) subEl.textContent = `${openMatches.length} PARTIDOS ABIERTOS · ${myPreds.length} PREDICCIONES · ${totalPts} PTS`;
+    if (subEl) subEl.textContent = `${openMatches.length} PARTIDOS ABIERTOS · ${allPreds.length} PREDICCIONES · ${totalPts} PTS`;
 
     const stageMap = {};
     matches.forEach(m => {
@@ -100,41 +134,26 @@ async function loadPredicciones(groupId) {
         _currentStageFilter = btn.dataset.stage;
         tabsEl.querySelectorAll(".fl-tab").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
-        renderPredBody(body, stages, stageMap, predsByMatch, groupId);
+        renderPredBody(body, stages, stageMap, predsByMatch, groupId, matches);
       });
     });
 
-    renderPredBody(body, stages, stageMap, predsByMatch, groupId);
+    renderPredBody(body, stages, stageMap, predsByMatch, groupId, matches);
 
   } catch (e) {
     if (body) body.innerHTML = `<div style="color:#FF5C4D;font-family:'JetBrains Mono',monospace;font-size:13px;padding:24px;text-align:center;">${escHtml(e.message)}</div>`;
   }
 }
 
-function renderPredBody(body, stages, stageMap, predsByMatch, groupId) {
+function renderPredBody(body, stages, stageMap, predsByMatch, groupId, allMatches) {
   const filter = _currentStageFilter;
   const isAll = filter === "all";
 
   if (isAll) {
-    const groupStages = stages.filter(s => GROUP_STAGES.includes(s));
-    const knockoutStages = stages.filter(s => KNOCKOUT_STAGES.includes(s));
-    let html = "";
-    if (groupStages.length) {
-      html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">`;
-      groupStages.forEach(stage => {
-        html += `<div>${buildStageBlock(stage, stageMap[stage], predsByMatch, groupId)}</div>`;
-      });
-      html += `</div>`;
-    }
-    if (knockoutStages.length) {
-      html += `<div style="display:flex;align-items:center;gap:12px;margin:32px 0 20px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.38);letter-spacing:0.14em;white-space:nowrap;">FASE ELIMINATORIA</div>
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.08);"></div>
-      </div>`;
-      knockoutStages.forEach(stage => { html += buildStageBlock(stage, stageMap[stage], predsByMatch, groupId); });
-    }
-    if (!html) html = `<div style="text-align:center;padding:48px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.3);">No hay partidos para mostrar todavía.</div>`;
-    body.innerHTML = html;
+    // Mostrar todos los partidos ordenados cronológicamente
+    const sorted = [...allMatches].sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+    const html = sorted.map(m => buildMatchRow(m, predsByMatch, groupId)).join('');
+    body.innerHTML = html || `<div style="text-align:center;padding:48px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.3);">No hay partidos para mostrar todavía.</div>`;
   } else {
     let html = "";
     stages.filter(s => s === filter).forEach(stage => { html += buildStageBlock(stage, stageMap[stage], predsByMatch, groupId); });
@@ -143,6 +162,46 @@ function renderPredBody(body, stages, stageMap, predsByMatch, groupId) {
   }
 
   attachSaveListeners(body, groupId);
+}
+
+function buildMatchRow(match, predsByMatch, groupId) {
+  const ex = predsByMatch[match.id];
+  const hVal = ex != null ? ex.predicted_home_goals : "";
+  const aVal = ex != null ? ex.predicted_away_goals : "";
+  const savedBadge = ex != null
+    ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#D4FF3F;letter-spacing:0.04em;">✓ ${ex.predicted_home_goals}—${ex.predicted_away_goals}</span>`
+    : `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.2);">sin predecir</span>`;
+  const homeTeam = teamName(match.home_team);
+  const awayTeam = teamName(match.away_team);
+
+  return `
+    <div class="match-pred-row" data-match-id="${match.id}" style="display:grid;grid-template-columns:80px 1fr auto 1fr 100px;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);background:#14172E;margin-bottom:4px;border-radius:8px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.38);">${match.match_datetime_str||''}</div>
+      <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;min-width:0;">
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:12px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(homeTeam)}</span>
+        ${chipByName(homeTeam,18,4)}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${match.id}"
+            style="width:32px;height:28px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#F4F5FF;-moz-appearance:textfield;outline:none;"
+            oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.25);">—</span>
+          <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${match.id}"
+            style="width:32px;height:28px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#F4F5FF;-moz-appearance:textfield;outline:none;"
+            oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
+        </div>
+        ${savedBadge}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+        ${chipByName(awayTeam,18,4)}
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:12px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(awayTeam)}</span>
+      </div>
+      <button class="btn-save-match" data-match-id="${match.id}" data-group-id="${groupId}"
+        style="width:90px;padding:8px 12px;background:#D4FF3F;color:#0A0B1E;border:none;border-radius:8px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;">
+        GUARDAR
+      </button>
+    </div>`;
 }
 
 function buildStageBlock(stage, matches, predsByMatch, groupId) {
@@ -290,47 +349,47 @@ function buildStageBlock(stage, matches, predsByMatch, groupId) {
 }
 
 function attachSaveListeners(body, groupId) {
-  body.querySelectorAll(".btn-save-stage").forEach(btn => {
+  body.querySelectorAll(".btn-save-match").forEach(btn => {
     btn.addEventListener("click", async () => {
-      const stageKey = btn.dataset.stageKey;
-      const gId = parseInt(btn.dataset.groupId);
-      const msgEl = document.getElementById(`msg-${stageKey}`);
+      const matchId = parseInt(btn.dataset.matchId);
+      let gId = parseInt(btn.dataset.groupId);
 
-      // Solo guardar los partidos del card de esta fase, no de todos los grupos
-      const card = document.getElementById(`card-open-${stageKey}`);
-      if (!card) return;
-
-      const toSave = [];
-      card.querySelectorAll(`.match-pred-row[data-match-id]`).forEach(row => {
-        const matchId = parseInt(row.dataset.matchId);
-        const hInput = document.getElementById(`ph-${matchId}`);
-        const aInput = document.getElementById(`pa-${matchId}`);
-        if (!hInput || !aInput || hInput.value === "" || aInput.value === "") return;
-        toSave.push({ matchId, hg: parseInt(hInput.value), ag: parseInt(aInput.value) });
-      });
-
-      if (!toSave.length) {
-        if (msgEl) { msgEl.style.color = "#FF5C4D"; msgEl.textContent = "Ingresá al menos un resultado."; }
-        return;
+      // Si es modo "Ver Todos", usar el primer grupo del usuario
+      if (!gId || gId === "null") {
+        const groups = await api.groups.list();
+        if (!groups.length) return;
+        gId = groups[0].id;
       }
+
+      const hInput = document.getElementById(`ph-${matchId}`);
+      const aInput = document.getElementById(`pa-${matchId}`);
+      if (!hInput || !aInput || hInput.value === "" || aInput.value === "") return;
 
       btn.disabled = true;
       btn.style.opacity = "0.5";
-      btn.textContent = "GUARDANDO...";
-      if (msgEl) msgEl.textContent = "";
+      btn.textContent = "...";
+      const originalText = "GUARDAR";
 
       try {
-        for (const p of toSave) {
-          await api.predictions.save(p.matchId, gId, p.hg, p.ag);
-          await new Promise(r => setTimeout(r, 300));
-        }
-        if (msgEl) { msgEl.style.color = "#D4FF3F"; msgEl.textContent = `${toSave.length} predicción${toSave.length>1?"es":""} guardada${toSave.length>1?"s":""}`; }
-        setTimeout(() => loadPredicciones(gId), 800);
+        await api.predictions.save(matchId, gId, parseInt(hInput.value), parseInt(aInput.value));
+        btn.textContent = "✓";
+        btn.style.background = "rgba(212,255,63,0.5)";
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          btn.textContent = originalText;
+          btn.style.background = "#D4FF3F";
+          loadPredicciones(_currentGroupId);
+        }, 800);
       } catch (e) {
-        if (msgEl) { msgEl.style.color = "#FF5C4D"; msgEl.textContent = "Error: " + escHtml(e.message); }
         btn.disabled = false;
         btn.style.opacity = "1";
-        btn.textContent = "GUARDAR";
+        btn.textContent = "Error";
+        btn.style.background = "#FF5C4D";
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = "#D4FF3F";
+        }, 2000);
       }
     });
   });
