@@ -43,30 +43,14 @@ async function renderPredicciones(el) {
     return;
   }
 
-  const groupSelectHtml = groups.length > 1
-    ? `<select id="pred-group-select" style="background:#14172E;border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#F4F5FF;cursor:pointer;letter-spacing:0.06em;flex-shrink:0;">
-        ${groups.map(g => `<option value="${g.id}">${escHtml(g.name)}</option>`).join('')}
-      </select>`
-    : '';
-
   el.innerHTML = `<div class="fl-page">
     <div style="position:absolute;top:-100px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(212,255,63,0.06),transparent 60%);pointer-events:none;"></div>
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
-      ${flPageTitle('PREDICCIONES','MUNDIAL 2026')}
-      ${groupSelectHtml}
-    </div>
+    ${flPageTitle('PREDICCIONES','MUNDIAL 2026')}
     <div id="pred-sub" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;margin-bottom:24px;margin-top:-20px;"></div>
     <div id="stage-tabs" style="display:flex;gap:6px;align-items:center;flex-wrap:nowrap;overflow-x:auto;margin-bottom:24px;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;"></div>
     <div id="pred-body"></div>
   </div>`;
 
-  const select = document.getElementById("pred-group-select");
-  if (select) {
-    select.addEventListener("change", () => {
-      _currentStageFilter = "all";
-      loadPredicciones(parseInt(select.value));
-    });
-  }
   loadPredicciones(groups[0].id);
 }
 
