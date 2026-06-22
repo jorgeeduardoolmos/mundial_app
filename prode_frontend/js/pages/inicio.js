@@ -258,6 +258,15 @@ function parseMatchDate(str) {
   return null;
 }
 
+function getTodayFinished(matches) {
+  try {
+    const nowArg = new Date(Date.now() - 3*3600*1000);
+    const today = nowArg.toISOString().slice(0,10);
+    return matches.filter(m => m.is_finished && parseMatchDate(m.match_datetime_str)===today);
+  } catch(e){}
+  return [];
+}
+
 function getTodayOrUpcoming(matches) {
   try {
     const nowArg = new Date(Date.now() - 3*3600*1000);
@@ -565,6 +574,57 @@ function upcomingMatchCardHTML(m, memberPreds, predState, hasGroup, showForm) {
     <div style="height:20px;"></div>`;
 
   return card(content, {padded:false, glow: showForm && m.is_open, extraStyle:'overflow:hidden;'});
+}
+
+function todayMatchesHTML(todayMatches, myPreds) {
+  if (!todayMatches?.length) return '';
+
+  const heading = card(`<div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:rgba(212,255,63,0.8);letter-spacing:0.14em;text-transform:uppercase;">HOY</div>`, {padded: false, extraStyle: 'padding:12px 0 8px 0;'});
+
+  const rows = todayMatches.map(m => {
+    const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
+    const away = typeof teamName === "function" ? teamName(m.away_team) : m.away_team;
+    const pred = myPreds.find(p => p.match_id === m.id);
+
+    let pts = 0;
+    if (pred && m.home_goals !== null && m.away_goals !== null) {
+      if (pred.predicted_home_goals === m.home_goals) pts += 2;
+      if (pred.predicted_away_goals === m.away_goals) pts += 2;
+      const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
+                       : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
+      const realResult = m.home_goals > m.away_goals ? "home"
+                       : m.away_goals > m.home_goals ? "away" : "draw";
+      if (predResult === realResult) pts += 4;
+    }
+
+    const predDisplay = pred
+      ? `<div style="text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);">pronóstico</div>
+          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:13px;color:rgba(212,255,63,0.8);">${pred.predicted_home_goals}—${pred.predicted_away_goals}</div>
+        </div>`
+      : `<div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.15);">—</div>`;
+
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:12px;">
+      <div style="flex:1;display:flex;align-items:center;gap:6px;min-width:0;">
+        ${chipByName(home,16,3)}
+        <span style="font-weight:700;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;">${escHtml(home)}</span>
+      </div>
+      ${predDisplay}
+      <div style="text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);">resultado</div>
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>
+      </div>
+      <div style="background:rgba(212,255,63,0.1);border:1px solid rgba(212,255,63,0.2);border-radius:6px;padding:4px 8px;text-align:center;min-width:36px;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#D4FF3F;">${pts}</div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;gap:6px;justify-content:flex-end;min-width:0;">
+        <span style="font-weight:700;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;">${escHtml(away)}</span>
+        ${chipByName(away,16,3)}
+      </div>
+    </div>`;
+  }).join('<div style="border-top:1px solid rgba(255,255,255,0.04);"></div>');
+
+  return heading + card(rows, {padded: false});
 }
 
 function upcomingMatchesHTML(next3Maps, predState, hasGroup) {
@@ -890,13 +950,15 @@ function sinPredecirCard(count, hasGroup) {
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
   const {s,selectedGroup,allRankings,myPreds,nextOpen,tickerItems,today,
-         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps} = d;
+         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps,todayMatches} = d;
   const hasGroup = !!selectedGroup;
 
   const liveCards = (liveMaps||[]).map(({match,preds}) => liveMatchHTML(match, preds)).join('');
+  const todayCards = todayMatchesHTML(todayMatches, myPreds);
 
   const leftCol = `<div style="display:flex;flex-direction:column;gap:28px;">
     ${liveCards}
+    ${todayCards}
     ${upcomingMatchesHTML(next3Maps, predState, hasGroup)}
     ${groupTableHTML(gt)}
   </div>`;
@@ -1129,11 +1191,16 @@ async function renderInicio(el) {
   const gt = calcGroupTable(nextOpen, matches);
   const allGroupTables = calcAllGroupTables(matches);
 
+  // Partidos de hoy finalizados, ordenados cronológicamente
+  const todayMatches = getTodayFinished(matches).sort((a, b) =>
+    a.match_datetime.localeCompare(b.match_datetime)
+  );
+
   el.innerHTML = buildDashboard({
     s, selectedGroup, allRankings, myPreds,
     nextOpen, tickerItems, today,
     pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-    predState, gt, allGroupTables, next3Maps, liveMaps,
+    predState, gt, allGroupTables, next3Maps, liveMaps, todayMatches,
   });
 
   wirePredictorInteractions(nextOpen, predState, selectedGroup?.id);
