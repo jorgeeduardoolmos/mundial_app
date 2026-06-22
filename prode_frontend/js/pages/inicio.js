@@ -128,9 +128,11 @@ function injectFloodlightStyles() {
     }
     @media (max-width: 600px) {
       #fl-predictor-grid { grid-template-columns:1fr !important; padding:0 18px 20px !important; }
-      .fl-team-name-lg { font-size:22px !important; }
-      .fl-team-chip-lg { width:56px !important; height:56px !important; }
-      .fl-chip-code-lg { font-size:20px !important; }
+      .fl-team-name-lg { font-size:18px !important; line-height:1.1 !important; }
+      .fl-team-chip-lg { width:48px !important; height:48px !important; }
+      .fl-chip-code-lg { font-size:16px !important; }
+      .fl-hero { padding:20px 16px !important; }
+      .fl-hero-h1 { font-size:48px !important; }
     }
   `;
   document.head.appendChild(s);
@@ -537,8 +539,8 @@ function upcomingMatchCardHTML(m, memberPreds, predState, hasGroup, showForm) {
   }
 
   const flagEl = (iso, code, flip) => iso
-    ? `<div style="width:56px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);"><img src="https://flagcdn.com/w80/${iso}.png" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="${escHtml(code)}"></div>`
-    : `<div style="width:56px;height:56px;border-radius:10px;flex-shrink:0;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:18px;color:rgba(244,245,255,0.2);">?</div>`;
+    ? `<div style="width:44px;height:44px;border-radius:8px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);"><img src="https://flagcdn.com/w80/${iso}.png" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" alt="${escHtml(code)}"></div>`
+    : `<div style="width:44px;height:44px;border-radius:8px;flex-shrink:0;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:14px;color:rgba(244,245,255,0.2);">?</div>`;
 
   const content = `
     <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;gap:8px;">
@@ -546,15 +548,15 @@ function upcomingMatchCardHTML(m, memberPreds, predState, hasGroup, showForm) {
       <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.45);letter-spacing:0.05em;">${escHtml(m.match_datetime_str||'')} · ${escHtml(m.stage||'')}</span>
     </div>
     <div style="padding:20px 20px 0;">
-      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
           ${flagEl(h.iso, h.code)}
-          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;line-height:1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;">${escHtml(m.home_team)}</div>
+          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;line-height:1.1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;word-break:break-word;">${escHtml(m.home_team)}</div>
         </div>
-        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:28px;color:rgba(244,245,255,0.25);padding:0 4px;">VS</div>
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;flex-direction:row-reverse;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:rgba(244,245,255,0.25);padding:0 2px;white-space:nowrap;">VS</div>
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-direction:row-reverse;">
           ${flagEl(a.iso, a.code)}
-          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;line-height:1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;text-align:right;">${escHtml(m.away_team)}</div>
+          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;line-height:1.1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;text-align:right;word-break:break-word;">${escHtml(m.away_team)}</div>
         </div>
       </div>
       ${predsSection}
