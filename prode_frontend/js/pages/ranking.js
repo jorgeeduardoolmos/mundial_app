@@ -49,8 +49,8 @@ async function renderRanking(el) {
   const cols = valid.map(({ group, data }) => flRankColumn(group, data, session.user_id)).join('');
 
   const grid = isSplit
-    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">${cols}</div>
-       <style>@media(max-width:768px){.fl-ranking-grid{grid-template-columns:1fr!important;}}</style>`
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="fl-ranking-grid">${cols}</div>
+       <style>@media(max-width:768px){.fl-ranking-grid{grid-template-columns:1fr!important;gap:16px!important;}}</style>`
     : `<div>${cols}</div>`;
 
   el.innerHTML = `<div class="fl-page">

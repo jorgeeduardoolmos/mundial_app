@@ -549,14 +549,14 @@ function upcomingMatchCardHTML(m, memberPreds, predState, hasGroup, showForm) {
     </div>
     <div style="padding:20px 20px 0;">
       <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;">
-        <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap;justify-content:flex-start;">
           ${flagEl(h.iso, h.code)}
-          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;line-height:1.1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;word-break:break-word;">${escHtml(m.home_team)}</div>
+          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;line-height:1.1;color:#F4F5FF;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;">${escHtml(m.home_team)}</div>
         </div>
-        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:rgba(244,245,255,0.25);padding:0 2px;white-space:nowrap;">VS</div>
-        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-direction:row-reverse;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:18px;color:rgba(244,245,255,0.25);white-space:nowrap;text-align:center;">VS</div>
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap;justify-content:flex-end;flex-direction:row-reverse;">
           ${flagEl(a.iso, a.code)}
-          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;line-height:1.1;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;text-align:right;word-break:break-word;">${escHtml(m.away_team)}</div>
+          <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;line-height:1.1;color:#F4F5FF;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;text-align:right;">${escHtml(m.away_team)}</div>
         </div>
       </div>
       ${predsSection}
