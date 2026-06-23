@@ -1169,7 +1169,7 @@ async function renderInicio(el) {
   const liveMatchIds = new Set();
   try {
     const liveList = await api.matches.live();
-    liveMatchIds.addAll = liveList.map(m => m.id);
+    liveList.forEach(m => liveMatchIds.add(m.id));
     if (liveList.length && groups.length) {
       const livePredsMatrix = await Promise.all(
         liveList.map(m => Promise.all(
