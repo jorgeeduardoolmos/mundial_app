@@ -617,12 +617,27 @@ function todayMatchCardHTML(m, isFirst) {
   let predsSection = '';
   if (window._todayAllGroupPreds && window._todayAllGroupPreds[m.id]?.length) {
     const preds = window._todayAllGroupPreds[m.id];
-    const predsHtml = preds.map(p =>
-      `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04);">
+    const predsHtml = preds.map(p => {
+      // Calcular puntos para este pronóstico
+      let pts = 0;
+      if (m.home_goals !== null && m.away_goals !== null) {
+        if (p.predicted_home_goals === m.home_goals) pts += 2;
+        if (p.predicted_away_goals === m.away_goals) pts += 2;
+        const predResult = p.predicted_home_goals > p.predicted_away_goals ? "home"
+                         : p.predicted_away_goals > p.predicted_home_goals ? "away" : "draw";
+        const realResult = m.home_goals > m.away_goals ? "home"
+                         : m.away_goals > m.home_goals ? "away" : "draw";
+        if (predResult === realResult) pts += 4;
+      }
+      const ptsColor = pts >= 6 ? '#D4FF3F' : pts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04);">
         <span style="color:rgba(244,245,255,0.75);">${escHtml(p.display_name)}</span>
-        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;color:#D4FF3F;">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
-      </div>`
-    ).join('');
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;color:#D4FF3F;">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
+          <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:12px;color:${ptsColor};min-width:18px;text-align:right;">${pts}pts</span>
+        </div>
+      </div>`;
+    }).join('');
     predsSection = `<div style="padding:10px 14px;border-top:1px solid rgba(255,255,255,0.04);">
       <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.3);letter-spacing:0.06em;margin-bottom:6px;">PRONÓSTICOS (${preds.length})</div>
       <div style="background:rgba(255,255,255,0.02);border-radius:6px;overflow:hidden;">${predsHtml}</div>
