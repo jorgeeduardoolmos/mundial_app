@@ -260,9 +260,11 @@ function parseMatchDate(str) {
 
 function getTodayFinished(matches) {
   try {
+    // Argentina es UTC-3
     const now = new Date();
-    const todayUTC = now.toISOString().slice(0,10);
-    return matches.filter(m => m.is_finished && m.match_datetime.slice(0,10)===todayUTC);
+    const artTime = new Date(now.getTime() - 3*3600*1000);
+    const todayART = artTime.toISOString().slice(0,10);
+    return matches.filter(m => m.is_finished && m.match_datetime.slice(0,10)===todayART);
   } catch(e){}
   return [];
 }
@@ -1162,9 +1164,37 @@ async function renderInicio(el) {
     saving: false,
   };
 
-  // Próximos 3 partidos con predicciones mergeadas de todos los grupos
+  // Partidos en vivo primero (para excluirlos de próximos 3)
+  let liveMaps = [];
+  const liveMatchIds = new Set();
+  try {
+    const liveList = await api.matches.live();
+    liveMatchIds.addAll = liveList.map(m => m.id);
+    if (liveList.length && groups.length) {
+      const livePredsMatrix = await Promise.all(
+        liveList.map(m => Promise.all(
+          groups.map(g => api.predictions.forMatch(m.id, g.id).catch(() => []))
+        ))
+      );
+      liveMaps = liveList.map((m, i) => {
+        const seen = new Set();
+        const merged = [];
+        for (const gp of livePredsMatrix[i]) {
+          for (const p of gp) {
+            if (!seen.has(p.user_id)) { seen.add(p.user_id); merged.push(p); }
+          }
+        }
+        liveMatchIds.add(m.id);
+        return { match: m, preds: merged };
+      });
+    } else {
+      liveMaps = liveList?.map(m => { liveMatchIds.add(m.id); return { match: m, preds: [] }; }) || [];
+    }
+  } catch { liveMaps = []; }
+
+  // Próximos 3 partidos (excluyendo los que ya están en vivo) con predicciones mergeadas de todos los grupos
   const next3 = matches.filter(m =>
-    !m.is_finished && !m.home_team.includes('TBD') && !m.away_team.includes('TBD')
+    !m.is_finished && !m.home_team.includes('TBD') && !m.away_team.includes('TBD') && !liveMatchIds.has(m.id)
   ).slice(0, 3);
 
   let next3Maps = next3.map(m => ({ match: m, preds: [] }));
@@ -1187,31 +1217,6 @@ async function renderInicio(el) {
       });
     } catch { /* mantener next3Maps vacíos */ }
   }
-
-  // Partidos en vivo con predicciones mergeadas de todos los grupos
-  let liveMaps = [];
-  try {
-    const liveList = await api.matches.live();
-    if (liveList.length && groups.length) {
-      const livePredsMatrix = await Promise.all(
-        liveList.map(m => Promise.all(
-          groups.map(g => api.predictions.forMatch(m.id, g.id).catch(() => []))
-        ))
-      );
-      liveMaps = liveList.map((m, i) => {
-        const seen = new Set();
-        const merged = [];
-        for (const gp of livePredsMatrix[i]) {
-          for (const p of gp) {
-            if (!seen.has(p.user_id)) { seen.add(p.user_id); merged.push(p); }
-          }
-        }
-        return { match: m, preds: merged };
-      });
-    } else {
-      liveMaps = liveList?.map(m => ({ match: m, preds: [] })) || [];
-    }
-  } catch { liveMaps = []; }
 
   const gt = calcGroupTable(nextOpen, matches);
   const allGroupTables = calcAllGroupTables(matches);
