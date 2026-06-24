@@ -176,30 +176,30 @@ function buildMatchRow(match, predsByMatch, groupId) {
   const awayTeam = teamName(match.away_team);
 
   return `
-    <div class="match-pred-row" data-match-id="${match.id}" style="display:grid;grid-template-columns:80px 1fr auto 1fr 100px;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);background:#14172E;margin-bottom:4px;border-radius:8px;">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.38);">${match.match_datetime_str||''}</div>
-      <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;min-width:0;">
-        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:12px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(homeTeam)}</span>
-        ${chipByName(homeTeam,18,4)}
+    <div class="match-pred-row" data-match-id="${match.id}" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.04);background:#14172E;margin-bottom:4px;border-radius:8px;justify-content:space-between;">
+      <div style="width:100%;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.38);margin-bottom:4px;">${match.match_datetime_str||''}</div>
+      <div style="display:flex;align-items:center;gap:5px;flex:1;min-width:0;">
+        ${chipByName(homeTeam,16,3)}
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(homeTeam)}</span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <div style="display:flex;align-items:center;gap:4px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:3px;">
           <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${match.id}"
-            style="width:32px;height:28px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#F4F5FF;-moz-appearance:textfield;outline:none;"
+            style="width:30px;height:26px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:5px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:12px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
             oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
-          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.25);">—</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.25);">—</span>
           <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${match.id}"
-            style="width:32px;height:28px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#F4F5FF;-moz-appearance:textfield;outline:none;"
+            style="width:30px;height:26px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:5px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:12px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
             oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
         </div>
         ${savedBadge}
       </div>
-      <div style="display:flex;align-items:center;gap:6px;min-width:0;">
-        ${chipByName(awayTeam,18,4)}
-        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:12px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(awayTeam)}</span>
+      <div style="display:flex;align-items:center;gap:5px;flex:1;min-width:0;justify-content:flex-end;">
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(awayTeam)}</span>
+        ${chipByName(awayTeam,16,3)}
       </div>
       <button class="btn-save-match" data-match-id="${match.id}" data-group-id="${groupId}"
-        style="width:90px;padding:8px 12px;background:#D4FF3F;color:#0A0B1E;border:none;border-radius:8px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;">
+        style="width:100%;padding:8px 12px;background:#D4FF3F;color:#0A0B1E;border:none;border-radius:8px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;margin-top:4px;">
         GUARDAR
       </button>
     </div>`;

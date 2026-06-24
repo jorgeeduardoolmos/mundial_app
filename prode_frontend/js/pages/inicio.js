@@ -466,23 +466,23 @@ function liveMatchHTML(m, matchPreds) {
       <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.55);letter-spacing:0.06em;">${escHtml(m.stage||'')}</span>
     </div>
 
-    <div style="padding:28px 36px 24px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:20px;position:relative;">
+    <div style="padding:24px 20px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;position:relative;">
       <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(255,92,77,0.07),transparent 70%);"></div>
 
-      <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;flex-direction:column;">
         ${flagDiv(m.home_team)}
-        <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:28px;line-height:0.95;color:#F4F5FF;text-transform:uppercase;">${escHtml(m.home_team)}</div>
+        <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:clamp(18px,4vw,28px);line-height:0.95;color:#F4F5FF;text-transform:uppercase;text-align:center;word-break:break-word;">${escHtml(m.home_team)}</div>
       </div>
 
-      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;padding:0 8px;">
-        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:48px;color:#F4F5FF;font-variant-numeric:tabular-nums;letter-spacing:0.04em;line-height:1;">—&thinsp;:&thinsp;—</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#FF5C4D;letter-spacing:0.12em;opacity:0.85;">EN CURSO</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;z-index:1;padding:0 4px;flex-shrink:0;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:clamp(36px,8vw,48px);color:#F4F5FF;font-variant-numeric:tabular-nums;letter-spacing:0.04em;line-height:1;">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#FF5C4D;letter-spacing:0.12em;opacity:0.85;">EN CURSO</div>
       </div>
 
-      <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0;flex-direction:row-reverse;">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;flex-direction:column-reverse;">
         ${flagDiv(m.away_team)}
-        <div style="text-align:right;flex:1;min-width:0;">
-          <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:28px;line-height:0.95;color:#F4F5FF;text-transform:uppercase;">${escHtml(m.away_team)}</div>
+        <div style="text-align:center;flex:1;min-width:0;width:100%;">
+          <div class="fl-team-name-lg" style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:clamp(18px,4vw,28px);line-height:0.95;color:#F4F5FF;text-transform:uppercase;word-break:break-word;">${escHtml(m.away_team)}</div>
         </div>
       </div>
     </div>
