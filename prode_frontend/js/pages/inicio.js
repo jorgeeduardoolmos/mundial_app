@@ -1116,11 +1116,36 @@ function buildDashboard(d) {
     ${allMatchesCards}
   </div>`;
 
+  const myStatsCard = `<div style="background:#14172E;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:24px;overflow:hidden;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:16px;">Mi Desempeño</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div style="text-align:center;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:32px;color:#D4FF3F;margin-bottom:4px;">${exactos}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.4);">Acertadas</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:32px;color:#F4F5FF;margin-bottom:4px;">${pos}/${total}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.4);">Posición</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.5);">Puntos actuales</span>
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#D4FF3F;">${pts}</span>
+      </div>
+      ${ptsToNext > 0 ? `<div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.5);">Falta para pasar</span>
+        <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:14px;color:rgba(212,255,63,0.7);">+${ptsToNext}</span>
+      </div>` : '<div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#D4FF3F;text-align:center;padding:8px;background:rgba(212,255,63,0.05);border-radius:6px;">🏆 Vas 1º</div>'}
+    </div>
+  </div>`;
+
   const rankingCards = hasGroup
     ? (allRankings||[]).map(({group, data}) => rankingCard(data, s.user_id, true, group.name)).join('')
     : rankingCard(null, s.user_id, false);
 
   const rightCol = `<div style="display:flex;flex-direction:column;gap:28px;">
+    ${myStatsCard}
     ${rankingCards}
     ${pointsCard()}
     ${premiosCard()}
