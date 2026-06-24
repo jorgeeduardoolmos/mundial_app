@@ -1107,7 +1107,7 @@ function sinPredecirCard(count, hasGroup) {
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
   const {s,selectedGroup,allRankings,myPreds,nextOpen,tickerItems,today,
-         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps,todayMatches} = d;
+         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps,todayMatches,matches} = d;
   const hasGroup = !!selectedGroup;
 
   const allMatchesCards = allMatchesHTML(matches, myPreds);
@@ -1393,7 +1393,7 @@ async function renderInicio(el) {
     s, selectedGroup, allRankings, myPreds,
     nextOpen, tickerItems, today,
     pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-    predState, gt, allGroupTables, next3Maps, liveMaps, todayMatches,
+    predState, gt, allGroupTables, next3Maps, liveMaps, todayMatches, matches,
   });
 
   wirePredictorInteractions(nextOpen, predState, selectedGroup?.id);
