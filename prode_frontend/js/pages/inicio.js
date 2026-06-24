@@ -673,9 +673,37 @@ function upcomingMatchesHTML(next3Maps, predState, hasGroup) {
   if (!next3Maps?.length) return card(`<div style="text-align:center;padding:40px 0;">
     <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;color:rgba(244,245,255,0.38);text-transform:uppercase;">Sin partidos próximos</div>
   </div>`);
-  return next3Maps.map(({match, preds}, i) =>
+
+  const cards = next3Maps.map(({match, preds}, i) =>
     upcomingMatchCardHTML(match, preds, predState, hasGroup, i === 0)
   ).join('');
+
+  // Desktop: grid de 2-3 columnas. Mobile: carrusel deslizable
+  const gridStyle = `
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    @media(max-width: 768px) {
+      grid-template-columns: 1fr;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 12px;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+    }
+  `;
+
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;@media(max-width:768px){display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:8px;scrollbar-width:thin;}" class="upcoming-carousel">${cards}</div>
+    <style>
+      @media(max-width:768px) {
+        .upcoming-carousel > * {
+          flex-shrink: 0;
+          width: calc(100vw - 40px);
+          scroll-snap-align: start;
+        }
+      }
+    </style>`;
 }
 
 /* ── Next Match card ───────────────────────────────────────────────────── */
@@ -1207,20 +1235,28 @@ async function renderInicio(el) {
     }
   } catch { liveMaps = []; }
 
-  // Próximos 3 partidos (excluyendo los que ya están en vivo) con predicciones mergeadas de todos los grupos
-  const next3 = matches.filter(m =>
+  // Próximos partidos del mismo horario (excluyendo los que ya están en vivo)
+  const upcomingMatches = matches.filter(m =>
     !m.is_finished && !m.home_team.includes('TBD') && !m.away_team.includes('TBD') && !liveMatchIds.has(m.id)
-  ).slice(0, 3);
+  );
 
-  let next3Maps = next3.map(m => ({ match: m, preds: [] }));
-  if (groups.length) {
+  // Obtener todos los partidos del próximo horario (todos los que se juegan a la misma hora)
+  let nextHourMatches = [];
+  if (upcomingMatches.length > 0) {
+    const firstMatch = upcomingMatches[0];
+    const nextHourTime = firstMatch.match_datetime;
+    nextHourMatches = upcomingMatches.filter(m => m.match_datetime === nextHourTime);
+  }
+
+  let next3Maps = nextHourMatches.map(m => ({ match: m, preds: [] }));
+  if (groups.length && nextHourMatches.length) {
     try {
       const predsMatrix = await Promise.all(
-        next3.map(m => Promise.all(
+        nextHourMatches.map(m => Promise.all(
           groups.map(g => api.predictions.forMatch(m.id, g.id).catch(() => []))
         ))
       );
-      next3Maps = next3.map((m, i) => {
+      next3Maps = nextHourMatches.map((m, i) => {
         const seen = new Set();
         const merged = [];
         for (const groupPreds of predsMatrix[i]) {
