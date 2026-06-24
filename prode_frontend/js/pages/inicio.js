@@ -669,6 +669,93 @@ function todayMatchCardHTML(m, isFirst) {
   return card(content, {padded: false, extraStyle: 'overflow:hidden;'});
 }
 
+function getDateRange() {
+  const now = new Date();
+  const artTime = new Date(now.getTime() - 3*3600*1000);
+  const todayART = artTime.toISOString().slice(0,10);
+
+  const yesterday = new Date(artTime);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0,10);
+
+  const tomorrow = new Date(artTime);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().slice(0,10);
+
+  return { yesterday: yesterdayStr, today: todayART, tomorrow: tomorrowStr };
+}
+
+function allMatchesHTML(matches, myPreds) {
+  const { yesterday, today, tomorrow } = getDateRange();
+
+  const yesterdayMatches = matches.filter(m => m.is_finished && m.match_datetime.slice(0,10) === yesterday);
+  const todayMatches = matches.filter(m => m.match_datetime.slice(0,10) === today);
+  const tomorrowMatches = matches.filter(m => m.match_datetime.slice(0,10) === tomorrow);
+
+  const renderSection = (title, matchList) => {
+    if (!matchList.length) return '';
+
+    const sorted = [...matchList].sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+    const matchCards = sorted.map(m => {
+      const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
+      const away = typeof teamName === "function" ? teamName(m.away_team) : m.away_team;
+      const pred = myPreds.find(p => p.match_id === m.id);
+
+      let pts = 0;
+      if (pred && m.home_goals !== null && m.away_goals !== null) {
+        if (pred.predicted_home_goals === m.home_goals) pts += 2;
+        if (pred.predicted_away_goals === m.away_goals) pts += 2;
+        const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
+                         : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
+        const realResult = m.home_goals > m.away_goals ? "home"
+                         : m.away_goals > m.home_goals ? "away" : "draw";
+        if (predResult === realResult) pts += 4;
+      }
+
+      const ptsDisplay = m.is_finished ? `<div style="background:rgba(212,255,63,0.1);border:1px solid rgba(212,255,63,0.2);border-radius:6px;padding:6px 10px;text-align:center;min-width:50px;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#D4FF3F;">${pts}</div>
+      </div>` : '';
+
+      const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
+
+      return `<div class="match-card-mini" style="display:flex;align-items:center;gap:10px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;flex-shrink:0;min-width:280px;scroll-snap-align:start;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            ${chipByName(home,18,3)}
+            <span style="font-weight:700;font-size:12px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.4);">${m.match_datetime_str||''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">
+          ${resultDisplay}
+          ${ptsDisplay}
+        </div>
+        <div style="flex:1;min-width:0;text-align:right;">
+          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-bottom:8px;">
+            <span style="font-weight:700;font-size:12px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
+            ${chipByName(away,18,3)}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <span>${escHtml(title)}</span>
+        <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;@media(max-width:768px){display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:8px;scrollbar-width:thin;}" class="matches-grid">
+        ${matchCards}
+      </div>
+      <div style="margin-bottom:28px;"></div>
+    </div>`;
+  };
+
+  return renderSection('AYER', yesterdayMatches) +
+         renderSection('HOY', todayMatches) +
+         renderSection('MAÑANA', tomorrowMatches);
+}
+
 function upcomingMatchesHTML(next3Maps, predState, hasGroup) {
   if (!next3Maps?.length) return card(`<div style="text-align:center;padding:40px 0;">
     <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:20px;color:rgba(244,245,255,0.38);text-transform:uppercase;">Sin partidos próximos</div>
@@ -1023,14 +1110,10 @@ function buildDashboard(d) {
          pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps,todayMatches} = d;
   const hasGroup = !!selectedGroup;
 
-  const liveCards = (liveMaps||[]).map(({match,preds}) => liveMatchHTML(match, preds)).join('');
-  const todayCards = todayMatchesHTML(todayMatches);
+  const allMatchesCards = allMatchesHTML(matches, myPreds);
 
   const leftCol = `<div style="display:flex;flex-direction:column;gap:28px;">
-    ${liveCards}
-    ${todayCards}
-    ${upcomingMatchesHTML(next3Maps, predState, hasGroup)}
-    ${groupTableHTML(gt)}
+    ${allMatchesCards}
   </div>`;
 
   const rankingCards = hasGroup
