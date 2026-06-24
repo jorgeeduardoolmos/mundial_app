@@ -718,24 +718,54 @@ function allMatchesHTML(matches, myPreds) {
 
       const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
 
-      return `<div class="match-card-mini" style="display:flex;align-items:center;gap:10px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;flex-shrink:0;min-width:280px;scroll-snap-align:start;">
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-            ${chipByName(home,18,3)}
-            <span style="font-weight:700;font-size:12px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
+      // Pronósticos de todos
+      let predsHtml = '';
+      if (window._allMatchesPreds && window._allMatchesPreds[m.id]?.length) {
+        const allPreds = window._allMatchesPreds[m.id];
+        const predsRows = allPreds.map(p => {
+          let pPts = 0;
+          if (m.home_goals !== null && m.away_goals !== null) {
+            if (p.predicted_home_goals === m.home_goals) pPts += 2;
+            if (p.predicted_away_goals === m.away_goals) pPts += 2;
+            const predResult = p.predicted_home_goals > p.predicted_away_goals ? "home"
+                             : p.predicted_away_goals > p.predicted_home_goals ? "away" : "draw";
+            const realResult = m.home_goals > m.away_goals ? "home"
+                             : m.away_goals > m.home_goals ? "away" : "draw";
+            if (predResult === realResult) pPts += 4;
+          }
+          const pColor = pPts >= 6 ? '#D4FF3F' : pPts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,0.04);">
+            <span style="color:rgba(244,245,255,0.65);">${escHtml(p.display_name)}</span>
+            <span style="font-weight:700;color:${pColor};">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
+          </div>`;
+        }).join('');
+        predsHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);margin-bottom:6px;letter-spacing:0.04em;">OTROS (${allPreds.length})</div>
+          ${predsRows}
+        </div>`;
+      }
+
+      return `<div class="match-card-mini" style="display:flex;flex-direction:column;gap:10px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;flex-shrink:0;min-width:320px;scroll-snap-align:start;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              ${chipByName(home,16,2)}
+              <span style="font-weight:700;font-size:11px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);">${m.match_datetime_str||''}</div>
           </div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.4);">${m.match_datetime_str||''}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">
-          ${resultDisplay}
-          ${ptsDisplay}
-        </div>
-        <div style="flex:1;min-width:0;text-align:right;">
-          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-bottom:8px;">
-            <span style="font-weight:700;font-size:12px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
-            ${chipByName(away,18,3)}
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+            ${resultDisplay}
+            ${ptsDisplay}
+          </div>
+          <div style="flex:1;min-width:0;text-align:right;">
+            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-bottom:6px;">
+              <span style="font-weight:700;font-size:11px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
+              ${chipByName(away,16,2)}
+            </div>
           </div>
         </div>
+        ${predsHtml}
       </div>`;
     }).join('');
 
@@ -1385,34 +1415,48 @@ async function renderInicio(el) {
     a.match_datetime.localeCompare(b.match_datetime)
   );
 
-  // Obtener pronósticos de todos para partidos de hoy
-  window._todayAllGroupPreds = {};
+  // Obtener pronósticos de TODOS los partidos (ayer, hoy, mañana)
+  const { yesterday, today, tomorrow } = getDateRange();
+  const allMatchesForPreds = matches.filter(m =>
+    m.match_datetime.slice(0,10) === yesterday ||
+    m.match_datetime.slice(0,10) === today ||
+    m.match_datetime.slice(0,10) === tomorrow
+  );
+
+  window._allMatchesPreds = {};
   window._allMyGroupPreds = [];
-  if (todayMatches.length && groups.length) {
+
+  if (allMatchesForPreds.length && groups.length) {
     try {
-      const todayPredsMatrix = await Promise.all(
-        todayMatches.map(m => Promise.all(
+      const allPredsMatrix = await Promise.all(
+        allMatchesForPreds.map(m => Promise.all(
           groups.map(g => api.predictions.forMatch(m.id, g.id).catch(() => []))
         ))
       );
-      todayMatches.forEach((m, i) => {
+      allMatchesForPreds.forEach((m, i) => {
         const seen = new Set();
         const merged = [];
-        for (const groupPreds of todayPredsMatrix[i]) {
+        for (const groupPreds of allPredsMatrix[i]) {
           for (const p of groupPreds) {
             if (!seen.has(p.user_id)) { seen.add(p.user_id); merged.push(p); }
           }
         }
-        window._todayAllGroupPreds[m.id] = merged;
+        window._allMatchesPreds[m.id] = merged;
       });
-      // También guardar mis predicciones de hoy
-      window._allMyGroupPreds = todayMatches.flatMap((m, i) => {
-        const myGroupPreds = todayPredsMatrix[i].flat().filter(p => p.user_id === s.user_id);
+      // Guardar mis predicciones
+      window._allMyGroupPreds = allMatchesForPreds.flatMap((m, i) => {
+        const myGroupPreds = allPredsMatrix[i].flat().filter(p => p.user_id === s.user_id);
         if (myGroupPreds.length) return myGroupPreds[0];
         return [];
       });
     } catch {}
   }
+
+  // Para compatibilidad con todayMatchCardHTML
+  window._todayAllGroupPreds = {};
+  todayMatches.forEach(m => {
+    window._todayAllGroupPreds[m.id] = window._allMatchesPreds[m.id] || [];
+  });
 
   el.innerHTML = buildDashboard({
     s, selectedGroup, allRankings, myPreds,
