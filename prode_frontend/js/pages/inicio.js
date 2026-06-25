@@ -685,8 +685,8 @@ function getDateRange() {
   return { yesterday: yesterdayStr, today: todayART, tomorrow: tomorrowStr };
 }
 
-function allMatchesHTML(matches, myPreds) {
-  const { yesterday, today, tomorrow } = getDateRange();
+function allMatchesHTML(matches, myPreds, dateRange) {
+  const { yesterday, today, tomorrow } = dateRange;
 
   const yesterdayMatches = matches.filter(m => m.is_finished && m.match_datetime.slice(0,10) === yesterday);
   const todayMatches = matches.filter(m => m.match_datetime.slice(0,10) === today);
@@ -1148,10 +1148,10 @@ function sinPredecirCard(count, hasGroup) {
 /* ── Full dashboard ────────────────────────────────────────────────────── */
 function buildDashboard(d) {
   const {s,selectedGroup,allRankings,myPreds,nextOpen,tickerItems,today,
-         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps,todayMatches,matches} = d;
+         pos,total,pts,ptsToLeader,ptsToNext,exactos,unpredicted,predState,gt,allGroupTables,next3Maps,liveMaps,todayMatches,matches,dateRange} = d;
   const hasGroup = !!selectedGroup;
 
-  const allMatchesCards = allMatchesHTML(matches, myPreds);
+  const allMatchesCards = allMatchesHTML(matches, myPreds, dateRange);
 
   const leftCol = `<div style="display:flex;flex-direction:column;gap:28px;">
     ${allMatchesCards}
@@ -1469,12 +1469,14 @@ async function renderInicio(el) {
     window._todayAllGroupPreds[m.id] = window._allMatchesPreds[m.id] || [];
   });
 
+  const dateRange = { yesterday, today, tomorrow };
+
   try {
     el.innerHTML = buildDashboard({
       s, selectedGroup, allRankings, myPreds,
       nextOpen, tickerItems, today,
       pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-      predState, gt, allGroupTables, next3Maps, liveMaps, todayMatches, matches,
+      predState, gt, allGroupTables, next3Maps, liveMaps, todayMatches, matches, dateRange,
     });
   } catch (e) {
     console.error('Error in buildDashboard:', e);
