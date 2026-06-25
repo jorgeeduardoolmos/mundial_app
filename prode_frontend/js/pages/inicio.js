@@ -692,7 +692,7 @@ function allMatchesHTML(matches, myPreds) {
   const todayMatches = matches.filter(m => m.match_datetime.slice(0,10) === today);
   const tomorrowMatches = matches.filter(m => m.match_datetime.slice(0,10) === tomorrow);
 
-  const renderSection = (title, matchList) => {
+  const renderSection = (title, matchList, matchesObj) => {
     if (!matchList.length) return '';
 
     const sorted = [...matchList].sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
@@ -774,16 +774,27 @@ function allMatchesHTML(matches, myPreds) {
         <span>${escHtml(title)}</span>
         <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;@media(max-width:768px){display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:8px;scrollbar-width:thin;}" class="matches-grid">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
         ${matchCards}
       </div>
+      <style>
+        @media(max-width:768px) {
+          .matches-grid {
+            display: flex !important;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 12px;
+            padding-bottom: 8px;
+          }
+        }
+      </style>
       <div style="margin-bottom:28px;"></div>
     </div>`;
   };
 
-  return renderSection('AYER', yesterdayMatches) +
-         renderSection('HOY', todayMatches) +
-         renderSection('MAÑANA', tomorrowMatches);
+  return renderSection('AYER', yesterdayMatches, matches) +
+         renderSection('HOY', todayMatches, matches) +
+         renderSection('MAÑANA', tomorrowMatches, matches);
 }
 
 function upcomingMatchesHTML(next3Maps, predState, hasGroup) {
