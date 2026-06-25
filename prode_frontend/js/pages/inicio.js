@@ -1427,10 +1427,10 @@ async function renderInicio(el) {
   );
 
   // Obtener pronósticos de TODOS los partidos (ayer, hoy, mañana)
-  const { yesterday, today, tomorrow } = getDateRange();
+  const { yesterday, today: todayStr, tomorrow } = getDateRange();
   const allMatchesForPreds = matches.filter(m =>
     m.match_datetime.slice(0,10) === yesterday ||
-    m.match_datetime.slice(0,10) === today ||
+    m.match_datetime.slice(0,10) === todayStr ||
     m.match_datetime.slice(0,10) === tomorrow
   );
 
@@ -1469,7 +1469,7 @@ async function renderInicio(el) {
     window._todayAllGroupPreds[m.id] = window._allMatchesPreds[m.id] || [];
   });
 
-  const dateRange = { yesterday, today, tomorrow };
+  const dateRange = { yesterday, today: todayStr, tomorrow };
 
   try {
     el.innerHTML = buildDashboard({
