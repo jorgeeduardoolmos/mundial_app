@@ -1469,12 +1469,18 @@ async function renderInicio(el) {
     window._todayAllGroupPreds[m.id] = window._allMatchesPreds[m.id] || [];
   });
 
-  el.innerHTML = buildDashboard({
-    s, selectedGroup, allRankings, myPreds,
-    nextOpen, tickerItems, today,
-    pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
-    predState, gt, allGroupTables, next3Maps, liveMaps, todayMatches, matches,
-  });
+  try {
+    el.innerHTML = buildDashboard({
+      s, selectedGroup, allRankings, myPreds,
+      nextOpen, tickerItems, today,
+      pos, total, pts, ptsToLeader, ptsToNext, exactos, unpredicted,
+      predState, gt, allGroupTables, next3Maps, liveMaps, todayMatches, matches,
+    });
+  } catch (e) {
+    console.error('Error in buildDashboard:', e);
+    el.innerHTML = `<div style="padding:40px;color:#FF5C4D;font-family:system-ui;font-size:14px;">Error rendering dashboard: ${escHtml(e.message)}</div>`;
+    return;
+  }
 
   wirePredictorInteractions(nextOpen, predState, selectedGroup?.id);
   wireNavClicks();
