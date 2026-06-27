@@ -643,11 +643,13 @@ function allMatchesHTML(matches, myPreds, dateRange) {
       <style>
         @media(max-width:768px) {
           .matches-grid {
-            display: flex !important;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
+            display: grid !important;
+            grid-template-columns: 1fr !important;
             gap: 12px;
-            padding-bottom: 8px;
+          }
+          .match-card-mini {
+            min-width: unset !important;
+            width: 100%;
           }
         }
       </style>
