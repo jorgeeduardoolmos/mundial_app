@@ -1136,7 +1136,13 @@ async function renderInicio(el) {
       allRankings = groups.map((g, i) => ({ group: g, data: rankingResults[i] }));
     } catch { myPreds=[]; allRankings=[]; }
   }
-  const rankingData = allRankings[0]?.data || null;
+  let rankingData = allRankings[0]?.data || null;
+
+  // Filtrar usuarios excluidos del dashboard
+  const excludedUsers = ['Sofi', 'Verito', 'Tomy', 'Pepu'];
+  if (rankingData?.entries) {
+    rankingData.entries = rankingData.entries.filter(e => !excludedUsers.includes(e.display_name));
+  }
 
   // Ordenar por fecha para que "próximo" sea el real
   matches.sort((a,b) => a.match_datetime < b.match_datetime ? -1 : 1);
