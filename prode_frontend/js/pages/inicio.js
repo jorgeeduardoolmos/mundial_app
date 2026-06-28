@@ -550,7 +550,7 @@ function getDateRange() {
 
 function allMatchesHTML(matches, myPreds, dateRange) {
   // Solo mostrar 16vos de final en orden cronológico
-  const octavosMatches = matches.filter(m => m.stage === "16vos").sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+  const octavosMatches = matches.filter(m => m.stage === "Octavos").sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
   const matchCards = octavosMatches.map(m => {
     const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
