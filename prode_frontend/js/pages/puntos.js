@@ -104,41 +104,52 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
 
     document.getElementById('total-pts').textContent = totalPts;
 
-    // Generar tabla
-    const tableHtml = `
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px;">
-          <thead style="border-bottom:1px solid rgba(255,255,255,0.12);">
-            <tr style="color:rgba(244,245,255,0.4);">
-              <th style="padding:12px 0;text-align:left;letter-spacing:0.06em;font-weight:600;">PARTIDO</th>
-              <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">PREDICCIÓN</th>
-              <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">RESULTADO</th>
-              <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">PTS</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${matchesWithPreds.map(item => {
-              const m = item.match;
-              const p = item.pred;
-              const pts = p.points_earned || 0;
-              const ptsColor = pts >= 6 ? '#D4FF3F' : pts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
+    // Generar tabla o mensaje vacío
+    let tableHtml = '';
 
-              return `
-                <tr style="border-bottom:1px solid rgba(255,255,255,0.06);color:#F4F5FF;">
-                  <td style="padding:12px 0;text-align:left;">
-                    <div style="font-weight:700;margin-bottom:2px;">${escHtml(m.home_team)} vs ${escHtml(m.away_team)}</div>
-                    <div style="color:rgba(244,245,255,0.4);font-size:9px;">${m.stage}</div>
-                  </td>
-                  <td style="padding:12px 0;text-align:center;font-weight:700;">${p.predicted_home_goals}–${p.predicted_away_goals}</td>
-                  <td style="padding:12px 0;text-align:center;font-weight:700;color:#D4FF3F;">${m.home_goals}–${m.away_goals}</td>
-                  <td style="padding:12px 0;text-align:center;font-weight:700;color:${ptsColor};">${pts}</td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
+    if (matchesWithPreds.length === 0) {
+      tableHtml = `<div style="padding:48px 20px;text-align:center;color:rgba(244,245,255,0.4);">
+        <div style="font-size:32px;margin-bottom:12px;">⚽</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.04em;">
+          Sin predicciones en partidos jugados aún
+        </div>
+      </div>`;
+    } else {
+      tableHtml = `
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px;">
+            <thead style="border-bottom:1px solid rgba(255,255,255,0.12);">
+              <tr style="color:rgba(244,245,255,0.4);">
+                <th style="padding:12px 0;text-align:left;letter-spacing:0.06em;font-weight:600;">PARTIDO</th>
+                <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">PREDICCIÓN</th>
+                <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">RESULTADO</th>
+                <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">PTS</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matchesWithPreds.map(item => {
+                const m = item.match;
+                const p = item.pred;
+                const pts = p.points_earned || 0;
+                const ptsColor = pts >= 6 ? '#D4FF3F' : pts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
+
+                return `
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.06);color:#F4F5FF;">
+                    <td style="padding:12px 0;text-align:left;">
+                      <div style="font-weight:700;margin-bottom:2px;">${escHtml(m.home_team)} vs ${escHtml(m.away_team)}</div>
+                      <div style="color:rgba(244,245,255,0.4);font-size:9px;">${m.stage}</div>
+                    </td>
+                    <td style="padding:12px 0;text-align:center;font-weight:700;">${p.predicted_home_goals}–${p.predicted_away_goals}</td>
+                    <td style="padding:12px 0;text-align:center;font-weight:700;color:#D4FF3F;">${m.home_goals}–${m.away_goals}</td>
+                    <td style="padding:12px 0;text-align:center;font-weight:700;color:${ptsColor};">${pts}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
 
     document.getElementById('puntos-table').innerHTML = tableHtml;
 
