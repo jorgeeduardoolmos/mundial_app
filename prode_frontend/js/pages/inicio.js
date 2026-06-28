@@ -1257,9 +1257,10 @@ async function renderInicio(el) {
     a.match_datetime.localeCompare(b.match_datetime)
   );
 
-  // Obtener pronósticos de TODOS los partidos (ayer, hoy, mañana)
+  // Obtener pronósticos de TODOS los partidos: 16vos, próximos, y hoy
   const { yesterday, today: todayStr, tomorrow } = getDateRange();
   const allMatchesForPreds = matches.filter(m =>
+    m.stage === "16vos" ||
     m.match_datetime.slice(0,10) === yesterday ||
     m.match_datetime.slice(0,10) === todayStr ||
     m.match_datetime.slice(0,10) === tomorrow
