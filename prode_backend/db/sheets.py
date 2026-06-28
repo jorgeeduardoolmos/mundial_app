@@ -172,14 +172,15 @@ def get_all_results() -> dict[int, dict]:
 def set_result_in_sheet(match_id: int, home_goals: int, away_goals: int) -> bool:
     """Inserta o actualiza el resultado de un partido."""
     ws = get_worksheet("results")
-    rows = ws.get_all_records()
+    # Headers: match_id, home_goals, away_goals
+    # Columnas: 1           2            3
+    rows = _get_records("results")
+    col_hg, col_ag = 2, 3
+
     for i, row in enumerate(rows):
         try:
             if int(row["match_id"]) == match_id:
                 sheet_row = i + 2
-                headers = ws.row_values(1)
-                col_hg = headers.index("home_goals") + 1
-                col_ag = headers.index("away_goals") + 1
                 ws.batch_update([
                     {"range": gspread.utils.rowcol_to_a1(sheet_row, col_hg), "values": [[home_goals]]},
                     {"range": gspread.utils.rowcol_to_a1(sheet_row, col_ag), "values": [[away_goals]]},
@@ -233,9 +234,10 @@ def create_group_in_sheet(name: str, description: str, owner_id: int, invite_tok
 
 def update_group_token(group_id: int, new_token: str):
     ws = get_worksheet("groups")
-    rows = ws.get_all_records()
-    headers = ws.row_values(1)
-    col = headers.index("invite_token") + 1
+    # Headers: id, name, description, invite_token, owner_id, created_at
+    # Columnas: 1   2     3             4              5         6
+    rows = _get_records("groups")
+    col = 4  # invite_token
     for i, row in enumerate(rows):
         if int(row["id"]) == group_id:
             ws.update_cell(i + 2, col, new_token)
@@ -358,9 +360,10 @@ def save_prediction_in_sheet(user_id: int, match_id: int, group_id: int,
 def score_predictions_for_match(match_id: int, home_goals: int, away_goals: int) -> int:
     from modules.predictions import calculate_points
     ws = get_worksheet("predictions")
-    rows = ws.get_all_records()
-    headers = ws.row_values(1)
-    col_pts = headers.index("points_earned") + 1
+    # Headers: id, user_id, match_id, group_id, predicted_home_goals, predicted_away_goals, points_earned, created_at, updated_at
+    # Columnas: 1   2        3         4          5                    6                     7              8          9
+    rows = _get_records("predictions")
+    col_pts = 7  # points_earned
     updates = []
     for i, row in enumerate(rows):
         try:
