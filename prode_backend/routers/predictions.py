@@ -113,11 +113,18 @@ def list_match_predictions(
         if not u:
             continue
         p = preds_by_user.get(m["user_id"])
+        # Calcular puntos on-the-fly si el partido está terminado
+        pts = None
+        if p and match["is_finished"] and match["home_goals"] is not None and match["away_goals"] is not None:
+            pts = calculate_points(
+                p["predicted_home_goals"], p["predicted_away_goals"],
+                match["home_goals"], match["away_goals"],
+            )
         result.append({
             "user_id":              m["user_id"],
             "display_name":         u.get("display_name") or u.get("username", ""),
             "predicted_home_goals": p["predicted_home_goals"] if p else None,
             "predicted_away_goals": p["predicted_away_goals"] if p else None,
-            "points_earned":        p.get("points_earned") if p else None,
+            "points_earned":        pts,
         })
     return result

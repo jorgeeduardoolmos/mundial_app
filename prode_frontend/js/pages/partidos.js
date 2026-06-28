@@ -105,15 +105,9 @@ async function renderComparisonTable(matches, groupMembers, selectedGroup) {
       let cellContent = '—';
       let cellColor = 'rgba(244,245,255,0.3)';
 
-      if (pred && pred.predicted_home_goals !== null) {
-        let pts = 0;
-        if (m.home_goals !== null && m.away_goals !== null) {
-          if (pred.predicted_home_goals === m.home_goals) pts += 2;
-          if (pred.predicted_away_goals === m.away_goals) pts += 2;
-          const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home" : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
-          const realResult = m.home_goals > m.away_goals ? "home" : m.away_goals > m.home_goals ? "away" : "draw";
-          if (predResult === realResult) pts += 4;
-        }
+      if (pred && pred.predicted_home_goals !== null && pred.predicted_away_goals !== null) {
+        // Usar puntos_earned del backend si está disponible
+        let pts = pred.points_earned !== null ? pred.points_earned : 0;
         cellColor = pts >= 6 ? '#D4FF3F' : pts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.4)';
         cellContent = `<div style="font-weight:600;color:#F4F5FF;">${pred.predicted_home_goals}—${pred.predicted_away_goals}</div><div style="font-size:8px;color:${cellColor};font-weight:700;">${pts} pts</div>`;
       }
