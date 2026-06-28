@@ -550,7 +550,7 @@ function getDateRange() {
 
 function allMatchesHTML(matches, myPreds, dateRange) {
   // Solo mostrar 16vos de final en orden cronológico
-  const octavosMatches = matches.filter(m => m.stage === "Octavos").sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+  const octavosMatches = matches.filter(m => m.stage === "16vos").sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
   const matchCards = octavosMatches.map(m => {
     const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
@@ -580,7 +580,8 @@ function allMatchesHTML(matches, myPreds, dateRange) {
     const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
 
     let predsHtml = '';
-    if (window._allMatchesPreds && window._allMatchesPreds[m.id]?.length) {
+    // Mostrar predicciones de otros jugadores del grupo (si las hay)
+    if (window._allMatchesPreds?.[m.id]?.length) {
       const allPreds = window._allMatchesPreds[m.id];
       const predsRows = allPreds.map(p => {
         let pPts = 0;
