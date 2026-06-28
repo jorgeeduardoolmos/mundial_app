@@ -118,5 +118,6 @@ def list_match_predictions(
             "display_name":         u.get("display_name") or u.get("username", ""),
             "predicted_home_goals": p["predicted_home_goals"] if p else None,
             "predicted_away_goals": p["predicted_away_goals"] if p else None,
+            "points_earned":        p.get("points_earned") if p else None,
         })
     return result
