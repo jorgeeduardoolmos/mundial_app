@@ -316,17 +316,21 @@ def get_predictions_for_match(match_id: int, group_id: int) -> list[dict]:
 
 
 def save_prediction_in_sheet(user_id: int, match_id: int, group_id: int,
-                              home_goals: int, away_goals: int) -> tuple[bool, str]:
+                              home_goals: int, away_goals: int, invalidate: bool = True) -> tuple[bool, str]:
     existing = get_prediction(user_id, match_id, group_id)
     now = datetime.utcnow().isoformat()
+    ws = get_worksheet("predictions")
+
     if existing:
-        ws = get_worksheet("predictions")
-        rows = ws.get_all_records()
-        headers = ws.row_values(1)
-        col_hg  = headers.index("predicted_home_goals") + 1
-        col_ag  = headers.index("predicted_away_goals") + 1
-        col_upd = headers.index("updated_at") + 1
-        for i, row in enumerate(rows):
+        # Actualizar existente: usar datos del caché para encontrar la fila
+        # Headers: id, user_id, match_id, group_id, predicted_home_goals, predicted_away_goals, points_earned, created_at, updated_at
+        # Columnas:  1     2         3          4         5                 6                    7              8          9
+        all_preds = _get_records("predictions")
+        col_hg  = 5  # predicted_home_goals
+        col_ag  = 6  # predicted_away_goals
+        col_upd = 9  # updated_at
+
+        for i, row in enumerate(all_preds):
             if (int(row["user_id"]) == user_id and int(row["match_id"]) == match_id
                     and int(row["group_id"]) == group_id):
                 sheet_row = i + 2
@@ -336,16 +340,18 @@ def save_prediction_in_sheet(user_id: int, match_id: int, group_id: int,
                     {"range": gspread.utils.rowcol_to_a1(sheet_row, col_upd), "values": [[now]]},
                 ])
                 break
-        _invalidate("predictions")
+        if invalidate:
+            _invalidate("predictions")
         return True, "¡Predicción actualizada!"
     else:
-        ws = get_worksheet("predictions")
+        # Crear nuevo: calcular ID desde caché
         preds = _get_records("predictions")
         next_id = max((int(r["id"]) for r in preds), default=0) + 1
         ws.append_row([next_id, user_id, match_id, group_id,
                        home_goals, away_goals, "", now, now],
                       value_input_option="RAW")
-        _invalidate("predictions")
+        if invalidate:
+            _invalidate("predictions")
         return True, "¡Predicción guardada!"
 
 

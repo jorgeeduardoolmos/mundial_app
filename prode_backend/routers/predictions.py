@@ -61,28 +61,36 @@ def _pred_to_response(p: dict, m: dict) -> PredictionResponse:
 
 @router.post("", status_code=200)
 def save(body: SavePredictionRequest, user: dict = Depends(get_current_user)):
-    from db.sheets import get_all_group_members
+    from db.sheets import get_all_group_members, save_prediction_in_sheet, _invalidate, get_prediction as db_get_prediction
+    from modules.predictions import is_open_for_prediction
 
-    # Guardar en el grupo solicitado (valida que esté abierto)
-    ok, msg = save_prediction(
-        user["id"], body.match_id, body.group_id,
-        body.predicted_home_goals, body.predicted_away_goals,
-    )
-    if not ok:
-        raise HTTPException(status_code=400, detail=msg)
+    # Validar que el partido está abierto
+    match = get_match_by_id(body.match_id)
+    if not match:
+        raise HTTPException(status_code=400, detail="Partido no encontrado.")
+    if not is_open_for_prediction(match):
+        raise HTTPException(status_code=400, detail="El partido ya no acepta predicciones (menos de 1 hora o ya terminó).")
 
-    # Replicar a todos los otros grupos del usuario automáticamente
+    # Guardar en el grupo solicitado + otros grupos del usuario (sin invalidar caché después de cada uno)
+    group_ids = {body.group_id}
     other_group_ids = {
         m["group_id"] for m in get_all_group_members()
         if m["user_id"] == user["id"] and m["group_id"] != body.group_id
     }
-    for gid in other_group_ids:
-        save_prediction(user["id"], body.match_id, gid,
-                        body.predicted_home_goals, body.predicted_away_goals)
+    group_ids.update(other_group_ids)
 
-    pred = get_prediction(user["id"], body.match_id, body.group_id)
-    match = get_match_by_id(body.match_id)
-    return {"message": msg, "prediction": _pred_to_response(pred, match)}
+    for gid in group_ids:
+        ok, msg = save_prediction_in_sheet(user["id"], body.match_id, gid,
+                                           body.predicted_home_goals, body.predicted_away_goals,
+                                           invalidate=False)
+        if not ok and gid == body.group_id:
+            raise HTTPException(status_code=400, detail=msg)
+
+    # Invalidar caché UNA SOLA VEZ al final
+    _invalidate("predictions")
+
+    pred = db_get_prediction(user["id"], body.match_id, body.group_id)
+    return {"message": f"¡Predicción guardada en {len(group_ids)} grupo(s)!", "prediction": _pred_to_response(pred, match)}
 
 
 @router.get("", response_model=list[PredictionResponse])
