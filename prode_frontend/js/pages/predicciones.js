@@ -129,8 +129,8 @@ async function loadPredicciones(groups) {
           ${matchRows}
         </div>
       </div>
-      <div style="display:flex;gap:12px;margin-top:28px;padding:0 16px;">
-        <button id="save-all-btn" style="flex:1;padding:14px;background:#D4FF3F;color:#0A0B1E;border:none;border-radius:10px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;transition:all 0.2s;">
+      <div style="display:flex;gap:12px;margin-top:28px;padding:0 16px 40px 16px;position:sticky;bottom:0;background:linear-gradient(to bottom,transparent,#0A0B1E 30%);z-index:10;">
+        <button id="save-all-btn" style="flex:1;padding:14px;background:#D4FF3F;color:#0A0B1E;border:none;border-radius:10px;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;transition:all 0.2s;box-shadow:0 -4px 12px rgba(0,0,0,0.3);">
           Guardar todas las predicciones
         </button>
       </div>
