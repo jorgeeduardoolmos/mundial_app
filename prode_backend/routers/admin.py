@@ -14,6 +14,10 @@ class DeletePredictionsRequest(BaseModel):
     display_names: list[str]
 
 
+class DeletePredictionsbyUserIdRequest(BaseModel):
+    user_ids: list[int]
+
+
 @router.delete("/delete-user/{user_id}")
 def delete_user_completely(user_id: int):
     """Eliminar completamente un usuario y todos sus datos asociados."""
@@ -113,6 +117,39 @@ def delete_predictions_by_name(body: DeletePredictionsRequest):
         "message": f"Predicciones eliminadas para {len(user_ids_to_delete)} usuario(s)",
         "stats": {
             "users_affected": user_ids_to_delete,
+            "predictions_deleted": len(rows_to_delete)
+        }
+    }
+
+
+@router.post("/delete-predictions-by-user-id")
+def delete_predictions_by_user_id(body: DeletePredictionsbyUserIdRequest):
+    """Eliminar predicciones de usuarios por user_id."""
+
+    print(f"[ADMIN] Eliminando predicciones de user_ids: {body.user_ids}")
+
+    # Eliminar predicciones de esos usuarios
+    ws_preds = get_worksheet("predictions")
+    all_preds = _get_records("predictions")
+    rows_to_delete = []
+
+    for idx, row in enumerate(all_preds, start=2):
+        if int(row.get("user_id", 0)) in body.user_ids:
+            rows_to_delete.append(idx)
+
+    # Eliminar de abajo hacia arriba para no cambiar índices
+    for row_idx in sorted(rows_to_delete, reverse=True):
+        ws_preds.delete_rows(row_idx)
+        print(f"   [OK] Predicción en fila {row_idx} eliminada")
+
+    print(f"Total predicciones eliminadas: {len(rows_to_delete)}")
+    _invalidate("predictions")
+
+    return {
+        "status": "success",
+        "message": f"Predicciones eliminadas para {len(body.user_ids)} usuario(s)",
+        "stats": {
+            "user_ids": body.user_ids,
             "predictions_deleted": len(rows_to_delete)
         }
     }
