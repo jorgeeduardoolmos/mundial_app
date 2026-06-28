@@ -73,14 +73,20 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
   body.style.display = 'block';
 
   try {
-    const preds = await api.predictions.list(groupId);
+    // Obtener predicciones del jugador para cada partido
     const playerPreds = {};
 
-    preds.forEach(p => {
-      if (p.user_id === playerId) {
-        playerPreds[p.match_id] = p;
+    for (const m of allMatches) {
+      try {
+        const matchPreds = await api.predictions.forMatch(m.id, groupId);
+        const playerPred = matchPreds.find(p => p.user_id === playerId);
+        if (playerPred) {
+          playerPreds[m.id] = playerPred;
+        }
+      } catch (e) {
+        // Si hay error en un partido, continuar con el siguiente
       }
-    });
+    }
 
     // Mostrar TODOS los partidos del mundial
     const matchesWithPreds = allMatches
