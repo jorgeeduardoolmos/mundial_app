@@ -118,15 +118,11 @@ async function loadPredicciones(groupId) {
     const stages = STAGE_ORDER.filter(s => stageMap[s]);
 
     const tabsEl = document.getElementById("stage-tabs");
-    const groupTabsHtml = GROUP_STAGES.filter(s => stageMap[s])
-      .map(s => `<button class="fl-tab ${_currentStageFilter===s?'active':''}" data-stage="${s}" style="white-space:nowrap;">${escHtml(s)}</button>`).join("");
     const knockoutTabsHtml = KNOCKOUT_STAGES.filter(s => stageMap[s])
       .map(s => `<button class="fl-tab ${_currentStageFilter===s?'active':''}" data-stage="${s}" style="white-space:nowrap;">${escHtml(KNOCKOUT_LABELS[s])}</button>`).join("");
 
     tabsEl.innerHTML = `
       <button class="fl-tab ${_currentStageFilter==='all'?'active':''}" data-stage="all" style="white-space:nowrap;">Todos</button>
-      <span style="width:1px;background:rgba(255,255,255,0.08);flex-shrink:0;align-self:stretch;margin:0 2px;"></span>
-      ${groupTabsHtml}
       ${knockoutTabsHtml ? `<span style="width:1px;background:rgba(255,255,255,0.08);flex-shrink:0;align-self:stretch;margin:0 2px;"></span>${knockoutTabsHtml}` : ''}`;
 
     tabsEl.querySelectorAll(".fl-tab").forEach(btn => {
