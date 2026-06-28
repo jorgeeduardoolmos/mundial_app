@@ -21,7 +21,6 @@ const C = {
   coral: "#FF5C4D",
   gold: "#FFD23F",
   green: "#00C46B",
-  onAccent: "#0A0B1E",
 };
 
 const DISPLAY = "'Big Shoulders Display', 'Archivo Black', system-ui, sans-serif";
@@ -277,7 +276,7 @@ function RankRow({ p, idx, isCurrent }) {
           {p.isYou && (
             <span style={{
               fontFamily: MONO, fontSize: 9, fontWeight: 700,
-              color: C.onAccent, background: C.lime,
+              color: "#0A0B1E", background: C.lime,
               padding: "2px 6px", borderRadius: 4, letterSpacing: "0.06em",
             }}>VOS</span>
           )}
@@ -449,8 +448,8 @@ function CardHeader({ eyebrow, title, right }) {
       to   { transform: translateX(-33.333%); }
     }
     @keyframes prodeBump {
-      0%   { transform: scale(1.15); }
-      100% { transform: scale(1); }
+      0%   { transform: scale(1.15); color: ${C.lime}; }
+      100% { transform: scale(1); color: ${C.text}; }
     }
     @keyframes prodeFadeUp {
       from { opacity: 0; transform: translateY(8px); }

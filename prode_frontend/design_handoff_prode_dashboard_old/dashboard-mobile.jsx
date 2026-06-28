@@ -2,9 +2,10 @@
 
 const { useState: useStateM } = React;
 
-function MobileDashboard({ state, setPrediction, savePrediction, ambient = true }) {
+function MobileDashboard({ state, setPrediction, savePrediction }) {
   const next = FIXTURE[5];
   const today = FIXTURE.slice(0, 12).filter(m => m.id !== next.id).slice(0, 4);
+  const recent = FIXTURE.filter(m => m.status === "FT" || m.status === "LIVE");
   const nextKey = `${next.home}-${next.away}`;
   const nextPred = state.predictions[nextKey] || { hg: 1, ag: 1 };
 
@@ -14,21 +15,20 @@ function MobileDashboard({ state, setPrediction, savePrediction, ambient = true 
       fontFamily: UI, position: "relative", overflow: "hidden",
       paddingBottom: 88,
     }} data-screen-label="02 Inicio · Mobile">
-      {ambient && <>
-        <div style={{
-          position: "absolute", top: -100, right: -200, width: 500, height: 500,
-          background: `radial-gradient(circle, ${C.lime}1F, transparent 60%)`,
-          pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", top: 600, left: -200, width: 500, height: 500,
-          background: `radial-gradient(circle, ${C.blue}1A, transparent 60%)`,
-          pointerEvents: "none",
-        }} />
-      </>}
+      <div style={{
+        position: "absolute", top: -100, right: -200, width: 500, height: 500,
+        background: "radial-gradient(circle, rgba(212,255,63,0.12), transparent 60%)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", top: 600, left: -200, width: 500, height: 500,
+        background: "radial-gradient(circle, rgba(59,91,255,0.10), transparent 60%)",
+        pointerEvents: "none",
+      }} />
 
       <MobileTopBar />
       <MobileHero state={state} />
+      <MobileTicker recent={recent} />
       <MobileNextMatch
         m={next}
         pred={nextPred}
@@ -78,7 +78,7 @@ function MobileTopBar() {
         <div style={{
           width: 36, height: 36, borderRadius: "50%", background: C.lime,
           display: "grid", placeItems: "center",
-          fontFamily: DISPLAY, fontWeight: 800, fontSize: 13, color: C.onAccent,
+          fontFamily: DISPLAY, fontWeight: 800, fontSize: 13, color: "#0A0B1E",
         }}>MC</div>
       </div>
     </div>
@@ -155,6 +155,14 @@ function MiniStat({ label, value, accent = C.text }) {
   );
 }
 
+function MobileTicker({ recent }) {
+  return (
+    <div style={{ marginTop: 8 }}>
+      <Ticker items={recent} speed={40} />
+    </div>
+  );
+}
+
 function MobileNextMatch({ m, pred, setPrediction, savePrediction, saved }) {
   const [savedAnim, setSavedAnim] = useStateM(false);
   const onSave = () => {
@@ -225,7 +233,7 @@ function MobileNextMatch({ m, pred, setPrediction, savePrediction, saved }) {
           <button onClick={onSave} style={{
             width: "100%", padding: "14px",
             background: saved || savedAnim ? "rgba(212,255,63,0.15)" : C.lime,
-            color: saved || savedAnim ? C.lime : C.onAccent,
+            color: saved || savedAnim ? C.lime : "#0A0B1E",
             border: saved || savedAnim ? `1px solid ${C.lime}` : "none",
             borderRadius: 10, cursor: "pointer",
             fontFamily: DISPLAY, fontWeight: 800, fontSize: 15,

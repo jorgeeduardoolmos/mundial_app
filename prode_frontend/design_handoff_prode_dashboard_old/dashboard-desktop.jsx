@@ -2,9 +2,10 @@
 
 const { useState: useStateD, useMemo: useMemoD } = React;
 
-function DesktopDashboard({ state, setPrediction, savePrediction, ambient = true }) {
+function DesktopDashboard({ state, setPrediction, savePrediction }) {
   const next = FIXTURE[5]; // forced USA vs PAR
   const today = FIXTURE.slice(0, 12).filter(m => m.id !== next.id).slice(0, 5);
+  const recent = FIXTURE.filter(m => m.status === "FT" || m.status === "LIVE");
 
   const nextKey = `${next.home}-${next.away}`;
   const nextPred = state.predictions[nextKey] || { hg: 1, ag: 1 };
@@ -14,9 +15,10 @@ function DesktopDashboard({ state, setPrediction, savePrediction, ambient = true
       width: 1440, minHeight: 1180, background: C.bg, color: C.text,
       fontFamily: UI, position: "relative", overflow: "hidden",
     }} data-screen-label="01 Inicio · Desktop">
-      {ambient && <BackgroundGlow />}
+      <BackgroundGlow />
       <TopBar />
       <HeroBand state={state} />
+      <Ticker items={recent} speed={50} />
       <MainGrid
         next={next}
         nextPred={nextPred}
@@ -36,12 +38,12 @@ function BackgroundGlow() {
     <>
       <div style={{
         position: "absolute", top: -200, right: -200, width: 700, height: 700,
-        background: `radial-gradient(circle, ${C.lime}1A, transparent 60%)`,
+        background: "radial-gradient(circle, rgba(212,255,63,0.10), transparent 60%)",
         pointerEvents: "none",
       }} />
       <div style={{
         position: "absolute", top: 400, left: -300, width: 800, height: 800,
-        background: `radial-gradient(circle, ${C.blue}1A, transparent 60%)`,
+        background: "radial-gradient(circle, rgba(59,91,255,0.10), transparent 60%)",
         pointerEvents: "none",
       }} />
     </>
@@ -112,7 +114,7 @@ function TopBar() {
           <div style={{
             width: 30, height: 30, borderRadius: "50%", background: C.lime,
             display: "grid", placeItems: "center",
-            fontFamily: DISPLAY, fontWeight: 800, color: C.onAccent, fontSize: 12,
+            fontFamily: DISPLAY, fontWeight: 800, color: "#0A0B1E", fontSize: 12,
           }}>MC</div>
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>Maca</div>
@@ -374,7 +376,7 @@ function NextMatchCard({ m, pred, setPrediction, savePrediction, saved }) {
             marginTop: 8,
             padding: "16px 24px", borderRadius: 12,
             background: saved || savedAnim ? "rgba(212,255,63,0.15)" : C.lime,
-            color: saved || savedAnim ? C.lime : C.onAccent,
+            color: saved || savedAnim ? C.lime : "#0A0B1E",
             border: saved || savedAnim ? `1px solid ${C.lime}` : "none",
             fontFamily: DISPLAY, fontWeight: 800, fontSize: 18,
             letterSpacing: "0.04em", textTransform: "uppercase",
