@@ -565,18 +565,24 @@ function allMatchesHTML(matches, myPreds, dateRange) {
       const pred = myPreds.find(p => p.match_id === m.id);
 
       let pts = 0;
-      if (pred && m.home_goals !== null && m.away_goals !== null) {
-        if (pred.predicted_home_goals === m.home_goals) pts += 2;
-        if (pred.predicted_away_goals === m.away_goals) pts += 2;
-        const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
-                         : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
-        const realResult = m.home_goals > m.away_goals ? "home"
-                         : m.away_goals > m.home_goals ? "away" : "draw";
-        if (predResult === realResult) pts += 4;
+      if (pred && m.is_finished && m.home_goals !== null && m.away_goals !== null) {
+        // Use points_earned from backend if available, otherwise calculate
+        if (pred.points_earned !== null && pred.points_earned !== undefined) {
+          pts = pred.points_earned;
+        } else {
+          if (pred.predicted_home_goals === m.home_goals) pts += 2;
+          if (pred.predicted_away_goals === m.away_goals) pts += 2;
+          const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
+                           : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
+          const realResult = m.home_goals > m.away_goals ? "home"
+                           : m.away_goals > m.home_goals ? "away" : "draw";
+          if (predResult === realResult) pts += 4;
+        }
       }
 
-      const ptsDisplay = m.is_finished ? `<div style="background:rgba(212,255,63,0.1);border:1px solid rgba(212,255,63,0.2);border-radius:6px;padding:6px 10px;text-align:center;min-width:50px;">
+      const ptsDisplay = m.is_finished && pred ? `<div style="background:rgba(212,255,63,0.1);border:1px solid rgba(212,255,63,0.2);border-radius:6px;padding:6px 10px;text-align:center;min-width:50px;">
         <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#D4FF3F;">${pts}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(212,255,63,0.6);letter-spacing:0.04em;margin-top:2px;">PTS</div>
       </div>` : '';
 
       const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
