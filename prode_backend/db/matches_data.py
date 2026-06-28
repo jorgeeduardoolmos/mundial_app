@@ -94,22 +94,22 @@ _RAW = [
     (72, "Jordania",        "Argentina",        _utc(6,27,22),    "Grupo J"),
 
     # ══ 16VOS DE FINAL — Jun 28-Jul 3 ════════════════════════════════════════
-    (73, "Brasil",           "Japón",                _utc(6,29,15),    "Octavos"),      # 29/6 14:00 ART
-    (74, "Sudáfrica",        "Canadá",               _utc(6,28,17),    "Octavos"),      # 28/6 16:00 ART (hoy)
-    (75, "Países Bajos",     "Marruecos",            _utc(6,29,23),    "Octavos"),      # 29/6 22:00 ART
-    (76, "Alemania",         "Paraguay",             _utc(6,29,18,30), "Octavos"),      # 29/6 17:30 ART
-    (77, "Costa de Marfil",  "Noruega",              _utc(6,30,15),    "Octavos"),      # 30/6 14:00 ART
-    (78, "México",           "Ecuador",              _utc(6,30,23),    "Octavos"),      # 30/6 22:00 ART
-    (79, "Francia",          "Suecia",               _utc(6,30,19),    "Octavos"),      # 30/6 18:00 ART
-    (80, "Bélgica",          "Senegal",              _utc(7, 1,18),    "Octavos"),      # 1/7 17:00 ART
-    (81, "Estados Unidos",   "Bosnia y Herzegovina", _utc(7, 1,22),    "Octavos"),      # 1/7 21:00 ART
-    (82, "Inglaterra",       "RD Congo",             _utc(7, 1,14),    "Octavos"),      # 1/7 13:00 ART
-    (83, "España",           "Austria",              _utc(7, 2,17),    "Octavos"),      # 2/7 16:00 ART
-    (84, "Portugal",         "Croacia",              _utc(7, 2,21),    "Octavos"),      # 2/7 20:00 ART
-    (85, "Suiza",            "Argelia",              _utc(7, 3, 1),    "Octavos"),      # 3/7 00:00 ART
-    (86, "Australia",        "Egipto",               _utc(7, 3,16),    "Octavos"),      # 3/7 15:00 ART
-    (87, "Colombia",         "Ghana",               _utc(7, 3,23,30), "Octavos"),      # 3/7 22:30 ART
-    (88, "Argentina",        "Cabo Verde",           _utc(7, 3,20),    "Octavos"),      # 3/7 19:00 ART
+    (73, "Brasil",           "Japón",                _utc(6,29,13),    "Octavos"),      # 29/6 14:00 ART
+    (74, "Sudáfrica",        "Canadá",               _utc(6,28,15),    "Octavos"),      # 28/6 16:00 ART (hoy)
+    (75, "Países Bajos",     "Marruecos",            _utc(6,29,21),    "Octavos"),      # 29/6 22:00 ART
+    (76, "Alemania",         "Paraguay",             _utc(6,29,16,30), "Octavos"),      # 29/6 17:30 ART
+    (77, "Costa de Marfil",  "Noruega",              _utc(6,30,13),    "Octavos"),      # 30/6 14:00 ART
+    (78, "México",           "Ecuador",              _utc(6,30,21),    "Octavos"),      # 30/6 22:00 ART
+    (79, "Francia",          "Suecia",               _utc(6,30,17),    "Octavos"),      # 30/6 18:00 ART
+    (80, "Bélgica",          "Senegal",              _utc(7, 1,16),    "Octavos"),      # 1/7 17:00 ART
+    (81, "Estados Unidos",   "Bosnia y Herzegovina", _utc(7, 1,20),    "Octavos"),      # 1/7 21:00 ART
+    (82, "Inglaterra",       "RD Congo",             _utc(7, 1,12),    "Octavos"),      # 1/7 13:00 ART
+    (83, "España",           "Austria",              _utc(7, 2,15),    "Octavos"),      # 2/7 16:00 ART
+    (84, "Portugal",         "Croacia",              _utc(7, 2,19),    "Octavos"),      # 2/7 20:00 ART
+    (85, "Suiza",            "Argelia",              _utc(7, 2,23),    "Octavos"),      # 3/7 00:00 ART
+    (86, "Australia",        "Egipto",               _utc(7, 3,14),    "Octavos"),      # 3/7 15:00 ART
+    (87, "Colombia",         "Ghana",               _utc(7, 3,21,30), "Octavos"),      # 3/7 22:30 ART
+    (88, "Argentina",        "Cabo Verde",           _utc(7, 3,18),    "Octavos"),      # 3/7 19:00 ART
 
     # ══ 8VOS DE FINAL — Jul 5-8 ══════════════════════════════════════════════
     (89, "8vos TBD 1",   "8vos TBD 2",    _utc(7, 5,15),    "Cuartos de final"),
