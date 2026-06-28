@@ -129,15 +129,10 @@ const api = {
 
     forMatch: (matchId, groupId) => apiFetch(`/predictions/match/${matchId}?group_id=${groupId}`),
 
-    save: (matchId, groupId, homeGoals, awayGoals) =>
+    save: (data) =>
       apiFetch("/predictions", {
         method: "POST",
-        body: JSON.stringify({
-          match_id: matchId,
-          group_id: groupId,
-          predicted_home_goals: homeGoals,
-          predicted_away_goals: awayGoals,
-        }),
+        body: JSON.stringify(data),
       }),
   },
 

@@ -145,13 +145,25 @@ async function loadPredicciones(groups) {
         saveBtn.disabled = true;
         saveBtn.textContent = "Guardando...";
         try {
-          // Guardar en el primer grupo (o todos si hay múltiples)
+          if (!groups || !groups.length) {
+            throw new Error("No estás en ningún grupo. Debes unirte a un grupo primero.");
+          }
+
           const groupId = groups[0].id;
+          let savedCount = 0;
+
           for (const match of octavosMatches) {
             const hInput = document.getElementById(`ph-${match.id}`);
             const aInput = document.getElementById(`pa-${match.id}`);
-            const hVal = parseInt(hInput.value);
-            const aVal = parseInt(aInput.value);
+
+            if (!hInput || !aInput) {
+              console.warn(`Inputs no encontrados para match ${match.id}`);
+              continue;
+            }
+
+            const hVal = parseInt(hInput.value, 10);
+            const aVal = parseInt(aInput.value, 10);
+
             if (!isNaN(hVal) && !isNaN(aVal)) {
               await api.predictions.save({
                 match_id: match.id,
@@ -159,9 +171,15 @@ async function loadPredicciones(groups) {
                 predicted_home_goals: hVal,
                 predicted_away_goals: aVal
               });
+              savedCount++;
             }
           }
-          saveBtn.textContent = "✓ Guardado!";
+
+          if (savedCount === 0) {
+            throw new Error("No hay predicciones para guardar. Completa al menos un partido.");
+          }
+
+          saveBtn.textContent = `✓ Guardadas ${savedCount} predicciones!`;
           saveBtn.style.background = "rgba(212,255,63,0.3)";
           setTimeout(() => {
             saveBtn.disabled = false;
@@ -169,6 +187,7 @@ async function loadPredicciones(groups) {
             saveBtn.style.background = "#D4FF3F";
           }, 2000);
         } catch (e) {
+          console.error("Error guardando:", e);
           showToast("Error: " + e.message);
           saveBtn.disabled = false;
           saveBtn.textContent = "Guardar todas las predicciones";
