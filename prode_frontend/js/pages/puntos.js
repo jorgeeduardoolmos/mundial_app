@@ -93,13 +93,13 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
 
     console.log(`Total de predicciones cargadas: ${Object.keys(playerPreds).length}`);
 
-    // Mostrar TODOS los partidos del mundial
+    // Mostrar solo partidos finalizados donde hizo predicción
     const matchesWithPreds = allMatches
       .map(m => ({
         match: m,
         pred: playerPreds[m.id]
       }))
-      .filter(item => item.pred) // Solo mostrar partidos donde hizo predicción
+      .filter(item => item.pred && item.match.is_finished) // Solo partidos finalizados con predicción
       .sort((a, b) => new Date(b.match.match_datetime) - new Date(a.match.match_datetime)); // Más nuevo a más viejo
 
     // Calcular total de puntos (solo de partidos finalizados)
@@ -125,13 +125,13 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
     } else {
       tableHtml = `
         <div style="overflow-x:auto;">
-          <table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px;">
+          <table style="width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;">
             <thead style="border-bottom:1px solid rgba(255,255,255,0.12);">
               <tr style="color:rgba(244,245,255,0.4);">
-                <th style="padding:12px 0;text-align:left;letter-spacing:0.06em;font-weight:600;">PARTIDO</th>
-                <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">PREDICCIÓN</th>
-                <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">RESULTADO</th>
-                <th style="padding:12px 0;text-align:center;letter-spacing:0.06em;font-weight:600;">PTS</th>
+                <th style="padding:14px 0;text-align:left;letter-spacing:0.06em;font-weight:600;font-size:12px;">PARTIDO</th>
+                <th style="padding:14px 0;text-align:center;letter-spacing:0.06em;font-weight:600;font-size:12px;">PREDICCIÓN</th>
+                <th style="padding:14px 0;text-align:center;letter-spacing:0.06em;font-weight:600;font-size:12px;">RESULTADO</th>
+                <th style="padding:14px 0;text-align:center;letter-spacing:0.06em;font-weight:600;font-size:12px;">PTS</th>
               </tr>
             </thead>
             <tbody>
@@ -149,13 +149,13 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
 
                 return `
                   <tr style="border-bottom:1px solid rgba(255,255,255,0.06);color:#F4F5FF;">
-                    <td style="padding:12px 0;text-align:left;">
-                      <div style="font-weight:700;margin-bottom:2px;">${escHtml(m.home_team)} vs ${escHtml(m.away_team)}</div>
-                      <div style="color:rgba(244,245,255,0.4);font-size:9px;">${m.stage}</div>
+                    <td style="padding:14px 0;text-align:left;">
+                      <div style="font-weight:700;margin-bottom:3px;font-size:13px;">${escHtml(m.home_team)} vs ${escHtml(m.away_team)}</div>
+                      <div style="color:rgba(244,245,255,0.4);font-size:11px;">${m.stage}</div>
                     </td>
-                    <td style="padding:12px 0;text-align:center;font-weight:700;">${p.predicted_home_goals}–${p.predicted_away_goals}</td>
-                    <td style="padding:12px 0;text-align:center;font-weight:700;color:#D4FF3F;">${resultDisplay}</td>
-                    <td style="padding:12px 0;text-align:center;font-weight:700;color:${ptsColor};">${ptsDisplay}</td>
+                    <td style="padding:14px 0;text-align:center;font-weight:700;font-size:13px;">${p.predicted_home_goals}–${p.predicted_away_goals}</td>
+                    <td style="padding:14px 0;text-align:center;font-weight:700;color:#D4FF3F;font-size:13px;">${resultDisplay}</td>
+                    <td style="padding:14px 0;text-align:center;font-weight:700;color:${ptsColor};font-size:13px;">${ptsDisplay}</td>
                   </tr>
                 `;
               }).join('')}
