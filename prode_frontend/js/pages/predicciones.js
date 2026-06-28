@@ -78,39 +78,45 @@ async function loadPredicciones(groups) {
       const awayTeam = teamName(m.away_team);
 
       return `
-        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:60px 1fr auto 1fr 80px;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:8px;border-radius:8px;align-items:center;">
-          <!-- Fecha -->
-          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);text-align:center;">${m.match_datetime_str||''}</div>
-
-          <!-- Equipo local -->
-          <div style="display:flex;align-items:center;gap:6px;min-width:0;justify-self:start;">
-            ${chipByName(homeTeam,14,2)}
-            <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(homeTeam)}</span>
+        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:10px;border-radius:8px;">
+          <!-- Columna izquierda: Fecha, Hora, País -->
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <!-- Fecha y Hora -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.4);line-height:1.3;">
+              <div>
+                <div style="color:rgba(244,245,255,0.25);margin-bottom:1px;">Fecha</div>
+                <div>${(m.match_datetime_str||'').split('—')[0].trim()}</div>
+              </div>
+              <div>
+                <div style="color:rgba(244,245,255,0.25);margin-bottom:1px;">Hora</div>
+                <div>${(m.match_datetime_str||'').split('—')[1]?.trim() || ''}</div>
+              </div>
+            </div>
+            <!-- Países -->
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${chipByName(homeTeam,18,2)}
+              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:10px;color:#F4F5FF;text-transform:uppercase;">${escHtml(homeTeam)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${chipByName(awayTeam,18,2)}
+              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:10px;color:#F4F5FF;text-transform:uppercase;">${escHtml(awayTeam)}</span>
+            </div>
           </div>
 
-          <!-- Pronóstico -->
-          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
-            <div style="display:flex;align-items:center;gap:2px;">
+          <!-- Columna derecha: Inputs -->
+          <div style="display:flex;flex-direction:column;gap:6px;justify-content:space-between;">
+            <!-- Inputs -->
+            <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
               <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${m.id}"
-                style="width:28px;height:26px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:5px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:11px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
+                style="width:100%;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
                 oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
-              <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.25);">—</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.25);text-align:center;">—</span>
               <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${m.id}"
-                style="width:28px;height:26px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:5px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:11px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
+                style="width:100%;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
                 oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
             </div>
-            <span style="font-size:7px;color:rgba(244,245,255,0.2);">${savedBadge}</span>
-          </div>
-
-          <!-- Equipo visitante -->
-          <div style="display:flex;align-items:center;gap:6px;min-width:0;justify-self:end;">
-            <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(awayTeam)}</span>
-            ${chipByName(awayTeam,14,2)}
-          </div>
-
-          <!-- Resultado si terminó -->
-          <div style="text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:12px;color:${m.is_finished?'#D4FF3F':'rgba(244,245,255,0.2)'};">
-            ${m.is_finished ? `${m.home_goals}—${m.away_goals}` : '—'}
+            <!-- Status -->
+            <div style="text-align:center;font-size:8px;color:rgba(244,245,255,0.2);">${savedBadge}</div>
           </div>
         </div>
       `;
