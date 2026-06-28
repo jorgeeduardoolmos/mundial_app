@@ -82,11 +82,8 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
       }
     });
 
-    // Filtrar solo partidos jugados
-    const finishedMatches = allMatches.filter(m => m.is_finished);
-
-    // Agrupar por match_id para obtener la predicción correcta
-    const matchesWithPreds = finishedMatches
+    // Mostrar TODOS los partidos del mundial
+    const matchesWithPreds = allMatches
       .map(m => ({
         match: m,
         pred: playerPreds[m.id]
@@ -94,10 +91,10 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
       .filter(item => item.pred) // Solo mostrar partidos donde hizo predicción
       .sort((a, b) => new Date(b.match.match_datetime) - new Date(a.match.match_datetime)); // Más nuevo a más viejo
 
-    // Calcular total de puntos
+    // Calcular total de puntos (solo de partidos finalizados)
     let totalPts = 0;
     matchesWithPreds.forEach(item => {
-      if (item.pred.points_earned !== null) {
+      if (item.match.is_finished && item.pred.points_earned !== null) {
         totalPts += item.pred.points_earned;
       }
     });
@@ -130,8 +127,14 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
               ${matchesWithPreds.map(item => {
                 const m = item.match;
                 const p = item.pred;
-                const pts = p.points_earned || 0;
+                const pts = (m.is_finished && p.points_earned !== null) ? p.points_earned : 0;
                 const ptsColor = pts >= 6 ? '#D4FF3F' : pts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
+                const resultDisplay = m.is_finished
+                  ? `${m.home_goals}–${m.away_goals}`
+                  : '–';
+                const ptsDisplay = m.is_finished
+                  ? `${pts}`
+                  : '–';
 
                 return `
                   <tr style="border-bottom:1px solid rgba(255,255,255,0.06);color:#F4F5FF;">
@@ -140,8 +143,8 @@ async function loadPlayerStats(playerId, playerName, groupId, allMatches) {
                       <div style="color:rgba(244,245,255,0.4);font-size:9px;">${m.stage}</div>
                     </td>
                     <td style="padding:12px 0;text-align:center;font-weight:700;">${p.predicted_home_goals}–${p.predicted_away_goals}</td>
-                    <td style="padding:12px 0;text-align:center;font-weight:700;color:#D4FF3F;">${m.home_goals}–${m.away_goals}</td>
-                    <td style="padding:12px 0;text-align:center;font-weight:700;color:${ptsColor};">${pts}</td>
+                    <td style="padding:12px 0;text-align:center;font-weight:700;color:#D4FF3F;">${resultDisplay}</td>
+                    <td style="padding:12px 0;text-align:center;font-weight:700;color:${ptsColor};">${ptsDisplay}</td>
                   </tr>
                 `;
               }).join('')}
