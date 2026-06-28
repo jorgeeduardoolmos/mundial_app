@@ -1,9 +1,9 @@
 """
 db/matches_data.py — Fixture completo del Mundial 2026 (datos fijos en código)
 ==============================================================================
-96 partidos con equipos, fecha UTC y fase.
+104 partidos con equipos, fecha UTC y fase.
 Los resultados (goles, is_finished) se guardan aparte en Google Sheets (tab 'results').
-IDs ordenados cronológicamente (1 = primer partido, 72 = último de grupos).
+IDs ordenados cronológicamente (1 = primer partido, 72 = último de grupos, 73-88 = 16vos).
 """
 from datetime import datetime, timedelta
 
@@ -93,39 +93,47 @@ _RAW = [
     (71, "Argelia",         "Austria",          _utc(6,27,22),    "Grupo J"),
     (72, "Jordania",        "Argentina",        _utc(6,27,22),    "Grupo J"),
 
-    # ══ 16VOS DE FINAL — Jul 1-4 ═════════════════════════════════════════════
-    (73, "16vos TBD 1",  "16vos TBD 2",   _utc(7, 1,15),    "Octavos"),
-    (74, "16vos TBD 3",  "16vos TBD 4",   _utc(7, 1,19),    "Octavos"),
-    (75, "16vos TBD 5",  "16vos TBD 6",   _utc(7, 2,15),    "Octavos"),
-    (76, "16vos TBD 7",  "16vos TBD 8",   _utc(7, 2,19),    "Octavos"),
-    (77, "16vos TBD 9",  "16vos TBD 10",  _utc(7, 3,15),    "Octavos"),
-    (78, "16vos TBD 11", "16vos TBD 12",  _utc(7, 3,19),    "Octavos"),
-    (79, "16vos TBD 13", "16vos TBD 14",  _utc(7, 4,15),    "Octavos"),
-    (80, "16vos TBD 15", "16vos TBD 16",  _utc(7, 4,19),    "Octavos"),
+    # ══ 16VOS DE FINAL — Jun 28-Jul 3 ════════════════════════════════════════
+    (73, "Brasil",           "Japón",                _utc(6,29,14),    "Octavos"),
+    (74, "Sudáfrica",        "Canadá",               _utc(6,28,20),    "Octavos"),
+    (75, "Países Bajos",     "Marruecos",            _utc(6,29,22),    "Octavos"),
+    (76, "Alemania",         "Paraguay",             _utc(6,30,18),    "Octavos"),
+    (77, "Costa de Marfil",  "Noruega",              _utc(6,30,16),    "Octavos"),
+    (78, "México",           "Ecuador",              _utc(6,30,22),    "Octavos"),
+    (79, "Francia",          "Suecia",               _utc(7, 1,18),    "Octavos"),
+    (80, "Bélgica",          "Senegal",              _utc(7, 1,17),    "Octavos"),
+    (81, "Estados Unidos",   "Bosnia y Herzegovina", _utc(7, 1,21),    "Octavos"),
+    (82, "Inglaterra",       "RD Congo",             _utc(7, 1,13),    "Octavos"),
+    (83, "España",           "A definir",            _utc(7, 2,16),    "Octavos"),
+    (84, "Portugal",         "Croacia",              _utc(7, 2,20),    "Octavos"),
+    (85, "Suiza",            "A definir",            _utc(7, 3, 0),    "Octavos"),
+    (86, "Australia",        "Egipto",               _utc(7, 3,15),    "Octavos"),
+    (87, "Colombia",         "Ghana",               _utc(7, 3,22,30), "Octavos"),
+    (88, "Argentina",        "Cabo Verde",           _utc(7, 3,19),    "Octavos"),
 
     # ══ 8VOS DE FINAL — Jul 5-8 ══════════════════════════════════════════════
-    (81, "8vos TBD 1",   "8vos TBD 2",    _utc(7, 5,15),    "Cuartos de final"),
-    (82, "8vos TBD 3",   "8vos TBD 4",    _utc(7, 5,19),    "Cuartos de final"),
-    (83, "8vos TBD 5",   "8vos TBD 6",    _utc(7, 6,15),    "Cuartos de final"),
-    (84, "8vos TBD 7",   "8vos TBD 8",    _utc(7, 6,19),    "Cuartos de final"),
-    (85, "8vos TBD 9",   "8vos TBD 10",   _utc(7, 7,15),    "Cuartos de final"),
-    (86, "8vos TBD 11",  "8vos TBD 12",   _utc(7, 7,19),    "Cuartos de final"),
-    (87, "8vos TBD 13",  "8vos TBD 14",   _utc(7, 8,15),    "Cuartos de final"),
-    (88, "8vos TBD 15",  "8vos TBD 16",   _utc(7, 8,19),    "Cuartos de final"),
+    (89, "8vos TBD 1",   "8vos TBD 2",    _utc(7, 5,15),    "Cuartos de final"),
+    (90, "8vos TBD 3",   "8vos TBD 4",    _utc(7, 5,19),    "Cuartos de final"),
+    (91, "8vos TBD 5",   "8vos TBD 6",    _utc(7, 6,15),    "Cuartos de final"),
+    (92, "8vos TBD 7",   "8vos TBD 8",    _utc(7, 6,19),    "Cuartos de final"),
+    (93, "8vos TBD 9",   "8vos TBD 10",   _utc(7, 7,15),    "Cuartos de final"),
+    (94, "8vos TBD 11",  "8vos TBD 12",   _utc(7, 7,19),    "Cuartos de final"),
+    (95, "8vos TBD 13",  "8vos TBD 14",   _utc(7, 8,15),    "Cuartos de final"),
+    (96, "8vos TBD 15",  "8vos TBD 16",   _utc(7, 8,19),    "Cuartos de final"),
 
     # ══ 4TOS DE FINAL — Jul 9-11 ═════════════════════════════════════════════
-    (89, "4tos TBD 1",   "4tos TBD 2",    _utc(7, 9,16),    "4tos de final"),
-    (90, "4tos TBD 3",   "4tos TBD 4",    _utc(7,10,15),    "4tos de final"),
-    (91, "4tos TBD 5",   "4tos TBD 6",    _utc(7,11,15),    "4tos de final"),
-    (92, "4tos TBD 7",   "4tos TBD 8",    _utc(7,11,19),    "4tos de final"),
+    (97, "4tos TBD 1",   "4tos TBD 2",    _utc(7, 9,16),    "4tos de final"),
+    (98, "4tos TBD 3",   "4tos TBD 4",    _utc(7,10,15),    "4tos de final"),
+    (99, "4tos TBD 5",   "4tos TBD 6",    _utc(7,11,15),    "4tos de final"),
+    (100, "4tos TBD 7",  "4tos TBD 8",    _utc(7,11,19),    "4tos de final"),
 
     # ══ SEMIFINALES — Jul 14-15 ══════════════════════════════════════════════
-    (93, "Semi TBD 1",   "Semi TBD 2",    _utc(7,14,15),    "Semifinales"),
-    (94, "Semi TBD 3",   "Semi TBD 4",    _utc(7,15,15),    "Semifinales"),
+    (101, "Semi TBD 1",  "Semi TBD 2",    _utc(7,14,15),    "Semifinales"),
+    (102, "Semi TBD 3",  "Semi TBD 4",    _utc(7,15,15),    "Semifinales"),
 
     # ══ FINAL Y TERCER PUESTO — Jul 18-19 ════════════════════════════════════
-    (95, "3er puesto TBD 1", "3er puesto TBD 2", _utc(7,18,15), "Tercer puesto"),
-    (96, "Final TBD 1",  "Final TBD 2",   _utc(7,19,15),    "Final"),
+    (103, "3er puesto TBD 1", "3er puesto TBD 2", _utc(7,18,15), "Tercer puesto"),
+    (104, "Final TBD 1", "Final TBD 2",   _utc(7,19,15),    "Final"),
 ]
 
 # Dict por ID para lookup rápido
