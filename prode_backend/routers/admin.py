@@ -4,9 +4,14 @@ CUIDADO: Solo usar en desarrollo o con validación segura
 """
 
 from fastapi import APIRouter, HTTPException
-from db.sheets import get_worksheet, _invalidate
+from pydantic import BaseModel
+from db.sheets import get_worksheet, _invalidate, _get_records
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+class DeletePredictionsRequest(BaseModel):
+    display_names: list[str]
 
 
 @router.delete("/delete-user/{user_id}")
@@ -64,5 +69,50 @@ def delete_user_completely(user_id: int):
             "predictions_deleted": preds_deleted,
             "memberships_deleted": members_deleted,
             "users_deleted": users_deleted
+        }
+    }
+
+
+@router.post("/delete-predictions-by-name")
+def delete_predictions_by_name(body: DeletePredictionsRequest):
+    """Eliminar predicciones de usuarios por display_name."""
+
+    print(f"[ADMIN] Eliminando predicciones de: {body.display_names}")
+
+    # Obtener user_ids por display_name
+    all_users = _get_records("users")
+    user_ids_to_delete = []
+    for user in all_users:
+        if user.get("display_name") in body.display_names:
+            user_ids_to_delete.append(int(user.get("id", 0)))
+
+    if not user_ids_to_delete:
+        raise HTTPException(status_code=400, detail=f"No se encontraron usuarios: {body.display_names}")
+
+    print(f"User IDs encontrados: {user_ids_to_delete}")
+
+    # Eliminar predicciones de esos usuarios
+    ws_preds = get_worksheet("predictions")
+    all_preds = _get_records("predictions")
+    rows_to_delete = []
+
+    for idx, row in enumerate(all_preds, start=2):
+        if int(row.get("user_id", 0)) in user_ids_to_delete:
+            rows_to_delete.append(idx)
+
+    # Eliminar de abajo hacia arriba para no cambiar índices
+    for row_idx in sorted(rows_to_delete, reverse=True):
+        ws_preds.delete_rows(row_idx)
+        print(f"   [OK] Predicción en fila {row_idx} eliminada")
+
+    print(f"Total predicciones eliminadas: {len(rows_to_delete)}")
+    _invalidate("predictions")
+
+    return {
+        "status": "success",
+        "message": f"Predicciones eliminadas para {len(user_ids_to_delete)} usuario(s)",
+        "stats": {
+            "users_affected": user_ids_to_delete,
+            "predictions_deleted": len(rows_to_delete)
         }
     }
