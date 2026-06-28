@@ -580,9 +580,9 @@ function allMatchesHTML(matches, myPreds, dateRange) {
         }
       }
 
-      const ptsDisplay = m.is_finished && pred ? `<div style="background:rgba(212,255,63,0.1);border:1px solid rgba(212,255,63,0.2);border-radius:6px;padding:6px 10px;text-align:center;min-width:50px;">
-        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#D4FF3F;">${pts}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(212,255,63,0.6);letter-spacing:0.04em;margin-top:2px;">PTS</div>
+      const ptsDisplay = m.is_finished && pred ? `<div style="background:rgba(212,255,63,0.15);border:1px solid rgba(212,255,63,0.35);border-radius:8px;padding:8px 12px;text-align:center;min-width:60px;">
+        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:18px;color:#D4FF3F;line-height:1;">${pts}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#D4FF3F;letter-spacing:0.06em;margin-top:3px;font-weight:600;">PUNTOS</div>
       </div>` : '';
 
       const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
