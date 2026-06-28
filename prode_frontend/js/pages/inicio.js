@@ -603,13 +603,18 @@ function allMatchesHTML(matches, myPreds, dateRange) {
             if (predResult === realResult) pPts += 4;
           }
           const pColor = pPts >= 6 ? '#D4FF3F' : pPts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
-          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,0.04);">
-            <span style="color:rgba(244,245,255,0.65);">${escHtml(p.display_name)}</span>
-            <span style="font-weight:700;color:${pColor};">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
+          const ptsDisplay = m.is_finished ? `<span style="font-weight:700;color:${pColor};min-width:20px;text-align:right;">${pPts}</span>` : '—';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,0.04);gap:8px;">
+            <span style="color:rgba(244,245,255,0.65);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(p.display_name)}</span>
+            <span style="font-weight:700;color:rgba(244,245,255,0.4);min-width:30px;text-align:center;">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
+            ${ptsDisplay}
           </div>`;
         }).join('');
         predsHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);margin-bottom:6px;letter-spacing:0.04em;">OTROS (${allPreds.length})</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);letter-spacing:0.04em;">JUGADORES (${allPreds.length})</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(244,245,255,0.2);letter-spacing:0.04em;">PRED · PTS</div>
+          </div>
           ${predsRows}
         </div>`;
       }
