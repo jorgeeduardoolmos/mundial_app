@@ -39,6 +39,7 @@ function navigate(page) {
     case "ranking":      renderRanking(main); break;
     case "predicciones": renderPredicciones(main); break;
     case "partidos":     renderPartidos(main); break;
+    case "puntos":       renderPuntos(main); break;
     case "grupos":       renderGrupos(main); break;
     default:             renderInicio(main);
   }
