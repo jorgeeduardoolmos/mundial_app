@@ -18,6 +18,10 @@ class DeletePredictionsbyUserIdRequest(BaseModel):
     user_ids: list[int]
 
 
+class DeleteUsersRequest(BaseModel):
+    user_ids: list[int]
+
+
 @router.delete("/delete-user/{user_id}")
 def delete_user_completely(user_id: int):
     """Eliminar completamente un usuario y todos sus datos asociados."""
@@ -152,4 +156,65 @@ def delete_predictions_by_user_id(body: DeletePredictionsbyUserIdRequest):
             "user_ids": body.user_ids,
             "predictions_deleted": len(rows_to_delete)
         }
+    }
+
+
+@router.post("/delete-users-completely")
+def delete_users_completely(body: DeleteUsersRequest):
+    """Eliminar completamente múltiples usuarios y todos sus datos asociados."""
+
+    print(f"[ADMIN] Eliminando completamente usuarios: {body.user_ids}")
+
+    stats = {
+        "predictions_deleted": 0,
+        "memberships_deleted": 0,
+        "users_deleted": 0
+    }
+
+    # 1. Eliminar predicciones
+    print(f"[1] Eliminando predicciones...")
+    ws_preds = get_worksheet("predictions")
+    all_preds = _get_records("predictions")
+    rows_to_delete = []
+    for idx, row in enumerate(all_preds, start=2):
+        if int(row.get("user_id", 0)) in body.user_ids:
+            rows_to_delete.append(idx)
+    for row_idx in sorted(rows_to_delete, reverse=True):
+        ws_preds.delete_rows(row_idx)
+    stats["predictions_deleted"] = len(rows_to_delete)
+    _invalidate("predictions")
+    print(f"   Total predicciones eliminadas: {len(rows_to_delete)}")
+
+    # 2. Eliminar membresías
+    print(f"[2] Eliminando membresías...")
+    ws_members = get_worksheet("group_members")
+    all_members = _get_records("group_members")
+    rows_to_delete = []
+    for idx, row in enumerate(all_members, start=2):
+        if int(row.get("user_id", 0)) in body.user_ids:
+            rows_to_delete.append(idx)
+    for row_idx in sorted(rows_to_delete, reverse=True):
+        ws_members.delete_rows(row_idx)
+    stats["memberships_deleted"] = len(rows_to_delete)
+    _invalidate("group_members")
+    print(f"   Total membresías eliminadas: {len(rows_to_delete)}")
+
+    # 3. Eliminar usuarios
+    print(f"[3] Eliminando cuentas...")
+    ws_users = get_worksheet("users")
+    all_users = _get_records("users")
+    rows_to_delete = []
+    for idx, row in enumerate(all_users, start=2):
+        if int(row.get("id", 0)) in body.user_ids:
+            rows_to_delete.append(idx)
+    for row_idx in sorted(rows_to_delete, reverse=True):
+        ws_users.delete_rows(row_idx)
+    stats["users_deleted"] = len(rows_to_delete)
+    _invalidate("users")
+    print(f"   Total usuarios eliminados: {len(rows_to_delete)}")
+
+    return {
+        "status": "success",
+        "message": f"{len(body.user_ids)} usuario(s) completamente eliminado(s)",
+        "stats": stats
     }
