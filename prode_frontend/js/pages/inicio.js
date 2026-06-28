@@ -549,128 +549,110 @@ function getDateRange() {
 }
 
 function allMatchesHTML(matches, myPreds, dateRange) {
-  const { yesterday, today, tomorrow } = dateRange;
+  // Solo mostrar 16vos de final en orden cronológico
+  const octavosMatches = matches.filter(m => m.stage === "Octavos").sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
-  const yesterdayMatches = matches.filter(m => m.is_finished && m.match_datetime.slice(0,10) === yesterday);
-  const todayMatches = matches.filter(m => m.match_datetime.slice(0,10) === today);
-  const tomorrowMatches = matches.filter(m => m.match_datetime.slice(0,10) === tomorrow);
+  const matchCards = octavosMatches.map(m => {
+    const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
+    const away = typeof teamName === "function" ? teamName(m.away_team) : m.away_team;
+    const pred = myPreds.find(p => p.match_id === m.id);
 
-  const renderSection = (title, matchList, matchesObj) => {
-    if (!matchList.length) return '';
+    let pts = 0;
+    if (pred && m.is_finished && m.home_goals !== null && m.away_goals !== null) {
+      if (pred.points_earned !== null && pred.points_earned !== undefined) {
+        pts = pred.points_earned;
+      } else {
+        if (pred.predicted_home_goals === m.home_goals) pts += 2;
+        if (pred.predicted_away_goals === m.away_goals) pts += 2;
+        const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
+                         : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
+        const realResult = m.home_goals > m.away_goals ? "home"
+                         : m.away_goals > m.home_goals ? "away" : "draw";
+        if (predResult === realResult) pts += 4;
+      }
+    }
 
-    const sorted = [...matchList].sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
-    const matchCards = sorted.map(m => {
-      const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
-      const away = typeof teamName === "function" ? teamName(m.away_team) : m.away_team;
-      const pred = myPreds.find(p => p.match_id === m.id);
+    const ptsDisplay = m.is_finished && pred ? `<div style="background:rgba(212,255,63,0.15);border:1px solid rgba(212,255,63,0.35);border-radius:8px;padding:8px 12px;text-align:center;min-width:60px;">
+      <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:18px;color:#D4FF3F;line-height:1;">${pts}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#D4FF3F;letter-spacing:0.06em;margin-top:3px;font-weight:600;">PUNTOS</div>
+    </div>` : '';
 
-      let pts = 0;
-      if (pred && m.is_finished && m.home_goals !== null && m.away_goals !== null) {
-        // Use points_earned from backend if available, otherwise calculate
-        if (pred.points_earned !== null && pred.points_earned !== undefined) {
-          pts = pred.points_earned;
-        } else {
-          if (pred.predicted_home_goals === m.home_goals) pts += 2;
-          if (pred.predicted_away_goals === m.away_goals) pts += 2;
-          const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
-                           : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
+    const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
+
+    let predsHtml = '';
+    if (window._allMatchesPreds && window._allMatchesPreds[m.id]?.length) {
+      const allPreds = window._allMatchesPreds[m.id];
+      const predsRows = allPreds.map(p => {
+        let pPts = 0;
+        if (m.home_goals !== null && m.away_goals !== null) {
+          if (p.predicted_home_goals === m.home_goals) pPts += 2;
+          if (p.predicted_away_goals === m.away_goals) pPts += 2;
+          const predResult = p.predicted_home_goals > p.predicted_away_goals ? "home"
+                           : p.predicted_away_goals > p.predicted_home_goals ? "away" : "draw";
           const realResult = m.home_goals > m.away_goals ? "home"
                            : m.away_goals > m.home_goals ? "away" : "draw";
-          if (predResult === realResult) pts += 4;
+          if (predResult === realResult) pPts += 4;
         }
-      }
-
-      const ptsDisplay = m.is_finished && pred ? `<div style="background:rgba(212,255,63,0.15);border:1px solid rgba(212,255,63,0.35);border-radius:8px;padding:8px 12px;text-align:center;min-width:60px;">
-        <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:18px;color:#D4FF3F;line-height:1;">${pts}</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#D4FF3F;letter-spacing:0.06em;margin-top:3px;font-weight:600;">PUNTOS</div>
-      </div>` : '';
-
-      const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
-
-      // Pronósticos de todos
-      let predsHtml = '';
-      if (window._allMatchesPreds && window._allMatchesPreds[m.id]?.length) {
-        const allPreds = window._allMatchesPreds[m.id];
-        const predsRows = allPreds.map(p => {
-          let pPts = 0;
-          if (m.home_goals !== null && m.away_goals !== null) {
-            if (p.predicted_home_goals === m.home_goals) pPts += 2;
-            if (p.predicted_away_goals === m.away_goals) pPts += 2;
-            const predResult = p.predicted_home_goals > p.predicted_away_goals ? "home"
-                             : p.predicted_away_goals > p.predicted_home_goals ? "away" : "draw";
-            const realResult = m.home_goals > m.away_goals ? "home"
-                             : m.away_goals > m.home_goals ? "away" : "draw";
-            if (predResult === realResult) pPts += 4;
-          }
-          const pColor = pPts >= 6 ? '#D4FF3F' : pPts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
-          const ptsDisplay = m.is_finished ? `<span style="font-weight:700;color:${pColor};min-width:20px;text-align:right;">${pPts}</span>` : '—';
-          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,0.04);gap:8px;">
-            <span style="color:rgba(244,245,255,0.65);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(p.display_name)}</span>
-            <span style="font-weight:700;color:rgba(244,245,255,0.4);min-width:30px;text-align:center;">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
-            ${ptsDisplay}
-          </div>`;
-        }).join('');
-        predsHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);letter-spacing:0.04em;">JUGADORES (${allPreds.length})</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(244,245,255,0.2);letter-spacing:0.04em;">PRED · PTS</div>
-          </div>
-          ${predsRows}
+        const pColor = pPts >= 6 ? '#D4FF3F' : pPts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
+        const ptsDisplay = m.is_finished ? `<span style="font-weight:700;color:${pColor};min-width:20px;text-align:right;">${pPts}</span>` : '—';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,0.04);gap:8px;">
+          <span style="color:rgba(244,245,255,0.65);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(p.display_name)}</span>
+          <span style="font-weight:700;color:rgba(244,245,255,0.4);min-width:30px;text-align:center;">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
+          ${ptsDisplay}
         </div>`;
-      }
+      }).join('');
+      predsHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);letter-spacing:0.04em;">JUGADORES (${allPreds.length})</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(244,245,255,0.2);letter-spacing:0.04em;">PRED · PTS</div>
+        </div>
+        ${predsRows}
+      </div>`;
+    }
 
-      return `<div class="match-card-mini" style="display:flex;flex-direction:column;gap:10px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;flex-shrink:0;min-width:320px;scroll-snap-align:start;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="flex:1;min-width:0;">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-              ${chipByName(home,16,2)}
-              <span style="font-weight:700;font-size:11px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
-            </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);">${m.match_datetime_str||''}</div>
+    return `<div class="match-card-mini" style="display:flex;flex-direction:column;gap:10px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;flex-shrink:0;width:100%;max-width:400px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            ${chipByName(home,16,2)}
+            <span style="font-weight:700;font-size:11px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
           </div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
-            ${resultDisplay}
-            ${ptsDisplay}
-          </div>
-          <div style="flex:1;min-width:0;text-align:right;">
-            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-bottom:6px;">
-              <span style="font-weight:700;font-size:11px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
-              ${chipByName(away,16,2)}
-            </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);">${m.match_datetime_str||''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+          ${resultDisplay}
+          ${ptsDisplay}
+        </div>
+        <div style="flex:1;min-width:0;text-align:right;">
+          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-bottom:6px;">
+            <span style="font-weight:700;font-size:11px;color:#F4F5FF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
+            ${chipByName(away,16,2)}
           </div>
         </div>
-        ${predsHtml}
-      </div>`;
-    }).join('');
-
-    return `<div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
-        <span>${escHtml(title)}</span>
-        <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
-        ${matchCards}
-      </div>
-      <style>
-        @media(max-width:768px) {
-          .matches-grid {
-            display: grid !important;
-            grid-template-columns: 1fr !important;
-            gap: 12px;
-          }
-          .match-card-mini {
-            min-width: unset !important;
-            width: 100%;
-          }
-        }
-      </style>
-      <div style="margin-bottom:28px;"></div>
+      ${predsHtml}
     </div>`;
-  };
+  }).join('');
 
-  return renderSection('AYER', yesterdayMatches, matches) +
-         renderSection('HOY', todayMatches, matches) +
-         renderSection('MAÑANA', tomorrowMatches, matches);
+  return `<div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+      <span>16VOS DE FINAL</span>
+      <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
+      ${matchCards}
+    </div>
+    <style>
+      @media(max-width:768px) {
+        .matches-grid {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          gap: 12px;
+        }
+      }
+    </style>
+    <div style="margin-bottom:28px;"></div>
+  </div>`;
 }
 
 function upcomingMatchesHTML(next3Maps, predState, hasGroup) {
@@ -1057,13 +1039,8 @@ function buildDashboard(d) {
     </div>
   </div>`;
 
-  const rankingCards = hasGroup
-    ? (allRankings||[]).map(({group, data}) => rankingCard(data, s.user_id, true, group.name)).join('')
-    : rankingCard(null, s.user_id, false);
-
   const rightCol = `<div style="display:flex;flex-direction:column;gap:28px;">
     ${myStatsCard}
-    ${rankingCards}
     ${pointsCard()}
     ${premiosCard()}
     ${sinPredecirCard(unpredicted, hasGroup)}
@@ -1075,11 +1052,8 @@ function buildDashboard(d) {
     ${heroHTML(s,pos,total,pts,ptsToLeader,ptsToNext,exactos,hasGroup)}
     ${tickerHTML(tickerItems)}
     <div class="fl-main-grid">${leftCol}${rightCol}</div>
-    <div style="height:1px;background:rgba(255,255,255,0.06);margin:0 40px;position:relative;z-index:1;"></div>
-    ${allGroupsHTML(allGroupTables)}
-    <div class="fl-footer" style="border-top:1px solid rgba(255,255,255,0.08);padding:18px 40px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;position:relative;z-index:1;">
+    <div class="fl-footer" style="border-top:1px solid rgba(255,255,255,0.08);padding:18px 40px;display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(244,245,255,0.38);letter-spacing:0.08em;position:relative;z-index:1;margin-top:40px;">
       <span>PRODE · MUNDIAL 2026</span>
-      <span>104 PARTIDOS · 12 GRUPOS</span>
       <span>⚽</span>
     </div>
   </div>`;
