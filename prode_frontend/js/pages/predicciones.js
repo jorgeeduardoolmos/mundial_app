@@ -71,14 +71,22 @@ async function loadPredicciones(groups) {
       const ex = predsByMatch[m.id];
       const hVal = ex != null ? ex.predicted_home_goals : "";
       const aVal = ex != null ? ex.predicted_away_goals : "";
-      const savedBadge = ex != null
+      const isDisabled = m.is_finished;
+      const disabledStyle = isDisabled
+        ? "opacity:0.5;cursor:not-allowed;pointer-events:none;"
+        : "";
+      const disabledAttr = isDisabled ? "disabled" : "";
+      const finishedBadge = isDisabled
+        ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#FF5C4D;letter-spacing:0.04em;">PARTIDO FINALIZADO</span>`
+        : null;
+      const savedBadge = finishedBadge || (ex != null
         ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#D4FF3F;letter-spacing:0.04em;">✓ ${ex.predicted_home_goals}—${ex.predicted_away_goals}</span>`
-        : `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.3);">sin predecir</span>`;
+        : `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.3);">sin predecir</span>`);
       const homeTeam = teamName(m.home_team);
       const awayTeam = teamName(m.away_team);
 
       return `
-        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:10px;border-radius:8px;">
+        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:10px;border-radius:8px;${disabledStyle}">
           <!-- Columna izquierda: Fecha, Hora, País -->
           <div style="display:flex;flex-direction:column;gap:6px;">
             <!-- Fecha y Hora -->
@@ -107,11 +115,11 @@ async function loadPredicciones(groups) {
           <div style="display:flex;flex-direction:column;gap:6px;justify-content:space-between;">
             <!-- Inputs -->
             <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
-              <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${m.id}"
+              <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${m.id}" ${disabledAttr}
                 style="width:100%;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
                 oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
               <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.25);text-align:center;">—</span>
-              <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${m.id}"
+              <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${m.id}" ${disabledAttr}
                 style="width:100%;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
                 oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
             </div>
