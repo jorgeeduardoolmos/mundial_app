@@ -71,7 +71,7 @@ async function loadPredicciones(groups) {
       const ex = predsByMatch[m.id];
       const hVal = ex != null ? ex.predicted_home_goals : "";
       const aVal = ex != null ? ex.predicted_away_goals : "";
-      const isDisabled = m.is_finished;
+      const isDisabled = !m.is_open;
       const disabledStyle = isDisabled
         ? "opacity:0.5;cursor:not-allowed;pointer-events:none;"
         : "";
