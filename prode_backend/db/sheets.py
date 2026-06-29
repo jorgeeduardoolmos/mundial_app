@@ -386,4 +386,16 @@ def score_predictions_for_match(match_id: int, home_goals: int, away_goals: int)
 
 def get_puntos_zona_grupos() -> list[dict]:
     """Lee la solapa 'Puntos zona de grupos' del Google Sheet."""
-    return _get_records("Puntos zona de grupos")
+    try:
+        return _get_records("Puntos zona de grupos")
+    except Exception:
+        ws = get_worksheet("Puntos zona de grupos")
+        rows = ws.get_all_values()
+        if len(rows) < 2:
+            return []
+        headers = rows[0]
+        return [
+            {h: v for h, v in zip(headers, rows[i])}
+            for i in range(1, len(rows))
+            if any(rows[i])
+        ]
