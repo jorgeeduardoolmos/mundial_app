@@ -59,10 +59,20 @@ app.include_router(admin.router)
 # ── Startup ───────────────────────────────────────────────────────────────
 @app.on_event("startup")
 def on_startup():
-    """Crea las pestañas en Sheets si no existen y carga los partidos."""
+    """Crea las pestañas en Sheets si no existen y precalienta el caché."""
     try:
         ensure_worksheets()
         print("✓ Google Sheets conectado.")
+
+        # Precalentar caché para evitar muchas lecturas simultáneas
+        print("⏳ Precalentando caché...")
+        from db.sheets import _get_records
+        _get_records("users")
+        _get_records("groups")
+        _get_records("group_members")
+        _get_records("predictions")
+        _get_records("results")
+        print("✓ Caché listo.")
     except Exception as e:
         print(f"⚠ Error en startup: {e}")
 
