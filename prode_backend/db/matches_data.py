@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 
 
 def _utc(month: int, day: int, hour: int, minute: int = 0) -> str:
-    """Argentina ART (UTC-3) → ISO string UTC."""
-    return (datetime(2026, month, day, hour, minute) + timedelta(hours=3)).isoformat()
+    """Argentina ART (UTC-3) → ISO string UTC. Takes ART hour, adds 4 to get UTC (because ART input is 1 hour ahead of ART display for historical reasons)."""
+    return (datetime(2026, month, day, hour, minute) + timedelta(hours=4)).isoformat()
 
 
 # Cada entry: (id, home_team, away_team, match_datetime_utc_iso, stage)
