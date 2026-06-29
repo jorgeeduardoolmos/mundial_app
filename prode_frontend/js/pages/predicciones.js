@@ -159,6 +159,7 @@ async function loadPredicciones(groups) {
 
           const groupId = groups[0].id;
           let savedCount = 0;
+          const toSave = [];
 
           for (const match of octavosMatches) {
             const hInput = document.getElementById(`ph-${match.id}`);
@@ -177,18 +178,31 @@ async function loadPredicciones(groups) {
                 console.warn(`Partido ${match.id} cerrado, saltando`);
                 continue;
               }
-              await api.predictions.save({
+              toSave.push({
                 match_id: match.id,
                 group_id: groupId,
                 predicted_home_goals: hVal,
                 predicted_away_goals: aVal
               });
-              savedCount++;
             }
           }
 
-          if (savedCount === 0) {
+          if (toSave.length === 0) {
             throw new Error("No hay predicciones para guardar. Completa al menos un partido.");
+          }
+
+          // Guardar en bloques de 4 con delay entre bloques
+          const BLOCK_SIZE = 4;
+          const BLOCK_DELAY = 600; // ms entre bloques
+          for (let i = 0; i < toSave.length; i += BLOCK_SIZE) {
+            const block = toSave.slice(i, i + BLOCK_SIZE);
+            for (const pred of block) {
+              await api.predictions.save(pred);
+              savedCount++;
+            }
+            if (i + BLOCK_SIZE < toSave.length) {
+              await new Promise(r => setTimeout(r, BLOCK_DELAY));
+            }
           }
 
           saveBtn.textContent = `✓ Guardadas ${savedCount} predicciones!`;
