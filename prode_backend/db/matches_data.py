@@ -95,7 +95,7 @@ _RAW = [
 
     # ══ 16VOS DE FINAL — Jun 28-Jul 3 ════════════════════════════════════════
     (73, "Brasil",           "Japón",                _utc(6,29,13),    "16vos"),      # 29/6 14:00 ART
-    (74, "Sudáfrica",        "Canadá",               _utc(6,28,15),    "16vos"),      # 28/6 16:00 ART (hoy)
+    (74, "Sudáfrica",        "Canadá",               _utc(6,28,15),    "16vos"),      # 28/6 16:00 ART (ayer)
     (75, "Países Bajos",     "Marruecos",            _utc(6,29,21),    "16vos"),      # 29/6 22:00 ART
     (76, "Alemania",         "Paraguay",             _utc(6,29,16,30), "16vos"),      # 29/6 17:30 ART
     (77, "Costa de Marfil",  "Noruega",              _utc(6,30,13),    "16vos"),      # 30/6 14:00 ART
