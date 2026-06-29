@@ -173,6 +173,10 @@ async function loadPredicciones(groups) {
             const aVal = parseInt(aInput.value, 10);
 
             if (!isNaN(hVal) && !isNaN(aVal)) {
+              if (!match.is_open) {
+                console.warn(`Partido ${match.id} cerrado, saltando`);
+                continue;
+              }
               await api.predictions.save({
                 match_id: match.id,
                 group_id: groupId,

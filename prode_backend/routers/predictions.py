@@ -101,6 +101,16 @@ def list_my_predictions(group_id: int = Query(...), user: dict = Depends(get_cur
             if p["match_id"] in matches_by_id]
 
 
+@router.delete("/{match_id}", status_code=200)
+def delete_prediction(match_id: int, group_id: int = Query(...), user: dict = Depends(get_current_user)):
+    from db.sheets import delete_prediction_in_sheet, _invalidate
+    ok, msg = delete_prediction_in_sheet(user["id"], match_id, group_id)
+    if not ok:
+        raise HTTPException(status_code=400, detail=msg)
+    _invalidate("predictions")
+    return {"message": "Predicción eliminada"}
+
+
 @router.get("/match/{match_id}")
 def list_match_predictions(
     match_id: int,
