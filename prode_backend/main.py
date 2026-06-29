@@ -17,7 +17,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from db.sheets import ensure_worksheets
-from routers import auth, groups, matches, predictions, ranking, admin
+from routers import auth, groups, matches, predictions, ranking, puntos, admin
 
 app = FastAPI(
     title="Prode Mundial 2026",
@@ -53,6 +53,7 @@ app.include_router(groups.router)
 app.include_router(matches.router)
 app.include_router(predictions.router)
 app.include_router(ranking.router)
+app.include_router(puntos.router)
 app.include_router(admin.router)
 
 

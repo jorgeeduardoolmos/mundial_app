@@ -382,3 +382,8 @@ def score_predictions_for_match(match_id: int, home_goals: int, away_goals: int)
         ws.batch_update(updates)
         _invalidate("predictions")
     return len(updates)
+
+
+def get_puntos_zona_grupos() -> list[dict]:
+    """Lee la solapa 'Puntos zona de grupos' del Google Sheet."""
+    return _get_records("Puntos zona de grupos")

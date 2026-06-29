@@ -140,6 +140,11 @@ const api = {
   ranking: {
     get: (groupId) => apiFetch(`/ranking?group_id=${groupId}`),
   },
+
+  /* ── Puntos ───────────────────────────────────────────────────────── */
+  puntos: {
+    zonasGrupos: () => apiFetch("/puntos"),
+  },
 };
 
 /* ── injectFloodlightStyles ──────────────────────────────────────────── */
