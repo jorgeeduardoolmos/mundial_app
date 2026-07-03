@@ -85,47 +85,40 @@ async function loadPredicciones(groups) {
       const homeTeam = teamName(m.home_team);
       const awayTeam = teamName(m.away_team);
 
+      const [date, time] = (m.match_datetime_str||'—').split('—').map(s => s.trim());
       return `
-        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:10px;border-radius:8px;${disabledStyle}">
-          <!-- Columna izquierda: Fecha, Hora, País -->
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <!-- Fecha y Hora -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.4);line-height:1.3;">
-              <div>
-                <div style="color:rgba(244,245,255,0.25);margin-bottom:1px;">Fecha</div>
-                <div>${(m.match_datetime_str||'').split('—')[0].trim()}</div>
-              </div>
-              <div>
-                <div style="color:rgba(244,245,255,0.25);margin-bottom:1px;">Hora</div>
-                <div>${(m.match_datetime_str||'').split('—')[1]?.trim() || ''}</div>
-              </div>
-            </div>
-            <!-- Países -->
+        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:80px 1fr 140px 120px;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:10px;border-radius:8px;align-items:center;${disabledStyle}">
+          <!-- Columna 1: Fecha y Hora -->
+          <div style="display:flex;flex-direction:column;gap:2px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.5);">
+            <div>${date}</div>
+            <div style="font-weight:700;color:#F4F5FF;">${time}</div>
+          </div>
+
+          <!-- Columna 2: Equipos -->
+          <div style="display:flex;flex-direction:column;gap:8px;">
             <div style="display:flex;align-items:center;gap:6px;">
               ${chipByName(homeTeam,18,2)}
-              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:10px;color:#F4F5FF;text-transform:uppercase;">${escHtml(homeTeam)}</span>
+              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;">${escHtml(homeTeam)}</span>
             </div>
             <div style="display:flex;align-items:center;gap:6px;">
               ${chipByName(awayTeam,18,2)}
-              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:10px;color:#F4F5FF;text-transform:uppercase;">${escHtml(awayTeam)}</span>
+              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;">${escHtml(awayTeam)}</span>
             </div>
           </div>
 
-          <!-- Columna derecha: Inputs -->
-          <div style="display:flex;flex-direction:column;gap:6px;justify-content:space-between;">
-            <!-- Inputs -->
-            <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;">
-              <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${m.id}" ${disabledAttr}
-                style="width:100%;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
-                oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
-              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.25);text-align:center;">—</span>
-              <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${m.id}" ${disabledAttr}
-                style="width:100%;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:18px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
-                oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
-            </div>
-            <!-- Status -->
-            <div style="text-align:center;font-size:8px;color:rgba(244,245,255,0.2);">${savedBadge}</div>
+          <!-- Columna 3: Inputs -->
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;">
+            <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${m.id}" ${disabledAttr}
+              style="width:100%;height:32px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
+              oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.25);text-align:center;font-weight:700;">—</span>
+            <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${m.id}" ${disabledAttr}
+              style="width:100%;height:32px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
+              oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
           </div>
+
+          <!-- Columna 4: Resultado guardado -->
+          <div style="text-align:center;font-size:9px;color:rgba(244,245,255,0.5);">${savedBadge}</div>
         </div>
       `;
     }).join('');
