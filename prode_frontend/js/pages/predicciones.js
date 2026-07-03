@@ -53,9 +53,9 @@ async function loadPredicciones(groups) {
       })()
     ]);
 
-    // Mostrar 16vos de final + octavos, ordenados por fecha
+    // Mostrar solo octavos de final, ordenados por fecha
     const octavosMatches = matches
-      .filter(m => m.stage === "16vos" || m.stage === "Octavos de final")
+      .filter(m => m.stage === "Octavos de final")
       .sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
     const predsByMatch = {};
