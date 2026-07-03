@@ -87,38 +87,39 @@ async function loadPredicciones(groups) {
 
       const [date, time] = (m.match_datetime_str||'—').split('—').map(s => s.trim());
       return `
-        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:80px 1fr 140px 120px;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:10px;border-radius:8px;align-items:center;${disabledStyle}">
+        <div class="match-pred-row" data-match-id="${m.id}" style="display:grid;grid-template-columns:minmax(60px,auto) 1fr minmax(60px,auto);gap:10px;padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-bottom:10px;border-radius:8px;${disabledStyle}">
           <!-- Columna 1: Fecha y Hora -->
-          <div style="display:flex;flex-direction:column;gap:2px;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(244,245,255,0.5);">
+          <div style="display:flex;flex-direction:column;gap:2px;font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(244,245,255,0.5);white-space:nowrap;">
             <div>${date}</div>
             <div style="font-weight:700;color:#F4F5FF;">${time}</div>
           </div>
 
-          <!-- Columna 2: Equipos -->
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              ${chipByName(homeTeam,18,2)}
-              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;">${escHtml(homeTeam)}</span>
+          <!-- Columna 2: Equipos con Inputs -->
+          <div style="display:flex;flex-direction:column;gap:8px;min-width:0;">
+            <!-- Equipo Local -->
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+              <div style="display:flex;align-items:center;gap:4px;flex:1;min-width:0;">
+                ${chipByName(homeTeam,14,2)}
+                <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:10px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(homeTeam)}</span>
+              </div>
+              <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${m.id}" ${disabledAttr}
+                style="width:40px;height:30px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;flex-shrink:0;"
+                oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
             </div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              ${chipByName(awayTeam,18,2)}
-              <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:11px;color:#F4F5FF;text-transform:uppercase;">${escHtml(awayTeam)}</span>
+            <!-- Equipo Visitante -->
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+              <div style="display:flex;align-items:center;gap:4px;flex:1;min-width:0;">
+                ${chipByName(awayTeam,14,2)}
+                <span style="font-family:'Big Shoulders Display',system-ui;font-weight:700;font-size:10px;color:#F4F5FF;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(awayTeam)}</span>
+              </div>
+              <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${m.id}" ${disabledAttr}
+                style="width:40px;height:30px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:14px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;flex-shrink:0;"
+                oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
             </div>
           </div>
 
-          <!-- Columna 3: Inputs -->
-          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;">
-            <input type="number" min="0" max="20" value="${String(hVal)}" id="ph-${m.id}" ${disabledAttr}
-              style="width:100%;height:32px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
-              oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(244,245,255,0.25);text-align:center;font-weight:700;">—</span>
-            <input type="number" min="0" max="20" value="${String(aVal)}" id="pa-${m.id}" ${disabledAttr}
-              style="width:100%;height:32px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:6px;text-align:center;font-family:'Big Shoulders Display',system-ui;font-weight:800;font-size:16px;color:#F4F5FF;-moz-appearance:textfield;outline:none;padding:0;"
-              oninput="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.5)':'rgba(255,255,255,0.15)'" onfocus="this.style.borderColor='rgba(212,255,63,0.5)'" onblur="this.style.borderColor=this.value!==''?'rgba(212,255,63,0.35)':'rgba(255,255,255,0.15)'">
-          </div>
-
-          <!-- Columna 4: Resultado guardado -->
-          <div style="text-align:center;font-size:9px;color:rgba(244,245,255,0.5);">${savedBadge}</div>
+          <!-- Columna 3: Resultado -->
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;text-align:center;font-size:8px;color:rgba(244,245,255,0.5);white-space:nowrap;">${savedBadge}</div>
         </div>
       `;
     }).join('');
