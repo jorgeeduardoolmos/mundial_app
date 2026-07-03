@@ -111,9 +111,9 @@ _RAW = [
     (87, "Colombia",         "Ghana",               _utc(7, 3,21,30), "16vos"),      # 3/7 22:30 ART
     (88, "Argentina",        "Cabo Verde",           _utc(7, 3,18),    "16vos"),      # 3/7 19:00 ART
 
-    # ══ 8VOS DE FINAL — Jun 30 - Jul 7 ═══════════════════════════════════════
-    (89, "Canadá",       "Marruecos",     _utc(6,30,13),    "Octavos de final"),      # 30/6 14:00 ART (mañana)
-    (90, "Paraguay",     "Francia",       _utc(6,30,17),    "Octavos de final"),      # 30/6 18:00 ART (mañana)
+    # ══ 8VOS DE FINAL — Jul 4 - Jul 7 ════════════════════════════════════════
+    (89, "Canadá",       "Marruecos",     _utc(7, 4,13),    "Octavos de final"),      # 4/7 14:00 ART (mañana)
+    (90, "Paraguay",     "Francia",       _utc(7, 4,17),    "Octavos de final"),      # 4/7 18:00 ART (mañana)
     (91, "Brasil",       "Noruega",       _utc(7, 5,16),    "Octavos de final"),      # 5/7 17:00 ART
     (92, "México",       "Inglaterra",    _utc(7, 5,20),    "Octavos de final"),      # 5/7 21:00 ART
     (93, "Portugal",     "España",        _utc(7, 6,15),    "Octavos de final"),      # 6/7 16:00 ART
