@@ -22,7 +22,7 @@ from routers import auth, groups, matches, predictions, ranking, puntos, admin
 app = FastAPI(
     title="Prode Mundial 2026",
     description="API REST para el prode del Mundial 2026",
-    version="2.0.1",
+    version="2.0.2",
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────
