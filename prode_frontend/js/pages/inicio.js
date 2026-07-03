@@ -549,8 +549,10 @@ function getDateRange() {
 }
 
 function allMatchesHTML(matches, myPreds, dateRange) {
-  // Solo mostrar 16vos de final en orden cronológico
-  const octavosMatches = matches.filter(m => m.stage === "16vos").sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+  // Mostrar 16vos de final no terminados (hoy y futuros) + octavos de final
+  const octavosMatches = matches.filter(m =>
+    (m.stage === "16vos" && !m.is_finished) || m.stage === "Octavos de final"
+  ).sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
   const matchCards = octavosMatches.map(m => {
     const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
