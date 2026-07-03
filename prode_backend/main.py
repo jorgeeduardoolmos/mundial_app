@@ -402,3 +402,4 @@ def debug_sheets():
         return {"status": "ok", "sheet_title": sp.title, "tabs": tabs, "sheet_id_used": sheet_id}
     except Exception as e:
         return {"error": str(e), "type": type(e).__name__, "sheet_id_used": sheet_id}
+# Trigger redeploy
