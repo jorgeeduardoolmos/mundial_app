@@ -111,15 +111,15 @@ _RAW = [
     (87, "Colombia",         "Ghana",               _utc(7, 3,21,30), "16vos"),      # 3/7 22:30 ART
     (88, "Argentina",        "Cabo Verde",           _utc(7, 3,18),    "16vos"),      # 3/7 19:00 ART
 
-    # ══ 8VOS DE FINAL — Jul 5-8 ══════════════════════════════════════════════
-    (89, "8vos TBD 1",   "8vos TBD 2",    _utc(7, 5,15),    "Cuartos de final"),
-    (90, "8vos TBD 3",   "8vos TBD 4",    _utc(7, 5,19),    "Cuartos de final"),
-    (91, "8vos TBD 5",   "8vos TBD 6",    _utc(7, 6,15),    "Cuartos de final"),
-    (92, "8vos TBD 7",   "8vos TBD 8",    _utc(7, 6,19),    "Cuartos de final"),
-    (93, "8vos TBD 9",   "8vos TBD 10",   _utc(7, 7,15),    "Cuartos de final"),
-    (94, "8vos TBD 11",  "8vos TBD 12",   _utc(7, 7,19),    "Cuartos de final"),
-    (95, "8vos TBD 13",  "8vos TBD 14",   _utc(7, 8,15),    "Cuartos de final"),
-    (96, "8vos TBD 15",  "8vos TBD 16",   _utc(7, 8,19),    "Cuartos de final"),
+    # ══ 8VOS DE FINAL — Jun 30 - Jul 7 ═══════════════════════════════════════
+    (89, "Canadá",       "Marruecos",     _utc(6,30,14),    "Octavos de final"),      # 30/6 14:00 ART (mañana)
+    (90, "Paraguay",     "Francia",       _utc(6,30,18),    "Octavos de final"),      # 30/6 18:00 ART (mañana)
+    (91, "Brasil",       "Noruega",       _utc(7, 5,17),    "Octavos de final"),      # 5/7 17:00 ART
+    (92, "México",       "Inglaterra",    _utc(7, 5,21),    "Octavos de final"),      # 5/7 21:00 ART
+    (93, "Portugal",     "España",        _utc(7, 6,16),    "Octavos de final"),      # 6/7 16:00 ART
+    (94, "Estados Unidos", "Bélgica",     _utc(7, 6,21),    "Octavos de final"),      # 6/7 21:00 ART
+    (95, "8vos TBD 13",  "8vos TBD 14",   _utc(7, 7,13),    "Octavos de final"),      # 7/7 13:00 ART (A definir)
+    (96, "Suiza",        "8vos TBD 16",   _utc(7, 7,17),    "Octavos de final"),      # 7/7 17:00 ART (Suiza vs A definir)
 
     # ══ 4TOS DE FINAL — Jul 9-11 ═════════════════════════════════════════════
     (97, "4tos TBD 1",   "4tos TBD 2",    _utc(7, 9,16),    "4tos de final"),
