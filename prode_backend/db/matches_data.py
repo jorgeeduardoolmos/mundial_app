@@ -118,8 +118,8 @@ _RAW = [
     (92, "México",       "Inglaterra",    _utc(7, 5,20),    "Octavos de final"),      # 5/7 21:00 ART
     (93, "Portugal",     "España",        _utc(7, 6,15),    "Octavos de final"),      # 6/7 16:00 ART
     (94, "Estados Unidos", "Bélgica",     _utc(7, 6,20),    "Octavos de final"),      # 6/7 21:00 ART
-    (95, "8vos TBD 13",  "8vos TBD 14",   _utc(7, 7,12),    "Octavos de final"),      # 7/7 13:00 ART (A definir)
-    (96, "Suiza",        "8vos TBD 16",   _utc(7, 7,16),    "Octavos de final"),      # 7/7 17:00 ART (Suiza vs A definir)
+    (95, "Argentina",    "Egipto",        _utc(7, 7,12),    "Octavos de final"),      # 7/7 13:00 ART
+    (96, "Suiza",        "Colombia",      _utc(7, 7,16),    "Octavos de final"),      # 7/7 17:00 ART
 
     # ══ 4TOS DE FINAL — Jul 9-11 ═════════════════════════════════════════════
     (97, "4tos TBD 1",   "4tos TBD 2",    _utc(7, 9,16),    "4tos de final"),
