@@ -549,9 +549,9 @@ function getDateRange() {
 }
 
 function allMatchesHTML(matches, myPreds, dateRange) {
-  // Mostrar 16vos de final no terminados (hoy y futuros) + octavos de final
+  // Mostrar últimos 3 octavos de final (6/7 en adelante) + todos los cuartos de final
   const octavosMatches = matches.filter(m =>
-    (m.stage === "16vos" && !m.is_finished) || m.stage === "Octavos de final"
+    (m.stage === "Octavos de final" && m.match_datetime.slice(0,10) >= "2026-07-06") || m.stage === "4tos de final"
   ).sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
   const matchCards = octavosMatches.map(m => {
@@ -1259,10 +1259,10 @@ async function renderInicio(el) {
     a.match_datetime.localeCompare(b.match_datetime)
   );
 
-  // Obtener pronósticos de TODOS los partidos: 16vos + octavos de final
+  // Obtener pronósticos: últimos 3 octavos (6/7+) + todos los cuartos de final
   const { yesterday, today: todayStr, tomorrow } = getDateRange();
   const allMatchesForPreds = matches.filter(m =>
-    m.stage === "16vos" || m.stage === "Octavos de final"
+    (m.stage === "Octavos de final" && m.match_datetime.slice(0,10) >= "2026-07-06") || m.stage === "4tos de final"
   );
 
   window._allMatchesPreds = {};
