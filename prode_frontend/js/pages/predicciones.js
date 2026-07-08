@@ -53,9 +53,9 @@ async function loadPredicciones(groups) {
       })()
     ]);
 
-    // Mostrar Suiza vs Colombia (último octavo) + todos los cuartos de final
+    // Mostrar solo cuartos de final
     const octavosMatches = matches
-      .filter(m => (m.stage === "Octavos de final" && m.match_datetime.slice(0,10) >= "2026-07-07") || m.stage === "4tos de final")
+      .filter(m => m.stage === "4tos de final")
       .sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
     const predsByMatch = {};
