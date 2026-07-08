@@ -94,11 +94,14 @@ def save(body: SavePredictionRequest, user: dict = Depends(get_current_user)):
 
 
 @router.get("", response_model=list[PredictionResponse])
-def list_my_predictions(group_id: int = Query(...), user: dict = Depends(get_current_user)):
+def list_my_predictions(group_id: int = Query(...), stage: Optional[str] = Query(None), user: dict = Depends(get_current_user)):
     preds = get_user_predictions_in_group(user["id"], group_id)
     matches_by_id = {m["id"]: m for m in get_all_matches()}
-    return [_pred_to_response(p, matches_by_id[p["match_id"]]) for p in preds
-            if p["match_id"] in matches_by_id]
+    result = [_pred_to_response(p, matches_by_id[p["match_id"]]) for p in preds
+              if p["match_id"] in matches_by_id]
+    if stage:
+        result = [p for p in result if matches_by_id[p.match_id]["stage"] == stage]
+    return result
 
 
 @router.delete("/{match_id}", status_code=200)

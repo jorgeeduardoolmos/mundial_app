@@ -1121,7 +1121,7 @@ async function renderInicio(el) {
 
   let groups=[], matches=[];
   try {
-    [groups, matches] = await Promise.all([api.groups.list(), api.matches.list()]);
+    [groups, matches] = await Promise.all([api.groups.list(), api.matches.list("4tos de final")]);
   } catch(e) {
     el.innerHTML = `<div style="padding:40px;color:#FF5C4D;font-family:system-ui;font-size:14px;">Error cargando datos: ${escHtml(e.message)}</div>`;
     return;
@@ -1131,12 +1131,12 @@ async function renderInicio(el) {
   let myPreds=[], allRankings=[];
   if (selectedGroup) {
     try {
-      const [preds, ...rankingResults] = await Promise.all([
-        api.predictions.list(selectedGroup.id),
-        ...groups.map(g => api.ranking.get(g.id)),
+      const [preds, rankingData] = await Promise.all([
+        api.predictions.list(selectedGroup.id, "4tos de final"),
+        api.ranking.get(selectedGroup.id),
       ]);
       myPreds = preds;
-      allRankings = groups.map((g, i) => ({ group: g, data: rankingResults[i] }));
+      allRankings = [{ group: selectedGroup, data: rankingData }];
     } catch { myPreds=[]; allRankings=[]; }
   }
   let rankingData = allRankings[0]?.data || null;

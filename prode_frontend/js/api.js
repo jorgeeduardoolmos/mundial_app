@@ -125,7 +125,7 @@ const api = {
 
   /* ── Predicciones ──────────────────────────────────────────────────── */
   predictions: {
-    list: (groupId) => apiFetch(`/predictions?group_id=${groupId}`),
+    list: (groupId, stage = null) => apiFetch(`/predictions?group_id=${groupId}${stage ? `&stage=${encodeURIComponent(stage)}` : ""}`),
 
     forMatch: (matchId, groupId) => apiFetch(`/predictions/match/${matchId}?group_id=${groupId}`),
 
