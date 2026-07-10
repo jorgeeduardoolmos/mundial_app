@@ -6,7 +6,7 @@
  * nada de URLs ni headers.
  */
 
-const API_URL = "https://mundialapp-prode.up.railway.app";
+const API_URL = "https://mundial-app-backend-f48s.onrender.com";
 
 /* ── Caché en memoria ────────────────────────────────────────────────── */
 // Los GETs se cachean 45 segundos. Cualquier mutación (POST/PUT) limpia
