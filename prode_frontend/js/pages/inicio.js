@@ -642,8 +642,8 @@ function allMatchesHTML(matches, myPreds, dateRange) {
     </div>`;
   }).join('');
 
-  const semifinalesCards = semifinales.map(m => matchCards.includes(m.id)).join('');
-  const cuartosCards = cuartos.map(m => matchCards.includes(m.id)).join('');
+  const semifinalesCards = generateCards(semifinales);
+  const cuartosCards = generateCards(cuartos);
 
   const semifinalesHtml = semifinales.length ? `
     <div style="margin-bottom:28px;">
@@ -652,7 +652,7 @@ function allMatchesHTML(matches, myPreds, dateRange) {
         <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
-        ${semifinales.map(m => octavosMatches.find(om => om.id === m.id) ? matchCards.split('</div></div>')[m.id] : '').join('')}
+        ${semifinalesCards}
       </div>
     </div>
   ` : '';
@@ -664,7 +664,7 @@ function allMatchesHTML(matches, myPreds, dateRange) {
         <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
-        ${cuartos.map(m => octavosMatches.find(om => om.id === m.id) ? matchCards.split('</div></div>')[m.id] : '').join('')}
+        ${cuartosCards}
       </div>
     </div>
   ` : '';
@@ -1148,7 +1148,13 @@ async function renderInicio(el) {
 
   let groups=[], matches=[];
   try {
-    [groups, matches] = await Promise.all([api.groups.list(), api.matches.list("4tos de final")]);
+    const [groupsList, semifinales, cuartos] = await Promise.all([
+      api.groups.list(),
+      api.matches.list("Semifinales"),
+      api.matches.list("4tos de final")
+    ]);
+    groups = groupsList;
+    matches = [...semifinales, ...cuartos];
   } catch(e) {
     el.innerHTML = `<div style="padding:40px;color:#FF5C4D;font-family:system-ui;font-size:14px;">Error cargando datos: ${escHtml(e.message)}</div>`;
     return;
@@ -1286,10 +1292,10 @@ async function renderInicio(el) {
     a.match_datetime.localeCompare(b.match_datetime)
   );
 
-  // Obtener pronósticos: solo cuartos de final
+  // Obtener pronósticos: semifinales + cuartos de final
   const { yesterday, today: todayStr, tomorrow } = getDateRange();
   const allMatchesForPreds = matches.filter(m =>
-    m.stage === "4tos de final"
+    m.stage === "Semifinales" || m.stage === "4tos de final"
   );
 
   window._allMatchesPreds = {};
