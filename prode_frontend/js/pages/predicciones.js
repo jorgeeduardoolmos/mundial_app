@@ -46,16 +46,16 @@ async function loadPredicciones(groups) {
       (async () => {
         const preds = [];
         for (const g of groups) {
-          const gPreds = await api.predictions.list(g.id);
+          const gPreds = await api.predictions.list(g.id, "Semifinales");
           preds.push(...gPreds);
         }
         return preds;
       })()
     ]);
 
-    // Mostrar solo cuartos de final
+    // Mostrar solo semifinales
     const octavosMatches = matches
-      .filter(m => m.stage === "4tos de final")
+      .filter(m => m.stage === "Semifinales")
       .sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
     const predsByMatch = {};
@@ -126,7 +126,7 @@ async function loadPredicciones(groups) {
 
     const html = `
       <div style="margin-bottom:20px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.4);letter-spacing:0.08em;margin-bottom:14px;">PRÓXIMAS FASES — ${octavosMatches.length} PARTIDOS</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.4);letter-spacing:0.08em;margin-bottom:14px;">SEMIFINALES — ${octavosMatches.length} PARTIDOS</div>
         <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:8px;overflow:hidden;">
           ${matchRows}
         </div>
