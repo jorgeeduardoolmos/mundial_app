@@ -128,8 +128,8 @@ _RAW = [
     (100, "Argentina",   "Suiza",         _utc(7,11,21),    "4tos de final"),      # 11/7 22:00 ART
 
     # ══ SEMIFINALES — Jul 14-15 ══════════════════════════════════════════════
-    (101, "Semi TBD 1",  "Semi TBD 2",    _utc(7,14,15),    "Semifinales"),
-    (102, "Semi TBD 3",  "Semi TBD 4",    _utc(7,15,15),    "Semifinales"),
+    (101, "Francia",     "España",        _utc(7,14,12),    "Semifinales"),      # 14/7 16:00 ART
+    (102, "Inglaterra",  "Argentina",     _utc(7,15,12),    "Semifinales"),      # 15/7 16:00 ART
 
     # ══ FINAL Y TERCER PUESTO — Jul 18-19 ════════════════════════════════════
     (103, "3er puesto TBD 1", "3er puesto TBD 2", _utc(7,18,15), "Tercer puesto"),
