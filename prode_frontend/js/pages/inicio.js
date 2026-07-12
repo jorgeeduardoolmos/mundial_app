@@ -549,12 +549,17 @@ function getDateRange() {
 }
 
 function allMatchesHTML(matches, myPreds, dateRange) {
-  // Mostrar solo cuartos de final
-  const octavosMatches = matches.filter(m =>
+  // Mostrar semifinales + cuartos de final
+  const semifinales = matches.filter(m =>
+    m.stage === "Semifinales"
+  ).sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+
+  const cuartos = matches.filter(m =>
     m.stage === "4tos de final"
   ).sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
-  const matchCards = octavosMatches.map(m => {
+  // Función para generar cards de una lista de matches
+  const generateCards = (matchList) => matchList.map(m => {
     const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
     const away = typeof teamName === "function" ? teamName(m.away_team) : m.away_team;
     const pred = myPreds.find(p => p.match_id === m.id);
@@ -637,14 +642,36 @@ function allMatchesHTML(matches, myPreds, dateRange) {
     </div>`;
   }).join('');
 
+  const semifinalesCards = semifinales.map(m => matchCards.includes(m.id)).join('');
+  const cuartosCards = cuartos.map(m => matchCards.includes(m.id)).join('');
+
+  const semifinalesHtml = semifinales.length ? `
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <span>SEMIFINAL</span>
+        <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
+        ${semifinales.map(m => octavosMatches.find(om => om.id === m.id) ? matchCards.split('</div></div>')[m.id] : '').join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const cuartosHtml = cuartos.length ? `
+    <div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <span>4RTOS DE FINAL</span>
+        <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
+        ${cuartos.map(m => octavosMatches.find(om => om.id === m.id) ? matchCards.split('</div></div>')[m.id] : '').join('')}
+      </div>
+    </div>
+  ` : '';
+
   return `<div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
-      <span>16VOS DE FINAL</span>
-      <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
-      ${matchCards}
-    </div>
+    ${semifinalesHtml}
+    ${cuartosHtml}
     <style>
       @media(max-width:768px) {
         .matches-grid {
