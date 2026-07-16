@@ -667,14 +667,14 @@ function allMatchesHTML(matches, myPreds, dateRange) {
     </div>
   ` : '';
 
-  const tercerYCuartosHtml = (tercerPuesto.length || cuartos.length) ? `
+  const tercerPuestoHtml = tercerPuesto.length ? `
     <div style="margin-bottom:28px;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
-        <span>TERCER PUESTO · 4RTOS DE FINAL</span>
+        <span>TERCER PUESTO</span>
         <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
-        ${tercerPuestoCards}${cuartosCards}
+        ${tercerPuestoCards}
       </div>
     </div>
   ` : '';
@@ -705,7 +705,7 @@ function allMatchesHTML(matches, myPreds, dateRange) {
 
   return `<div>
     ${finalHtml}
-    ${tercerYCuartosHtml}
+    ${tercerPuestoHtml}
     ${semifinalesHtml}
     <style>
       @media(max-width:768px) {
