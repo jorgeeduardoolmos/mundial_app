@@ -41,8 +41,10 @@ async function loadPredicciones(groups) {
   if (body) body.innerHTML = flLoading('CARGANDO...');
 
   try {
-    const [matches, allPreds] = await Promise.all([
-      api.matches.list(),
+    const [finalMatches, cuartosMatches, tercerMatches, allPreds] = await Promise.all([
+      api.matches.list("Final"),
+      api.matches.list("4tos de final"),
+      api.matches.list("Tercer puesto"),
       (async () => {
         const preds = [];
         for (const g of groups) {
@@ -56,6 +58,8 @@ async function loadPredicciones(groups) {
         return preds;
       })()
     ]);
+
+    const matches = [...finalMatches, ...cuartosMatches, ...tercerMatches];
 
     // Mostrar final + tercer puesto + cuartos de final
     const octavosMatches = matches
