@@ -46,21 +46,20 @@ async function loadPredicciones(groups) {
       (async () => {
         const preds = [];
         for (const g of groups) {
-          const [semiPreds, cuartosPreds, tercerPreds, finalPreds] = await Promise.all([
-            api.predictions.list(g.id, "Semifinales"),
+          const [cuartosPreds, tercerPreds, finalPreds] = await Promise.all([
             api.predictions.list(g.id, "4tos de final"),
             api.predictions.list(g.id, "Tercer puesto"),
             api.predictions.list(g.id, "Final"),
           ]);
-          preds.push(...semiPreds, ...cuartosPreds, ...tercerPreds, ...finalPreds);
+          preds.push(...cuartosPreds, ...tercerPreds, ...finalPreds);
         }
         return preds;
       })()
     ]);
 
-    // Mostrar semifinales + cuartos + tercer puesto + final
+    // Mostrar final + tercer puesto + cuartos de final
     const octavosMatches = matches
-      .filter(m => ["Semifinales", "4tos de final", "Tercer puesto", "Final"].includes(m.stage))
+      .filter(m => ["Final", "Tercer puesto", "4tos de final"].includes(m.stage))
       .sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
     const predsByMatch = {};
@@ -131,7 +130,7 @@ async function loadPredicciones(groups) {
 
     const html = `
       <div style="margin-bottom:20px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.4);letter-spacing:0.08em;margin-bottom:14px;">FASES FINALES — ${octavosMatches.length} PARTIDOS</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.4);letter-spacing:0.08em;margin-bottom:14px;">FINAL RECTA — ${octavosMatches.length} PARTIDOS</div>
         <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:8px;overflow:hidden;">
           ${matchRows}
         </div>
