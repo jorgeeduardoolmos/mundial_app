@@ -549,7 +549,11 @@ function getDateRange() {
 }
 
 function allMatchesHTML(matches, myPreds, dateRange) {
-  // Mostrar semifinales + cuartos de final
+  // Mostrar Final + Semifinales + Cuartos + Tercer puesto
+  const final = matches.filter(m =>
+    m.stage === "Final"
+  );
+
   const semifinales = matches.filter(m =>
     m.stage === "Semifinales"
   ).sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
@@ -557,6 +561,10 @@ function allMatchesHTML(matches, myPreds, dateRange) {
   const cuartos = matches.filter(m =>
     m.stage === "4tos de final"
   ).sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
+
+  const tercerPuesto = matches.filter(m =>
+    m.stage === "Tercer puesto"
+  );
 
   // Función para generar cards de una lista de matches
   const generateCards = (matchList) => matchList.map(m => {
@@ -642,8 +650,34 @@ function allMatchesHTML(matches, myPreds, dateRange) {
     </div>`;
   }).join('');
 
+  const finalCards = generateCards(final);
   const semifinalesCards = generateCards(semifinales);
   const cuartosCards = generateCards(cuartos);
+  const tercerPuestoCards = generateCards(tercerPuesto);
+
+  const finalHtml = final.length ? `
+    <div style="margin-bottom:40px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <span>⭐ LA FINAL ⭐</span>
+        <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(212,255,63,0.5),transparent);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:20px;">
+        ${finalCards}
+      </div>
+    </div>
+  ` : '';
+
+  const tercerYCuartosHtml = (tercerPuesto.length || cuartos.length) ? `
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:#D4FF3F;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <span>TERCER PUESTO · 4RTOS DE FINAL</span>
+        <div style="flex:1;height:1px;background:rgba(212,255,63,0.2);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;" class="matches-grid">
+        ${tercerPuestoCards}${cuartosCards}
+      </div>
+    </div>
+  ` : '';
 
   const semifinalesHtml = semifinales.length ? `
     <div style="margin-bottom:28px;">
@@ -670,8 +704,9 @@ function allMatchesHTML(matches, myPreds, dateRange) {
   ` : '';
 
   return `<div>
+    ${finalHtml}
+    ${tercerYCuartosHtml}
     ${semifinalesHtml}
-    ${cuartosHtml}
     <style>
       @media(max-width:768px) {
         .matches-grid {
@@ -1148,13 +1183,15 @@ async function renderInicio(el) {
 
   let groups=[], matches=[];
   try {
-    const [groupsList, semifinales, cuartos] = await Promise.all([
+    const [groupsList, final, semifinales, cuartos, tercerPuesto] = await Promise.all([
       api.groups.list(),
+      api.matches.list("Final"),
       api.matches.list("Semifinales"),
-      api.matches.list("4tos de final")
+      api.matches.list("4tos de final"),
+      api.matches.list("Tercer puesto")
     ]);
     groups = groupsList;
-    matches = [...semifinales, ...cuartos];
+    matches = [...final, ...semifinales, ...cuartos, ...tercerPuesto];
   } catch(e) {
     el.innerHTML = `<div style="padding:40px;color:#FF5C4D;font-family:system-ui;font-size:14px;">Error cargando datos: ${escHtml(e.message)}</div>`;
     return;
@@ -1295,7 +1332,7 @@ async function renderInicio(el) {
   // Obtener pronósticos: semifinales + cuartos de final
   const { yesterday, today: todayStr, tomorrow } = getDateRange();
   const allMatchesForPreds = matches.filter(m =>
-    m.stage === "Semifinales" || m.stage === "4tos de final"
+    ["Final", "Semifinales", "4tos de final", "Tercer puesto"].includes(m.stage)
   );
 
   window._allMatchesPreds = {};
