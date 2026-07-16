@@ -41,29 +41,27 @@ async function loadPredicciones(groups) {
   if (body) body.innerHTML = flLoading('CARGANDO...');
 
   try {
-    const [finalMatches, cuartosMatches, tercerMatches, allPreds] = await Promise.all([
+    const [finalMatches, tercerMatches, allPreds] = await Promise.all([
       api.matches.list("Final"),
-      api.matches.list("4tos de final"),
       api.matches.list("Tercer puesto"),
       (async () => {
         const preds = [];
         for (const g of groups) {
-          const [cuartosPreds, tercerPreds, finalPreds] = await Promise.all([
-            api.predictions.list(g.id, "4tos de final"),
+          const [tercerPreds, finalPreds] = await Promise.all([
             api.predictions.list(g.id, "Tercer puesto"),
             api.predictions.list(g.id, "Final"),
           ]);
-          preds.push(...cuartosPreds, ...tercerPreds, ...finalPreds);
+          preds.push(...tercerPreds, ...finalPreds);
         }
         return preds;
       })()
     ]);
 
-    const matches = [...finalMatches, ...cuartosMatches, ...tercerMatches];
+    const matches = [...finalMatches, ...tercerMatches];
 
-    // Mostrar final + tercer puesto + cuartos de final
+    // Mostrar final + tercer puesto
     const octavosMatches = matches
-      .filter(m => ["Final", "Tercer puesto", "4tos de final"].includes(m.stage))
+      .filter(m => ["Final", "Tercer puesto"].includes(m.stage))
       .sort((a, b) => a.match_datetime.localeCompare(b.match_datetime));
 
     const predsByMatch = {};
@@ -134,7 +132,7 @@ async function loadPredicciones(groups) {
 
     const html = `
       <div style="margin-bottom:20px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.4);letter-spacing:0.08em;margin-bottom:14px;">FINAL RECTA — ${octavosMatches.length} PARTIDOS</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:rgba(244,245,255,0.4);letter-spacing:0.08em;margin-bottom:14px;">FINAL Y TERCER PUESTO — ${octavosMatches.length} PARTIDOS</div>
         <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:8px;overflow:hidden;">
           ${matchRows}
         </div>
