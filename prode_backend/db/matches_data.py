@@ -132,8 +132,8 @@ _RAW = [
     (102, "Inglaterra",  "Argentina",     _utc(7,15,12),    "Semifinales"),      # 15/7 16:00 ART
 
     # ══ FINAL Y TERCER PUESTO — Jul 18-19 ════════════════════════════════════
-    (103, "Francia",     "Inglaterra",    _utc(7,18,14),    "Tercer puesto"),    # 18/7 18:00 ART
-    (104, "España",      "Argentina",     _utc(7,19,12),    "Final"),           # 19/7 16:00 ART
+    (103, "Francia",     "Inglaterra",    _utc(7,18,17),    "Tercer puesto"),    # 18/7 18:00 ART
+    (104, "España",      "Argentina",     _utc(7,19,15),    "Final"),           # 19/7 16:00 ART
 ]
 
 # Dict por ID para lookup rápido
