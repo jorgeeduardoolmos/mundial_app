@@ -566,6 +566,91 @@ function allMatchesHTML(matches, myPreds, dateRange) {
     m.stage === "Tercer puesto"
   );
 
+  // Función para generar la card especial de la Final
+  const generateFinalCard = (m) => {
+    const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
+    const away = typeof teamName === "function" ? teamName(m.away_team) : m.away_team;
+    const isArgentina = away === "Argentina";
+    const pred = myPreds.find(p => p.match_id === m.id);
+
+    let pts = 0;
+    if (pred && m.is_finished && m.home_goals !== null && m.away_goals !== null) {
+      if (pred.points_earned !== null && pred.points_earned !== undefined) {
+        pts = pred.points_earned;
+      } else {
+        if (pred.predicted_home_goals === m.home_goals) pts += 2;
+        if (pred.predicted_away_goals === m.away_goals) pts += 2;
+        const predResult = pred.predicted_home_goals > pred.predicted_away_goals ? "home"
+                         : pred.predicted_away_goals > pred.predicted_home_goals ? "away" : "draw";
+        const realResult = m.home_goals > m.away_goals ? "home"
+                         : m.away_goals > m.home_goals ? "away" : "draw";
+        if (predResult === realResult) pts += 4;
+      }
+    }
+
+    const ptsDisplay = m.is_finished && pred ? `<div style="background:rgba(212,255,63,0.15);border:1px solid rgba(212,255,63,0.35);border-radius:8px;padding:8px 12px;text-align:center;min-width:60px;">
+      <div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:18px;color:#D4FF3F;line-height:1;">${pts}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#D4FF3F;letter-spacing:0.06em;margin-top:3px;font-weight:600;">PUNTOS</div>
+    </div>` : '';
+
+    const resultDisplay = m.is_finished ? `<div style="font-family:'Big Shoulders Display',system-ui;font-weight:900;font-size:20px;color:#F4F5FF;">${m.home_goals}—${m.away_goals}</div>` : '';
+
+    let predsHtml = '';
+    if (window._allMatchesPreds?.[m.id]?.length) {
+      const allPreds = window._allMatchesPreds[m.id];
+      const predsRows = allPreds.map(p => {
+        let pPts = 0;
+        if (m.home_goals !== null && m.away_goals !== null) {
+          if (p.predicted_home_goals === m.home_goals) pPts += 2;
+          if (p.predicted_away_goals === m.away_goals) pPts += 2;
+          const predResult = p.predicted_home_goals > p.predicted_away_goals ? "home"
+                           : p.predicted_away_goals > p.predicted_home_goals ? "away" : "draw";
+          const realResult = m.home_goals > m.away_goals ? "home"
+                           : m.away_goals > m.home_goals ? "away" : "draw";
+          if (predResult === realResult) pPts += 4;
+        }
+        const pColor = pPts >= 6 ? '#D4FF3F' : pPts > 0 ? 'rgba(212,255,63,0.6)' : 'rgba(244,245,255,0.2)';
+        const ptsDisplay = m.is_finished ? `<span style="font-weight:700;color:${pColor};min-width:20px;text-align:right;">${pPts}</span>` : '—';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:10px;border-bottom:1px solid rgba(255,255,255,0.04);gap:8px;">
+          <span style="color:rgba(244,245,255,0.65);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(p.display_name)}</span>
+          <span style="font-weight:700;color:rgba(244,245,255,0.4);min-width:30px;text-align:center;">${p.predicted_home_goals}—${p.predicted_away_goals}</span>
+          ${ptsDisplay}
+        </div>`;
+      }).join('');
+      predsHtml = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(244,245,255,0.3);letter-spacing:0.04em;">JUGADORES (${allPreds.length})</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:rgba(244,245,255,0.2);letter-spacing:0.04em;">PRED · PTS</div>
+        </div>
+        ${predsRows}
+      </div>`;
+    }
+
+    return `<div class="match-card-mini" style="display:flex;flex-direction:column;gap:10px;padding:20px;background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,165,0,0.1));border:2px solid rgba(255,215,0,0.4);border-radius:12px;box-shadow:0 0 20px rgba(255,215,0,0.2);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            ${chipByName(home,16,2)}
+            <span style="font-weight:700;font-size:11px;color:#FFD700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(home)}</span>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,215,0,0.5);">${m.match_datetime_str||''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+          ${resultDisplay}
+          ${ptsDisplay}
+        </div>
+        <div style="flex:1;min-width:0;text-align:right;">
+          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-bottom:6px;">
+            <span style="font-weight:700;font-size:11px;color:#FFD700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(away)}</span>
+            ${isArgentina ? '❤️' : ''}
+            ${chipByName(away,16,2)}
+          </div>
+        </div>
+      </div>
+      ${predsHtml}
+    </div>`;
+  };
+
   // Función para generar cards de una lista de matches
   const generateCards = (matchList) => matchList.map(m => {
     const home = typeof teamName === "function" ? teamName(m.home_team) : m.home_team;
@@ -650,7 +735,7 @@ function allMatchesHTML(matches, myPreds, dateRange) {
     </div>`;
   }).join('');
 
-  const finalCards = generateCards(final);
+  const finalCards = final.length ? generateFinalCard(final[0]) : '';
   const semifinalesCards = generateCards(semifinales);
   const cuartosCards = generateCards(cuartos);
   const tercerPuestoCards = generateCards(tercerPuesto);
